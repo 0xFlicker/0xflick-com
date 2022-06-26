@@ -1,0 +1,53 @@
+{
+  "name": "@0xflick/functions",
+  "version": "1.0.0",
+  "source": "src/index.ts",
+  "author": "0xflick <cmdrnft@protonmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "build": "yarn image:build && yarn ipfs:origin:build && yarn axolotl:origin:build",
+    "image:accept:build": "esbuild src/lambda/image/accept.ts --platform=node --target=node14.19 --bundle --outfile=../../deploy/.layers/image/accept/index.cjs",
+    "image:origin:build": "esbuild src/lambda/image/origin.ts --platform=node --target=node14.19 --outfile=../../deploy/.layers/image/origin/index.mjs",
+    "image:build": "yarn image:origin:build && yarn image:accept:build && cd .. && yarn build:layer:sharp",
+    "ipfs:origin:build": "esbuild src/lambda/ipfs/origin.ts --platform=node --target=node14.19 --outfile=../../deploy/.layers/ipfs/origin/index.mjs",
+    "axolotl:origin:build": "esbuild src/lambda/axolotl/index.ts --platform=node --target=node14.19 --bundle --external:canvas --outfile=../../deploy/.layers/axolotl/index.mjs",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "@esbuild-plugins/node-modules-polyfill": "^0.1.4",
+    "@types/aws-lambda": "^8.10.95",
+    "@types/jest": "^27.4.1",
+    "@types/sharp": "^0.30.2",
+    "esbuild": "^0.14.38",
+    "eslint": "^8.13.0",
+    "jest": "^27.5.1",
+    "prettier": "^2.6.2",
+    "ts-jest": "^27.1.4",
+    "ts-node": "^10.7.0",
+    "typescript": "^4.7.4"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.75.0",
+    "@aws-sdk/client-s3": "^3.131.0",
+    "@discordjs/builders": "^0.13.0",
+    "@discordjs/rest": "^0.4.1",
+    "@twitter-api-v2/plugin-token-refresher": "^1.0.0",
+    "aws-lambda": "^1.0.7",
+    "aws-sdk": "^2.1120.0",
+    "axios": "^0.27.2",
+    "canvas": "^2.9.3",
+    "commander": "^9.2.0",
+    "discord-api-types": "^0.31.2",
+    "discord-interactions": "^3.2.0",
+    "discord.js": "^13.6.0",
+    "ethers": "^5.6.9",
+    "ipfs-http-client": "^57.0.1",
+    "lambda-logger-node": "4.0.0-7",
+    "multiformats": "^9.6.5",
+    "ramda": "^0.28.0",
+    "sharp": "^0.30.4",
+    "tweetnacl": "^1.0.3",
+    "twitter-api-v2": "^1.12.0"
+  },
+  "packageManager": "yarn@3.2.0"
+}

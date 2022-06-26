@@ -1,0 +1,45 @@
+{
+  "seed": "0x3db53bd10f4d8ece89d24fc5e5cb04b835bbe1525ac279fdf46001bcc4287333",
+  "attributes": [
+    {
+      "trait_type": "Background Color",
+      "value": "Blue"
+    },
+    {
+      "trait_type": "Base Color",
+      "value": "White"
+    },
+    {
+      "trait_type": "Split Color",
+      "value": "None"
+    },
+    {
+      "trait_type": "Accessory",
+      "value": "None"
+    },
+    {
+      "trait_type": "Tail",
+      "value": "Normal"
+    },
+    {
+      "trait_type": "Arm",
+      "value": "Paws"
+    },
+    {
+      "trait_type": "Frills",
+      "value": "Thin"
+    },
+    {
+      "trait_type": "Face",
+      "value": "Troll"
+    },
+    {
+      "trait_type": "Mouth",
+      "value": "Moustache"
+    },
+    {
+      "trait_type": "Head",
+      "value": "Cowboy Hat"
+    }
+  ]
+}
