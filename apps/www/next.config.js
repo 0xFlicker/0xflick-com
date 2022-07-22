@@ -1,4 +1,5 @@
 const path = require("path");
+const withTM = require('next-transpile-modules')(['@0xflick/backend', '@0xflick/models', '@0xflick/graphql', '@0xflick/contracts']);
 const { spawnSync } = require("child_process");
 
 
@@ -28,13 +29,14 @@ if (!process.env.WEB3_RPC) {
 const WEB3_RPC = process.env.WEB3_RPC
 
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+const nextConfig = withTM({
   reactStrictMode: true,
   env: {
     INFURA_IPFS_AUTH,
     WEB3_RPC,
     NEXT_PUBLIC_IMAGE_RESIZER: "https://image.0xflick.com",
     NEXT_PUBLIC_IPFS: "https://ipfs.0xflick.com",
+    NFT_CONTRACT_ADDRESS: "0x0000000000000000000000000000000000000000",
     NFT_COLLECTIONS_OF_INTEREST: JSON.stringify([{
       address: "0x71eaa691b6e5d5e75a3ebb36d4f87cbfb23c87b0",
       name: "The Odd Dystrict",
@@ -54,6 +56,6 @@ const nextConfig = {
       isEnumerable: true,
     }]),
   }
-}
+})
 
 module.exports = nextConfig

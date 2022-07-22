@@ -5,8 +5,8 @@ import {
   DeleteCommand,
   BatchWriteCommand,
 } from "@aws-sdk/lib-dynamodb";
-import { decodeCursor, encodeCursor, paginate } from "backend/helpers";
-import { IPaginatedResult, IPaginationOptions } from "backend/types";
+import { decodeCursor, encodeCursor, paginate } from "../helpers";
+import { IPaginatedResult, IPaginationOptions } from "../types";
 
 export class UserRolesDAO {
   public static TABLE_NAME = process.env.TABLE_NAME_USER_ROLES || "UserRoles";

@@ -6,8 +6,8 @@
     "rootDir": "./src" /* Specify the root folder within your source files. */,
     "outDir": "dist" /* Specify an output folder for all emitted files. */,
     "paths": {
-      "@youtube-toolbox/models": ["../models/src/index"],
-      "@youtube-toolbox/models/*": ["../models/src/*"]
+      "@0xflick/models": ["../models/src/index"],
+      "@0xflick/models/*": ["../models/src/*"]
     },
     "noErrorTruncation": true,
     "noImplicitAny": true,

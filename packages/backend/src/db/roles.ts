@@ -9,10 +9,10 @@ import {
   DeleteCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { RolePermissionsDAO } from "./rolePermissions";
-import { IRole, RoleModel } from "models/roles";
+import { IRole, RoleModel } from "@0xflick/models";
 import { UserRolesDAO } from "./userRoles";
-import { IPaginatedResult, IPaginationOptions } from "backend/types";
-import { decodeCursor, encodeCursor, paginate } from "backend/helpers";
+import { IPaginatedResult, IPaginationOptions } from "../types";
+import { decodeCursor, encodeCursor, paginate } from "../helpers";
 
 export class RolesDAO {
   public static TABLE_NAME = process.env.TABLE_NAME_ROLES || "Roles";

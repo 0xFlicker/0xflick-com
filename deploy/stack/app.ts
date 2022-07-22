@@ -11,12 +11,14 @@ import { Redirects } from "./redirect.js";
 import { SopsStack } from "./sops.js";
 import { IpfsStack } from "./ipfs.js";
 import { AssetStack } from "./assets.js";
+import { GraphqlStack } from "./graphql.js";
 
 const secretsJson = jsonFromSecret("deploy-secrets.json");
 
 const app = new cdk.App();
 
 new AssetStack(app, "Assets", {});
+new GraphqlStack(app, "Graphql", {});
 new ImageStack(app, "Image", {
   domain: ["image", "0xflick.com"],
   infuraIpfsAuth: `Basic ${Buffer.from(

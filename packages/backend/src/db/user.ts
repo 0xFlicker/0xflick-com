@@ -4,9 +4,9 @@ import {
   PutCommand,
   UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
-import { getOwner } from "backend/helpers";
-import { EActions, EResource } from "models/permissions";
-import { UserModel, IUser, UserWithRolesModel } from "models/user";
+import { getOwner } from "../helpers";
+import { EActions, EResource } from "@0xflick/models";
+import { UserModel, IUser, UserWithRolesModel } from "@0xflick/models";
 import { RolePermissionsDAO } from "./rolePermissions";
 import { UserRolesDAO } from "./userRoles";
 

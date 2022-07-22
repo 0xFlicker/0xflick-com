@@ -1,7 +1,7 @@
-import { Ownable__factory } from "@souls-of-akaso/contracts";
+import { Ownable__factory } from "@0xflick/contracts";
 import { NextApiRequest } from "next";
 import AWS from "aws-sdk";
-import { jsonRpcProvider } from "utils/provider";
+import { jsonRpcProvider } from "./utils/provider";
 import {
   IPaginationCursor,
   IPaginatedResult,
@@ -12,7 +12,7 @@ import { RolesDAO } from "./db/roles";
 import { RolePermissionsDAO } from "./db/rolePermissions";
 import { UserRolesDAO } from "./db/userRoles";
 import { TwitterApi, TwitterApiTokens } from "twitter-api-v2";
-import { deserializeSessionCookie } from "utils/cookie";
+import { deserializeSessionCookie } from "./utils/cookie";
 import { DrinkerDAO } from "./db/drinker";
 import { AuthOrchestrationDao } from "./db/auth/orchestration";
 
@@ -107,7 +107,8 @@ export function defaultChainId() {
   return process.env.NEXT_PUBLIC_CHAIN_ID || "1";
 }
 
-export function defaultProviderUrl(chainId: string): string {
+export function defaultProviderUrl(chainId?: string): string {
+  chainId = chainId ?? defaultChainId();
   return JSON.parse(process.env.WEB_CONNECT_RPC_JSON || "{}")[chainId] || "";
 }
 

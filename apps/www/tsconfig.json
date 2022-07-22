@@ -14,8 +14,33 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "baseUrl": "src/."
+    "baseUrl": "src/.",
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "strictBindCallApply": true,
+    "strictFunctionTypes": true,
+    "strictNullChecks": false,
+    "strictPropertyInitialization": false,
+    "paths": {
+      "@0xflick/models": ["../../packages/models/src/index"],
+      "@0xflick/models/*": ["../../packages/models/src/*"],
+      "@0xflick/backend": ["../../packages/backend/src/index"],
+      "@0xflick/backend/*": ["../../packages/backend/src/*"],
+      "@0xflick/graphql": ["../../packages/backend/src/index"]
+    }
   },
   "include": ["next-env.d.ts", "src/**/*.ts", "src/**/*.tsx"],
-  "exclude": ["./node_modules"]
+  "exclude": ["./node_modules"],
+  "references": [
+    {
+      "path": "../models"
+    },
+    {
+      "path": "../backend"
+    },
+    {
+      "path": "../graphql"
+    }
+  ]
 }

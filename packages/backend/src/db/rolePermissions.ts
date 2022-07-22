@@ -7,10 +7,13 @@ import {
   BatchWriteCommand,
   ScanCommand,
 } from "@aws-sdk/lib-dynamodb";
-import { decodeCursor, encodeCursor, paginate } from "backend/helpers";
-import { IPaginatedResult, IPaginationOptions } from "backend/types";
-import { EActions, EResource } from "models/permissions";
-import { IRolePermission, RolePermissionModel } from "models/rolePermissions";
+import { decodeCursor, encodeCursor, paginate } from "../helpers";
+import { IPaginatedResult, IPaginationOptions } from "../types";
+import { EActions, EResource } from "@0xflick/models/permissions";
+import {
+  IRolePermission,
+  RolePermissionModel,
+} from "@0xflick/models/rolePermissions";
 
 export class RolePermissionsDAO {
   public static TABLE_NAME =

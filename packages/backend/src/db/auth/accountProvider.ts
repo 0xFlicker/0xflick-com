@@ -8,7 +8,7 @@ import {
 import type {
   IAccountProvider,
   TProviderTypes,
-} from "models/auth/accountProvider";
+} from "0xflick/models/auth/accountProvider.ts";
 import {
   accountProviderDBItemToModel,
   accountProviderToDBItem,

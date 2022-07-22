@@ -2,12 +2,12 @@ import {
   AccountProviderModel,
   IAccountProvider,
   TProviderTypes,
-} from "models/auth/accountProvider";
-import { AccountUserModel, IAccountUser } from "models/auth/accountUser";
-import {
+  AccountUserModel,
+  IAccountUser,
   IVerificationRequest,
   VerificationRequestModel,
-} from "models/auth/verificationRequest";
+} from "@0xflick/models";
+
 import { AuthOrchestrationDao } from "./orchestration";
 
 export type TPK = string & { __pk: true };

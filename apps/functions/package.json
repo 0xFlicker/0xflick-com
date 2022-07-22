@@ -11,6 +11,7 @@
     "image:build": "yarn image:origin:build && yarn image:accept:build && cd .. && yarn build:layer:sharp",
     "ipfs:origin:build": "esbuild src/lambda/ipfs/origin.ts --platform=node --target=node14.19 --outfile=../../deploy/.layers/ipfs/origin/index.mjs",
     "axolotl:origin:build": "esbuild src/lambda/axolotl/index.ts --platform=node --target=node14.19 --bundle --external:canvas --outfile=../../deploy/.layers/axolotl/index.mjs",
+    "graphql:build": "esbuild src/lambda/graphql.ts --platform=node --target=node14.19 --bundle --outfile=../../deploy/.layers/graphql/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
@@ -32,6 +33,8 @@
     "@discordjs/builders": "^0.13.0",
     "@discordjs/rest": "^0.4.1",
     "@twitter-api-v2/plugin-token-refresher": "^1.0.0",
+    "apollo-server-core": "^3.10.0",
+    "apollo-server-lambda": "^3.10.0",
     "aws-lambda": "^1.0.7",
     "aws-sdk": "^2.1120.0",
     "axios": "^0.27.2",
