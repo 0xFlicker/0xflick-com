@@ -1,11 +1,11 @@
-import { promisePublicKey, verifyJwtToken } from "models/user";
+import { promisePublicKey, verifyJwtToken } from "@0xflick/models/user";
 import { getDb } from "./dynamodb";
 import { v4 as createUuid } from "uuid";
 import { UserDAO } from "./user";
 import { createJwtToken, promisePrivateKey } from "./token";
-import { TokenModel } from "models/token";
+import { TokenModel } from "@0xflick/models/token";
 import * as jose from "jose";
-import { EActions, EResource } from "models/permissions";
+import { EActions, EResource } from "@0xflick/models/permissions";
 import { RolePermissionsDAO } from "./rolePermissions";
 import { RolesDAO } from "./roles";
 import { UserRolesDAO } from "./userRoles";

@@ -1,20 +1,20 @@
-import { getDb } from "backend/db/dynamodb";
-import { RolePermissionsDAO } from "backend/db/rolePermissions";
-import { UserDAO } from "backend/db/user";
-import { UserRolesDAO } from "backend/db/userRoles";
+import { getDb } from "../../db/dynamodb";
+import { RolePermissionsDAO } from "../../db/rolePermissions";
+import { UserDAO } from "../../db/user";
+import { UserRolesDAO } from "../../db/userRoles";
 import {
   fetchTableNames,
   getAuthorizationToken,
   getOwner,
-} from "backend/helpers";
-import { EActions, EResource } from "models/permissions";
-import { verifyJwtToken } from "models/user";
+} from "../../helpers";
+import { EActions, EResource } from "@0xflick/models/permissions";
+import { verifyJwtToken } from "@0xflick/models/user";
 import type { NextApiRequest, NextApiResponse } from "next";
-import { RolesDAO } from "backend/db/roles";
+import { RolesDAO } from "../../db/roles";
 import {
   defaultAdminStrategyAll,
   isActionOnResource,
-} from "utils/allowedActions";
+} from "../../utils/allowedActions";
 
 type TSuccess = "OK";
 

@@ -9,11 +9,8 @@ import {
 } from "@aws-sdk/lib-dynamodb";
 import { decodeCursor, encodeCursor, paginate } from "../helpers";
 import { IPaginatedResult, IPaginationOptions } from "../types";
-import { EActions, EResource } from "@0xflick/models/permissions";
-import {
-  IRolePermission,
-  RolePermissionModel,
-} from "@0xflick/models/rolePermissions";
+import type { EActions, EResource, IRolePermission } from "@0xflick/models";
+import { RolePermissionModel } from "@0xflick/models";
 
 export class RolePermissionsDAO {
   public static TABLE_NAME =

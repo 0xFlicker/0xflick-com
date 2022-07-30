@@ -4,7 +4,7 @@ import {
   GetCommand,
   PutCommand,
 } from "@aws-sdk/lib-dynamodb";
-import type { IVerificationRequest } from "models/auth/verificationRequest";
+import type { IVerificationRequest } from "@0xflick/models";
 import {
   stateDBItemToModel,
   stateToDBItem,

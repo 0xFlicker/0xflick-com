@@ -1,11 +1,13 @@
 import axios from "axios";
-import { CID } from "multiformats/cid";
+import { cidPath as isCidPath } from "is-ipfs";
 import type {
   CloudFrontResponseCallback,
   CloudFrontResponseEvent,
 } from "aws-lambda";
 import AWS from "aws-sdk";
+import { UrlShortenerDAO, fetchTableNames, createDb } from "@0xflick/backend";
 import Sharp, { AvailableFormatInfo, FormatEnum } from "sharp";
+
 import {
   create as createIpfsHttpClient,
   IPFSHTTPClient,
@@ -66,11 +68,29 @@ export async function loadIpfsContent(
   ipfsCid: string
 ) {
   const contents: Uint8Array[] = [];
-  for await (let metadataBuf of ipfsClient.cat(ipfsCid)) {
+  for await (const metadataBuf of ipfsClient.cat(ipfsCid)) {
     contents.push(metadataBuf);
   }
   return Buffer.concat(contents);
 }
+
+const getUrlShortenerDao = (() => {
+  let instance: UrlShortenerDAO;
+  return async () => {
+    if (!instance) {
+      const region = await fetchTableNames({
+        paramName: "Image_DynamoDB_TableNames",
+        region: "us-east-1",
+      });
+      instance = new UrlShortenerDAO(
+        createDb({
+          region,
+        })
+      );
+    }
+    return instance;
+  };
+})();
 
 export const handler = async (
   event: CloudFrontResponseEvent,
@@ -101,48 +121,67 @@ export const handler = async (
     //check if image is not present
     if (Number(response.status) === 404 || Number(response.status) === 403) {
       console.log("Image not found");
-      let request = event.Records[0].cf.request;
+      const request = event.Records[0].cf.request;
 
       // read the required path. Ex: uri /images/100x100/webp/image.jpg
-      let path = request.uri;
+      const path = request.uri;
 
       // read the S3 key from the path variable.
       // Ex: path variable /images/100x100/webp/image.jpg
-      let key = path.substring(1);
+      const key = path.substring(1);
 
       // parse the prefix, width, height and image name
       // Ex: key=images/200x200/webp/image.jpg
-      let prefix, originalKey, match, imageName;
-      let requiredFormat: string;
-      let width: string, height: string;
-
-      match = key.match(/(.*)\/(\d+|auto)x(\d+|auto)\/(.*)\/(.*)/);
+      const match = key.match(
+        /(ipfs|web)\/(.*)\/(\d+|auto)x(\d+|auto)\/(.*)\/(.*)/
+      );
       if (!match) {
         console.log(`Invalid key: ${key}`);
         return callback(null, response);
       }
 
-      prefix = match[1];
-      width = match[2];
-      height = match[3];
+      const type = match[1];
+      const prefix = match[2];
+      const width = match[3];
+      const height = match[4];
 
-      console.log(`prefix: ${prefix} width: ${width} height: ${height}`);
       // correction for jpg required for 'Sharp'
-      requiredFormat = match[4] == "jpg" ? "jpeg" : match[4];
-      imageName = match[5];
-      originalKey = prefix + "/" + imageName;
+      const requiredFormat = match[5] == "jpg" ? "jpeg" : match[5];
+      const imageName = match[6];
+      const originalKey = `${type}/${prefix}/${imageName}`;
+      const pathKey = `${prefix}/${imageName}`;
+
+      console.log(
+        `type: ${type} prefix: ${prefix} width: ${width} height: ${height} pathKey: ${pathKey} imageName: ${imageName} originalKey: ${originalKey} requiredFormat ${requiredFormat}`
+      );
 
       // Check if the image does not exist in S3
       let buffer: Buffer;
       if (!(await s3Exists(originalKey))) {
         // Check if the key is a CID
-        // if (!CID.isCID(originalKey)) {
-        //   response.status = "404";
-        //   return callback(null, response);
-        // }
+        if (type === "web") {
+          const urlShortenerDao = await getUrlShortenerDao();
+          const model = await urlShortenerDao.get(prefix);
+          if (!model) {
+            console.log(`Key ${prefix} not found`);
+            return callback(null, response);
+          }
+          const { url } = model;
+          const imageResponse = await axios.get(`${url}/${imageName}`, {
+            responseType: "arraybuffer",
+          });
+          buffer = Buffer.from(imageResponse.data, "binary");
+        } else if (type === "ipfs") {
+          if (!isCidPath(pathKey)) {
+            console.log(`Invalid key: ${pathKey}`);
+            response.status = "404";
+            return callback(null, response);
+          }
 
-        console.log("IPFS request: ", originalKey);
-        buffer = await loadIpfsContent(ipfsClient, originalKey);
+          console.log("IPFS request: ", pathKey);
+          buffer = await loadIpfsContent(ipfsClient, pathKey);
+        }
+
         // Cache the image in S3
         await S3.putObject({
           Body: buffer,

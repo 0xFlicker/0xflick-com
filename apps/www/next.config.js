@@ -18,22 +18,49 @@ function jsonFromSecret(file) {
 }
 
 const secretsJson = jsonFromSecret("deploy-secrets.json");
+
 const INFURA_IPFS_AUTH = `Basic ${Buffer.from(
   `${secretsJson.infraIpfsProjectId}:${secretsJson.infraIpfsSecret}`
 ).toString("base64")}`
 
+
+if (!process.env.IPFS_API_URL) {
+  process.env.IPFS_API_URL = secretsJson.ipfsApiUrl;
+}
+const IPFS_API_URL = process.env.IPFS_API_URL;
+
+if (!process.env.IPFS_API_PROJECT) {
+  process.env.IPFS_API_PROJECT = secretsJson.infraIpfsProjectId;
+}
+const IPFS_API_PROJECT = process.env.IPFS_API_PROJECT;
+
+if (!process.env.IPFS_API_SECRET) {
+  process.env.IPFS_API_SECRET = secretsJson.infraIpfsSecret;
+}
+const IPFS_API_SECRET = process.env.IPFS_API_SECRET;
 
 if (!process.env.WEB3_RPC) {
   throw new Error('WEB3_RPC is not defined')
 }
 const WEB3_RPC = process.env.WEB3_RPC
 
+
+if (!process.env.ENS_RPC_URL) {
+  throw new Error('ENS_RPC_URL is not defined')
+}
+const ENS_RPC_URL = process.env.ENS_RPC_URL;
+
 /** @type {import('next').NextConfig} */
 const nextConfig = withTM({
   reactStrictMode: true,
   env: {
+    IPFS_API_URL,
+    IPFS_API_PROJECT,
+    IPFS_API_SECRET,
     INFURA_IPFS_AUTH,
     WEB3_RPC,
+    ENS_RPC_URL,
+    FLICK_ENS_DOMAIN: process.env.FLICK_ENS_DOMAIN,
     NEXT_PUBLIC_IMAGE_RESIZER: "https://image.0xflick.com",
     NEXT_PUBLIC_IPFS: "https://ipfs.0xflick.com",
     NFT_CONTRACT_ADDRESS: "0x0000000000000000000000000000000000000000",

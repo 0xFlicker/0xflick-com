@@ -1,20 +1,20 @@
-import { getDb } from "backend/db/dynamodb";
-import { RolePermissionsDAO } from "backend/db/rolePermissions";
+import { getDb } from "../../db/dynamodb";
+import { RolePermissionsDAO } from "../../db/rolePermissions";
 import {
   fetchTableNames,
   getAuthorizationToken,
   paginationOptions,
   toPaginationResponse,
-} from "backend/helpers";
-import { EActions, EResource } from "models/permissions";
-import { verifyJwtToken } from "models/user";
+} from "../../helpers";
+import { EActions, EResource } from "@0xflick/models/permissions";
+import { verifyJwtToken } from "@0xflick/models/user";
 import type { NextApiRequest, NextApiResponse } from "next";
 import {
   defaultAdminStrategyAll,
   isActionOnResource,
-} from "utils/allowedActions";
-import { IRoleListResponseSuccess } from "models/roles";
-import { RolesDAO } from "backend/db/roles";
+} from "../../utils/allowedActions";
+import { IRoleListResponseSuccess } from "@0xflick/models/roles";
+import { RolesDAO } from "../../db/roles";
 
 interface IDataError {
   error: string;

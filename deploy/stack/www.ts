@@ -2,28 +2,27 @@ import path from "path";
 import * as cdk from "aws-cdk-lib";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as lambda from "aws-cdk-lib/aws-lambda";
-import * as ecr from "aws-cdk-lib/aws-ecr";
-import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as acm from "aws-cdk-lib/aws-certificatemanager";
 import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
-import * as ecra from "aws-cdk-lib/aws-ecr-assets";
-import * as ssm from "aws-cdk-lib/aws-ssm";
 import * as patterns from "aws-cdk-lib/aws-route53-patterns";
 import * as route53 from "aws-cdk-lib/aws-route53";
 import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
 import * as targets from "aws-cdk-lib/aws-route53-targets";
+import { HttpApi } from "@aws-cdk/aws-apigatewayv2-alpha";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export interface IProps extends cdk.StackProps {
   readonly domain: [string, string] | string;
+  readonly graphqlApiUrl: string;
 }
 
 export class WwwStack extends cdk.Stack {
-  constructor(scope: cdk.App, id: string, props: IProps) {
-    const { domain, ...rest } = props;
+  readonly api: HttpApi;
+  constructor(scope: cdk.Stage, id: string, props: IProps) {
+    const { domain, graphqlApiUrl: graphqlApi, ...rest } = props;
     super(scope, id, rest);
 
     const staticAssets = new s3.Bucket(this, "StaticAssets", {
@@ -124,7 +123,9 @@ export class WwwStack extends cdk.Stack {
         queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
         headerBehavior: cloudfront.CacheHeaderBehavior.allowList(
           "Authorization",
-          "Host"
+          "Host",
+          "Content-Type",
+          "Accept"
         ),
       }
     );
@@ -132,7 +133,7 @@ export class WwwStack extends cdk.Stack {
       certificate,
       domainNames: [domainName],
       priceClass: cloudfront.PriceClass.PRICE_CLASS_ALL,
-
+      enableLogging: true,
       defaultBehavior: {
         origin: new origins.S3Origin(staticAssets),
         edgeLambdas: [
@@ -172,6 +173,21 @@ export class WwwStack extends cdk.Stack {
         "static/*": {
           origin: new origins.S3Origin(staticAssets),
           cachePolicy: defaultCachePolicy,
+          viewerProtocolPolicy:
+            cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        },
+        "api/graphql": {
+          origin: new origins.HttpOrigin(graphqlApi, {}),
+          allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
+          cachePolicy: new cloudfront.CachePolicy(this, "apiCacheDisabled", {
+            cookieBehavior: cloudfront.CacheCookieBehavior.all(),
+            queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
+            headerBehavior: cloudfront.CacheHeaderBehavior.allowList(
+              "Authorization",
+              "Content-Type",
+              "Accept"
+            ),
+          }),
           viewerProtocolPolicy:
             cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         },

@@ -1,0 +1,44 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "composite": true /* Enable the use of the ES2015 module loader. */,
+    "rootDir": "./src" /* Specify the root folder within your source files. */,
+    "outDir": "dist" /* Specify an output folder for all emitted files. */,
+    "paths": {
+      "@0xflick/graphql": ["../../packages/graphql/src/index"],
+      "@0xflick/graphql/*": ["../../package/graphql/src/*"],
+      "@0xflick/models": ["../../packages/models/src/index"],
+      "@0xflick/models/*": ["../../packages/models/src/*"],
+      "@0xflick/backend": ["../../packages/backend/src/index"],
+      "@0xflick/backend/*": ["../../packages/backend/src/*"],
+      "@0xflick/contracts": ["../../packages/contracts/src/index"],
+      "@0xflick/contracts/*": ["../../packages/contracts/src/*"]
+    },
+    "incremental": true,
+    "noErrorTruncation": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "strictBindCallApply": true,
+    "strictFunctionTypes": true,
+    "strictNullChecks": false
+    // "strictPropertyInitialization": false
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["**/node_modules", "**/.*/", "dist", "build"],
+  "references": [
+    {
+      "path": "../../packages/graphql"
+    },
+    {
+      "path": "../../packages/models"
+    },
+    {
+      "path": "../../packages/backend"
+    },
+    {
+      "path": "../../packages/contracts"
+    }
+  ]
+}

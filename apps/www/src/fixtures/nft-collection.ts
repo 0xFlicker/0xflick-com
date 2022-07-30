@@ -1,8 +1,9 @@
-import { INfts } from "models/nfts";
+import { INfts } from "@0xflick/models";
 
 const fixture: INfts[] = [
   {
     collectionName: "TheOddDystrict",
+    contractAddress: "",
     ownedTokens: [
       {
         tokenId: 84,
@@ -576,6 +577,7 @@ const fixture: INfts[] = [
   },
   {
     collectionName: "Hunnys",
+    contractAddress: "",
     ownedTokens: [
       {
         tokenId: 187,
@@ -1473,6 +1475,7 @@ const fixture: INfts[] = [
   },
   {
     collectionName: "Stardust Generation",
+    contractAddress: "",
     ownedTokens: [
       {
         tokenId: 544,
@@ -1583,6 +1586,7 @@ const fixture: INfts[] = [
   },
   {
     collectionName: "The Nutleys",
+    contractAddress: "",
     ownedTokens: [
       {
         tokenId: 98,
@@ -1661,6 +1665,7 @@ const fixture: INfts[] = [
   },
   {
     collectionName: "Vigilante",
+    contractAddress: "",
     ownedTokens: [
       {
         tokenId: 1324,

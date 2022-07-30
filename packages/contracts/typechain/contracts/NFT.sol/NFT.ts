@@ -28,6 +28,20 @@ import type {
   PromiseOrValue,
 } from "../../common";
 
+export declare namespace IERC721A {
+  export type TokenOwnershipStruct = {
+    addr: PromiseOrValue<string>;
+    startTimestamp: PromiseOrValue<BigNumberish>;
+    burned: PromiseOrValue<boolean>;
+  };
+
+  export type TokenOwnershipStructOutput = [string, BigNumber, boolean] & {
+    addr: string;
+    startTimestamp: BigNumber;
+    burned: boolean;
+  };
+}
+
 export interface NFTInterface extends utils.Interface {
   functions: {
     "DEFAULT_ADMIN_ROLE()": FunctionFragment;
@@ -39,6 +53,8 @@ export interface NFTInterface extends utils.Interface {
     "baseTokenURI()": FunctionFragment;
     "cost()": FunctionFragment;
     "expelFromStaking(uint256)": FunctionFragment;
+    "explicitOwnershipOf(uint256)": FunctionFragment;
+    "explicitOwnershipsOf(uint256[])": FunctionFragment;
     "getApproved(uint256)": FunctionFragment;
     "getRoleAdmin(bytes32)": FunctionFragment;
     "getRoleMember(bytes32,uint256)": FunctionFragment;
@@ -94,6 +110,8 @@ export interface NFTInterface extends utils.Interface {
     "symbol()": FunctionFragment;
     "toggleStaking(uint256[])": FunctionFragment;
     "tokenURI(uint256)": FunctionFragment;
+    "tokensOfOwner(address)": FunctionFragment;
+    "tokensOfOwnerIn(address,uint256,uint256)": FunctionFragment;
     "totalReleased(address)": FunctionFragment;
     "totalReleased()": FunctionFragment;
     "totalShares()": FunctionFragment;
@@ -116,6 +134,8 @@ export interface NFTInterface extends utils.Interface {
       | "baseTokenURI"
       | "cost"
       | "expelFromStaking"
+      | "explicitOwnershipOf"
+      | "explicitOwnershipsOf"
       | "getApproved"
       | "getRoleAdmin"
       | "getRoleMember"
@@ -171,6 +191,8 @@ export interface NFTInterface extends utils.Interface {
       | "symbol"
       | "toggleStaking"
       | "tokenURI"
+      | "tokensOfOwner"
+      | "tokensOfOwnerIn"
       | "totalReleased(address)"
       | "totalReleased()"
       | "totalShares"
@@ -214,6 +236,14 @@ export interface NFTInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "expelFromStaking",
     values: [PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "explicitOwnershipOf",
+    values: [PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "explicitOwnershipsOf",
+    values: [PromiseOrValue<BigNumberish>[]]
   ): string;
   encodeFunctionData(
     functionFragment: "getApproved",
@@ -433,6 +463,18 @@ export interface NFTInterface extends utils.Interface {
     values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
+    functionFragment: "tokensOfOwner",
+    values: [PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "tokensOfOwnerIn",
+    values: [
+      PromiseOrValue<string>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>
+    ]
+  ): string;
+  encodeFunctionData(
     functionFragment: "totalReleased(address)",
     values: [PromiseOrValue<string>]
   ): string;
@@ -492,6 +534,14 @@ export interface NFTInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "cost", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "expelFromStaking",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "explicitOwnershipOf",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "explicitOwnershipsOf",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -660,6 +710,14 @@ export interface NFTInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "tokenURI", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "tokensOfOwner",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "tokensOfOwnerIn",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "totalReleased(address)",
     data: BytesLike
@@ -959,6 +1017,16 @@ export interface NFT extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    explicitOwnershipOf(
+      tokenId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<[IERC721A.TokenOwnershipStructOutput]>;
+
+    explicitOwnershipsOf(
+      tokenIds: PromiseOrValue<BigNumberish>[],
+      overrides?: CallOverrides
+    ): Promise<[IERC721A.TokenOwnershipStructOutput[]]>;
+
     getApproved(
       tokenId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
@@ -1229,6 +1297,18 @@ export interface NFT extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[string]>;
 
+    tokensOfOwner(
+      owner: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber[]]>;
+
+    tokensOfOwnerIn(
+      owner: PromiseOrValue<string>,
+      start: PromiseOrValue<BigNumberish>,
+      stop: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber[]]>;
+
     "totalReleased(address)"(
       token: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -1300,6 +1380,16 @@ export interface NFT extends BaseContract {
     tokenId: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
+
+  explicitOwnershipOf(
+    tokenId: PromiseOrValue<BigNumberish>,
+    overrides?: CallOverrides
+  ): Promise<IERC721A.TokenOwnershipStructOutput>;
+
+  explicitOwnershipsOf(
+    tokenIds: PromiseOrValue<BigNumberish>[],
+    overrides?: CallOverrides
+  ): Promise<IERC721A.TokenOwnershipStructOutput[]>;
 
   getApproved(
     tokenId: PromiseOrValue<BigNumberish>,
@@ -1571,6 +1661,18 @@ export interface NFT extends BaseContract {
     overrides?: CallOverrides
   ): Promise<string>;
 
+  tokensOfOwner(
+    owner: PromiseOrValue<string>,
+    overrides?: CallOverrides
+  ): Promise<BigNumber[]>;
+
+  tokensOfOwnerIn(
+    owner: PromiseOrValue<string>,
+    start: PromiseOrValue<BigNumberish>,
+    stop: PromiseOrValue<BigNumberish>,
+    overrides?: CallOverrides
+  ): Promise<BigNumber[]>;
+
   "totalReleased(address)"(
     token: PromiseOrValue<string>,
     overrides?: CallOverrides
@@ -1642,6 +1744,16 @@ export interface NFT extends BaseContract {
       tokenId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
+
+    explicitOwnershipOf(
+      tokenId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<IERC721A.TokenOwnershipStructOutput>;
+
+    explicitOwnershipsOf(
+      tokenIds: PromiseOrValue<BigNumberish>[],
+      overrides?: CallOverrides
+    ): Promise<IERC721A.TokenOwnershipStructOutput[]>;
 
     getApproved(
       tokenId: PromiseOrValue<BigNumberish>,
@@ -1909,6 +2021,18 @@ export interface NFT extends BaseContract {
       overrides?: CallOverrides
     ): Promise<string>;
 
+    tokensOfOwner(
+      owner: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber[]>;
+
+    tokensOfOwnerIn(
+      owner: PromiseOrValue<string>,
+      start: PromiseOrValue<BigNumberish>,
+      stop: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber[]>;
+
     "totalReleased(address)"(
       token: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -2107,6 +2231,16 @@ export interface NFT extends BaseContract {
     expelFromStaking(
       tokenId: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    explicitOwnershipOf(
+      tokenId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    explicitOwnershipsOf(
+      tokenIds: PromiseOrValue<BigNumberish>[],
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     getApproved(
@@ -2373,6 +2507,18 @@ export interface NFT extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    tokensOfOwner(
+      owner: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    tokensOfOwnerIn(
+      owner: PromiseOrValue<string>,
+      start: PromiseOrValue<BigNumberish>,
+      stop: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     "totalReleased(address)"(
       token: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -2446,6 +2592,16 @@ export interface NFT extends BaseContract {
     expelFromStaking(
       tokenId: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    explicitOwnershipOf(
+      tokenId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    explicitOwnershipsOf(
+      tokenIds: PromiseOrValue<BigNumberish>[],
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     getApproved(
@@ -2711,6 +2867,18 @@ export interface NFT extends BaseContract {
 
     tokenURI(
       tokenId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    tokensOfOwner(
+      owner: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    tokensOfOwnerIn(
+      owner: PromiseOrValue<string>,
+      start: PromiseOrValue<BigNumberish>,
+      stop: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 

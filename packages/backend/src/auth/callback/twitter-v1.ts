@@ -1,14 +1,13 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { TwitterApi } from "twitter-api-v2";
-import { getDb } from "backend/db/dynamodb";
-import { AuthOrchestrationDao } from "backend/db/auth/orchestration";
+import { getDb } from "../../db/dynamodb";
+import { AuthOrchestrationDao } from "../../db/auth/orchestration";
 import {
   fetchTableNames,
   getAppTwitterClient,
   getAuthorizationToken,
-} from "backend/helpers";
-import { verifyJwtToken } from "models/user";
-import { EProviderTypes } from "models/auth/accountProvider";
+} from "../../helpers";
+import { verifyJwtToken } from "@0xflick/models/user";
+import { EProviderTypes } from "@0xflick/models/auth/accountProvider";
 
 const db = getDb();
 const authOrchestrationDao = new AuthOrchestrationDao(db);

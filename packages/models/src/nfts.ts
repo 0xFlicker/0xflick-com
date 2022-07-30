@@ -1,4 +1,4 @@
-import { IMetadata } from "utils/metadata";
+import { IMetadata } from "./metadata";
 
 export interface IOwnedToken {
   tokenId: number;
@@ -7,6 +7,7 @@ export interface IOwnedToken {
 }
 export interface INfts {
   collectionName: string;
+  contractAddress: string;
   ownedTokens: IOwnedToken[];
 }
 

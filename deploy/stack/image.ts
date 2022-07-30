@@ -10,6 +10,8 @@ import * as ssm from "aws-cdk-lib/aws-ssm";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as targets from "aws-cdk-lib/aws-route53-targets";
 import * as route53 from "aws-cdk-lib/aws-route53";
+import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
+import * as cr from "aws-cdk-lib/custom-resources";
 
 export interface ImageProps extends cdk.StackProps {
   readonly domain: [string, string] | string;
@@ -23,6 +25,63 @@ export class ImageStack extends cdk.Stack {
   constructor(scope: cdk.Stage, id: string, props: ImageProps) {
     const { domain, infuraIpfsAuth, ...rest } = props;
     super(scope, id, rest);
+
+    // Fetch table names from SSM Parameter Store
+    const urlShortenerTableArnParam = new cr.AwsCustomResource(
+      this,
+      "UrlShortenerTableArnParam",
+      {
+        onUpdate: {
+          // will also be called for a CREATE event
+          service: "SSM",
+          action: "getParameter",
+          parameters: {
+            Name: "UrlShortener_TableArn",
+            WithDecryption: true,
+          },
+          region: "us-east-2",
+          physicalResourceId: cr.PhysicalResourceId.of(Date.now().toString()), // Update physical id to always fetch the latest version
+        },
+        policy: cr.AwsCustomResourcePolicy.fromSdkCalls({
+          resources: cr.AwsCustomResourcePolicy.ANY_RESOURCE,
+        }),
+      }
+    );
+
+    const urlShortenerTableArn =
+      urlShortenerTableArnParam.getResponseField("Parameter.Value");
+    const urlShortenerTable = dynamodb.Table.fromTableArn(
+      this,
+      "UrlShortener",
+      urlShortenerTableArn
+    );
+
+    // Fetch table names from SSM Parameter Store
+    const tableNamesParamResource = new cr.AwsCustomResource(
+      this,
+      "TableNamesParamResource",
+      {
+        onUpdate: {
+          // will also be called for a CREATE event
+          service: "SSM",
+          action: "getParameter",
+          parameters: {
+            Name: "DynamoDB_TableNames",
+          },
+          region: "us-east-2",
+          physicalResourceId: cr.PhysicalResourceId.of(Date.now().toString()), // Update physical id to always fetch the latest version
+        },
+        policy: cr.AwsCustomResourcePolicy.fromSdkCalls({
+          resources: cr.AwsCustomResourcePolicy.ANY_RESOURCE,
+        }),
+      }
+    );
+    const tableNamesParamValue =
+      tableNamesParamResource.getResponseField("Parameter.Value");
+    const tableNameParams = new ssm.StringParameter(this, "TableNamesParam", {
+      parameterName: "Image_DynamoDB_TableNames",
+      stringValue: tableNamesParamValue,
+    });
 
     // Domain
     const domains = domain instanceof Array ? domain : [domain];
@@ -75,6 +134,8 @@ export class ImageStack extends cdk.Stack {
       timeout: cdk.Duration.seconds(15),
       memorySize: 1536,
     });
+    urlShortenerTable.grantReadData(imageOrigin);
+    tableNameParams.grantRead(imageOrigin);
 
     const imageAccept = new cloudfront.experimental.EdgeFunction(this, "ia", {
       runtime: lambda.Runtime.NODEJS_16_X,

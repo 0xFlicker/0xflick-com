@@ -15,36 +15,48 @@ import { TwitterApi, TwitterApiTokens } from "twitter-api-v2";
 import { deserializeSessionCookie } from "./utils/cookie";
 import { DrinkerDAO } from "./db/drinker";
 import { AuthOrchestrationDao } from "./db/auth/orchestration";
+import { UrlShortenerDAO } from "./db/urlShortener";
 
-export function fetchTableNames() {
-  if (
-    !process.env.SSM_TABLE_NAMES ||
-    process.env.DYNAMODB_REGION === "local-env"
-  ) {
-    return Promise.resolve();
+/**
+ * Configures all the DAOs.
+ *
+ * @returns the table region
+ */
+export async function fetchTableNames({
+  region,
+  paramName,
+}: {
+  paramName?: string;
+  region?: string;
+} = {}) {
+  if (process.env.DYNAMODB_REGION === "local-env") {
+    return process.env.DYNAMODB_REGION;
   }
-  console.log(`Fetching table names... from ${process.env.SSM_TABLE_NAMES}`);
-
+  paramName = paramName ?? process.env.SSM_TABLE_NAMES ?? "DynamoDB_TableNames";
+  region = region ?? process.env.SSM_TABLE_NAMES_REGION ?? "us-east-2";
+  console.log(`Fetching table names... from ${paramName} in region ${region}`);
   const ssm = new AWS.SSM({
-    region: "us-east-1",
+    region,
   });
 
-  const promiseTableName = ssm
-    .getParameter({ Name: process.env.SSM_TABLE_NAMES || "" })
+  const result = await ssm
+    .getParameter({
+      Name: paramName,
+    })
     .promise();
-  return promiseTableName.then((result) => {
-    const tableNames = JSON.parse(result.Parameter?.Value ?? "{}");
-    UserDAO.TABLE_NAME = tableNames.userNonceTable ?? UserDAO.TABLE_NAME;
-    RolesDAO.TABLE_NAME = tableNames.rolesTable ?? RolesDAO.TABLE_NAME;
-    RolePermissionsDAO.TABLE_NAME =
-      tableNames.rolesPermissionsTable ?? RolePermissionsDAO.TABLE_NAME;
-    UserRolesDAO.TABLE_NAME =
-      tableNames.userRolesTable ?? UserRolesDAO.TABLE_NAME;
-    DrinkerDAO.TABLE_NAME = tableNames.drinkerTable ?? DrinkerDAO.TABLE_NAME;
-    // This name is shared, so set it on the env
-    AuthOrchestrationDao.TABLE_NAME =
-      tableNames.externalAuthTable ?? AuthOrchestrationDao.TABLE_NAME;
-  });
+  const tableNames = JSON.parse(result.Parameter?.Value ?? "{}");
+  UserDAO.TABLE_NAME = tableNames.userNonceTable ?? UserDAO.TABLE_NAME;
+  RolesDAO.TABLE_NAME = tableNames.rolesTable ?? RolesDAO.TABLE_NAME;
+  RolePermissionsDAO.TABLE_NAME =
+    tableNames.rolesPermissionsTable ?? RolePermissionsDAO.TABLE_NAME;
+  UserRolesDAO.TABLE_NAME =
+    tableNames.userRolesTable ?? UserRolesDAO.TABLE_NAME;
+  DrinkerDAO.TABLE_NAME = tableNames.drinkerTable ?? DrinkerDAO.TABLE_NAME;
+  AuthOrchestrationDao.TABLE_NAME =
+    tableNames.externalAuthTable ?? AuthOrchestrationDao.TABLE_NAME;
+  UrlShortenerDAO.TABLE_NAME =
+    tableNames.urlShortenerTable ?? UrlShortenerDAO.TABLE_NAME;
+  return tableNames.region as string;
 }
 
 export function getAuthorizationToken(req: NextApiRequest): string | undefined {
@@ -107,9 +119,11 @@ export function defaultChainId() {
   return process.env.NEXT_PUBLIC_CHAIN_ID || "1";
 }
 
-export function defaultProviderUrl(chainId?: string): string {
-  chainId = chainId ?? defaultChainId();
-  return JSON.parse(process.env.WEB_CONNECT_RPC_JSON || "{}")[chainId] || "";
+export function defaultProviderUrl(): string {
+  if (!process.env.WEB3_RPC) {
+    throw new Error("WEB3_RPC is not set");
+  }
+  return process.env.WEB3_RPC;
 }
 
 export function getOwner(): () => Promise<string> {
@@ -120,7 +134,7 @@ export function getOwner(): () => Promise<string> {
 
   const promiseContractOwner = (() => {
     return async () => {
-      const provider = jsonRpcProvider(defaultProviderUrl(defaultChainId()));
+      const provider = jsonRpcProvider(defaultProviderUrl());
       const contract = Ownable__factory.connect(nftContractAddress, provider);
       const owner = await contract.owner();
       return owner;

@@ -4,10 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node build.mjs",
     "start": "next start",
-    "lint": "next lint",
-    "typechain": "typechain --target ethers-v5 --out-dir src/contracts contract-artifacts/IERC721AQueryable.json ./node_modules/@openzeppelin/contracts/build/contracts/ERC721Enumerable.json ./node_modules/@openzeppelin/contracts/build/contracts/ERC721URIStorage.json ./node_modules/@openzeppelin/contracts/build/contracts/Ownable.json"
+    "lint": "next lint"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.113.0",
@@ -26,12 +25,16 @@
     "@reduxjs/toolkit": "^1.8.2",
     "@use-gesture/react": "^10.2.15",
     "@walletconnect/web3-provider": "^1.7.8",
+    "apollo-server-core": "^3.10.0",
+    "apollo-server-micro": "^3.10.0",
     "classnames": "^2.3.1",
     "ethers": "^5.6.8",
+    "graphql": "^16.5.0",
     "ipfs-http-client": "^57.0.1",
     "isomorphic-fetch": "^3.0.0",
     "isomorphic-unfetch": "^3.1.0",
     "jose": "^4.8.1",
+    "micro": "^9.4.0",
     "motion-sensors-polyfill": "^0.3.1",
     "next": "^12.2.2",
     "next-auth": "^4.5.0",

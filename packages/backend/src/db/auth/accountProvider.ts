@@ -5,10 +5,7 @@ import {
   PutCommand,
   ScanCommand,
 } from "@aws-sdk/lib-dynamodb";
-import type {
-  IAccountProvider,
-  TProviderTypes,
-} from "0xflick/models/auth/accountProvider.ts";
+import type { IAccountProvider, TProviderTypes } from "@0xflick/models";
 import {
   accountProviderDBItemToModel,
   accountProviderToDBItem,

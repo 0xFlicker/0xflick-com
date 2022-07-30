@@ -5,12 +5,17 @@ import {
   UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { getOwner } from "../helpers";
-import { EActions, EResource } from "@0xflick/models";
-import { UserModel, IUser, UserWithRolesModel } from "@0xflick/models";
+import {
+  EActions,
+  EResource,
+  UserModel,
+  IUser,
+  UserWithRolesModel,
+} from "@0xflick/models";
 import { RolePermissionsDAO } from "./rolePermissions";
 import { UserRolesDAO } from "./userRoles";
 
-const promiseContractOwner = getOwner();
+let promiseContractOwner: undefined | (() => Promise<string>);
 
 export class UserDAO {
   public static TABLE_NAME = process.env.TABLE_NAME_USER_NONCE || "UserNonce";
@@ -107,6 +112,9 @@ export class UserDAO {
     address: string,
     possibilities: [EActions, EResource][] | [EActions, EResource]
   ): Promise<[EActions, EResource] | null> {
+    if (!promiseContractOwner) {
+      promiseContractOwner = getOwner();
+    }
     const permissions = await this.allowedActionsForAddress(
       userRoles,
       rolePermissionsDao,

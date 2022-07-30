@@ -1,15 +1,19 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { jsonRpcProvider } from "utils/providers";
 import { nftCollectionsOfInterest, flickEnsDomain } from "utils/config";
-import type { IMetadata } from "utils/metadata";
+import type { IMetadata } from "@0xflick/models";
 import {
-  ERC721Enumerable__factory,
+  IERC721Enumerable__factory,
   IERC721AQueryable__factory,
-} from "contracts";
+  IERC721Metadata__factory,
+} from "@0xflick/contracts";
 
 import { BigNumber, providers } from "ethers";
 import fetch from "isomorphic-unfetch";
-import { defaultProviderUrl } from "backend/helpers";
+
+if (!process.env.WEB3_RPC) {
+  throw new Error("WEB3_RPC is not set");
+}
+const WEB3_RPC = process.env.WEB3_RPC;
 
 if (!process.env.NEXT_PUBLIC_IMAGE_RESIZER) {
   throw new Error("NEXT_PUBLIC_IMAGE_RESIZER is not set");
@@ -40,8 +44,15 @@ async function getEnumerableNftTokens(
   provider: providers.JsonRpcProvider,
   enumerable: boolean
 ): Promise<Nft> {
-  const contract = ERC721Enumerable__factory.connect(contractAddress, provider);
-  const nftTokens = (await contract.balanceOf(myAddress)).toNumber();
+  const contractEnumerable = IERC721Enumerable__factory.connect(
+    contractAddress,
+    provider
+  );
+  const contractMetadata = IERC721Metadata__factory.connect(
+    contractAddress,
+    provider
+  );
+  const nftTokens = (await contractEnumerable.balanceOf(myAddress)).toNumber();
   const tokenUris: Promise<{
     tokenId: number;
     metadata: IMetadata;
@@ -51,9 +62,9 @@ async function getEnumerableNftTokens(
     contractAddress,
     provider
   );
-  const collectionName = await contract.name();
+  const collectionName = await contractMetadata.name();
   const imageFetcher = (tokenId: BigNumber) =>
-    contract
+    contractMetadata
       .tokenURI(tokenId)
       .then(async (metadataUrl) => {
         if (metadataUrl.startsWith("ipfs://")) {
@@ -69,7 +80,7 @@ async function getEnumerableNftTokens(
       .then((metadata) => {
         let resizedImage = metadata.image;
         if (metadata.image.startsWith("ipfs://")) {
-          resizedImage = `${NEXT_PUBLIC_IMAGE_RESIZER}/${metadata.image.substring(
+          resizedImage = `${NEXT_PUBLIC_IMAGE_RESIZER}/ipfs/${metadata.image.substring(
             7
           )}`;
         }
@@ -82,7 +93,7 @@ async function getEnumerableNftTokens(
   if (enumerable) {
     for (let i = 0; i < nftTokens; i++) {
       tokenUris.push(
-        contract.tokenOfOwnerByIndex(myAddress, i).then(imageFetcher)
+        contractEnumerable.tokenOfOwnerByIndex(myAddress, i).then(imageFetcher)
       );
     }
     return Promise.all(tokenUris).then((tokenUris) => ({
@@ -106,7 +117,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const provider = jsonRpcProvider(defaultProviderUrl());
+  const provider = new providers.JsonRpcProvider(WEB3_RPC);
   const myAddress = await flickAddress(provider);
   if (!myAddress) {
     res.status(500).send("Could not get your address");

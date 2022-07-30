@@ -8,7 +8,6 @@ import { createLogger } from "../../utils/logging.js";
 // dimension is allowed.
 
 const variables = {
-  allowedDimensions: [50, 100, 500, 1000],
   defaultDimension: { w: 1000, h: "auto" },
   variance: 20,
   webpExtension: "webp",
@@ -45,21 +44,22 @@ export const handler = logger.handler(
     // parse the prefix, image name and extension from the uri.
     // In our case /images/image.jpg
 
-    const match = fwdUri.match(/(.*)\/(.*)\.(.*)/);
+    const match = fwdUri.match(/(.*)\/(.*)\/(.*)\.(.*)/);
     if (!match) {
       return request;
     }
-    let prefix = match[1];
-    let imageName = match[2];
-    let extension = match[3];
+    const type = match[1];
+    const prefix = match[2];
+    const imageName = match[3];
+    const extension = match[4];
 
     console.log(
-      `Fetching image ${prefix}/${imageName}.${extension} at ${width}x${height}`
+      `Fetching image ${prefix}/${imageName}.${extension} at ${width}x${height} of type ${type}`
     );
     // read the accept header to determine if webP is supported.
-    let accept = headers["accept"] ? headers["accept"][0].value : "";
+    const accept = headers["accept"] ? headers["accept"][0].value : "";
 
-    let url = [];
+    const url = [type];
     // build the new uri to be forwarded upstream
     url.push(prefix);
     url.push(width + "x" + height);

@@ -1,0 +1,23 @@
+{
+  "name": "@xflick/graphql-app",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc --build",
+    "dev": "ts-node-dev --inspect -- src/index.ts | bunyan"
+  },
+  "dependencies": {
+    "apollo-server": "^3.10.0",
+    "apollo-server-core": "^3.10.0"
+  },
+  "devDependencies": {
+    "@types/dotenv": "^8.2.0",
+    "bunyan": "^1.8.15",
+    "concurrently": "^7.3.0",
+    "dotenv": "^16.0.1",
+    "ts-node": "^10.9.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^4.7.4"
+  }
+}

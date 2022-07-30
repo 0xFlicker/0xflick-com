@@ -80,3 +80,5 @@ export type { NFT } from "./contracts/NFT.sol/NFT";
 export { NFT__factory } from "./factories/contracts/NFT.sol/NFT__factory";
 export type { ERC721A } from "./erc721a/contracts/ERC721A";
 export { ERC721A__factory } from "./factories/erc721a/contracts/ERC721A__factory";
+export type { ERC721AQueryable } from "./erc721a/contracts/extensions/ERC721AQueryable";
+export { ERC721AQueryable__factory } from "./factories/erc721a/contracts/extensions/ERC721AQueryable__factory";

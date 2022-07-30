@@ -1,15 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { jsonRpcProvider } from "utils/provider";
+import { jsonRpcProvider } from "../utils/provider";
 
-import { factory as erc721Factory } from "contracts/ERC721";
+import { NFT__factory } from "@0xflick/contracts";
 import { BigNumber, utils, Wallet } from "ethers";
-import { EActions, EResource } from "models/permissions";
-import { isActionOnResource } from "utils/allowedActions";
-import { oneOf } from "utils/matcher";
-import { RolePermissionsDAO } from "backend/db/rolePermissions";
-import { getDb } from "backend/db/dynamodb";
-import { verifyJwtToken } from "models/user";
-import { fetchTableNames, getAuthorizationToken } from "backend/helpers";
+import { EActions, EResource } from "@0xflick/models/permissions";
+import { isActionOnResource } from "../utils/allowedActions";
+import { oneOf } from "../utils/matcher";
+import { RolePermissionsDAO } from "../db/rolePermissions";
+import { getDb } from "../db/dynamodb";
+import { verifyJwtToken } from "@0xflick/models/user";
+import { fetchTableNames, getAuthorizationToken } from "../helpers";
 
 interface IDataSuccess {
   signature: string;
@@ -83,7 +83,7 @@ export default async function handler(
   }
 
   const provider = jsonRpcProvider(defaultProviderUrl(defaultChainId()));
-  const contract = erc721Factory(provider, nftContractAddress);
+  const contract = NFT__factory.connect(nftContractAddress, provider);
   const signer = new Wallet(process.env.SIGNER_PRIVATE_KEY || "");
   const [preSaleMaxMintPerAccountBigNumber, preSaleMintedBigNumber] =
     await Promise.all([

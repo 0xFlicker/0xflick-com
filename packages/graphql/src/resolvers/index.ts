@@ -1,5 +1,7 @@
-import { gql } from "apollo-server-micro";
-import * as nfts from "./nfts";
+import { gql } from "apollo-server-core";
+import { IResolvers } from "@graphql-tools/utils";
+import { resolveFlick, resolveImage, resolveNftTokenImage } from "./nfts";
+import { TContext } from "../context";
 
 export const typeDefs = gql`
   type MetadataProperties {
@@ -31,10 +33,12 @@ export const typeDefs = gql`
   type NftToken {
     id: ID!
     tokenId: String!
+    image(width: Int, height: Int): String
     metadata: Metadata
   }
   type Nft {
     collectionName: String!
+    contractAddress: String!
     ownedTokens: [NftToken!]!
   }
 
@@ -44,13 +48,16 @@ export const typeDefs = gql`
 
   type Query {
     flick: Flick
+    image(contract: String!, tokenId: Int!, width: Int, height: Int): String
   }
 `;
 
 export const resolvers = {
   Query: {
-    flick: {
-      nfts: nfts.get,
-    },
+    flick: resolveFlick,
+    image: resolveImage,
   },
-};
+  NftToken: {
+    image: resolveNftTokenImage,
+  },
+} as IResolvers<any, TContext, Record<string, any>, any>;

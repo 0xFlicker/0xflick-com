@@ -4,7 +4,7 @@ import {
   DeleteCommand,
   PutCommand,
 } from "@aws-sdk/lib-dynamodb";
-import type { IAccountUser } from "models/auth/accountUser";
+import type { IAccountUser } from "@0xflick/models";
 import {
   tableName,
   userDBItemToModel,

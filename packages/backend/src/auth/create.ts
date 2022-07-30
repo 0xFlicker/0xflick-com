@@ -1,12 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { utils } from "ethers";
-import { getDb } from "backend/db/dynamodb";
-import { UserDAO } from "backend/db/user";
-import { authMessage } from "utils/message";
-import { createJwtToken, decryptJweToken } from "backend/db/token";
-import { UserRolesDAO } from "backend/db/userRoles";
-import { fetchTableNames, getOwner } from "backend/helpers";
-import { serializeSessionCookie } from "utils/cookie";
+import { getDb } from "../db/dynamodb";
+import { UserDAO } from "../db/user";
+import { authMessage } from "../utils/message";
+import { createJwtToken, decryptJweToken } from "../db/token";
+import { UserRolesDAO } from "../db/userRoles";
+import { fetchTableNames, getOwner } from "../helpers";
+import { serializeSessionCookie } from "../utils/cookie";
 
 interface IDataSuccess {
   token: string;

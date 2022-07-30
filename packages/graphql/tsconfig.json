@@ -6,13 +6,14 @@
     "rootDir": "./src" /* Specify the root folder within your source files. */,
     "outDir": "dist" /* Specify an output folder for all emitted files. */,
     "paths": {
-      "@0xflick/models": ["../models/src/index"],
-      "@0xflick/models/*": ["../models/src/*"],
-      "@0xflick/backend": ["../backend/src/index"],
-      "@0xflick/backend/*": ["../backend/src/*"],
-      "@0xflick/contracts": ["../contracts/src/index"],
-      "@0xflick/contracts/*": ["../contracts/src/*"]
+      "@0xflick/models": ["../../packages/models/src/index"],
+      "@0xflick/models/*": ["../../packages/models/src/*"],
+      "@0xflick/backend": ["../../packages/backend/src/index"],
+      "@0xflick/backend/*": ["../../packages/backend/src/*"],
+      "@0xflick/contracts": ["../../packages/contracts/src/index"],
+      "@0xflick/contracts/*": ["../../packages/contracts/src/*"]
     },
+    "incremental": true,
     "noErrorTruncation": true,
     "noImplicitAny": true,
     "noImplicitThis": true,
@@ -26,13 +27,22 @@
   "exclude": ["**/node_modules", "**/.*/", "dist", "build"],
   "references": [
     {
-      "path": "../models"
+      "path": "../../packages/models"
     },
     {
-      "path": "../backend"
+      "path": "../../packages/backend"
     },
     {
-      "path": "../contracts"
+      "path": "../../packages/contracts"
     }
-  ]
+  ],
+  "ts-node": {
+    "files": true,
+    "require": ["tsconfig-paths/register"],
+    "experimentalResolverFeatures": true,
+    "compilerOptions": {
+      "module": "CommonJS",
+      "types": ["node"]
+    }
+  }
 }

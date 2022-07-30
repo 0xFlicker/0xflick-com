@@ -1,6 +1,6 @@
-import { getDb } from "backend/db/dynamodb";
-import { UserDAO } from "backend/db/user";
-import { fetchTableNames } from "backend/helpers";
+import { getDb } from "../db/dynamodb";
+import { UserDAO } from "../db/user";
+import { fetchTableNames } from "../helpers";
 import { utils } from "ethers";
 import type { NextApiRequest, NextApiResponse } from "next";
 

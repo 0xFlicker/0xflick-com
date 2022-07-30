@@ -25,7 +25,7 @@ import { useAppSelector } from "app/store";
 import { selectors as appbarSelectors } from "features/appbar/redux";
 import { Minimap } from "./Minimap";
 
-import { INfts, IOwnedToken } from "models/nfts";
+import { INfts, IOwnedToken } from "@0xflick/models";
 import { useGetNftCollectionQuery } from "../api";
 import { shuffle } from "utils/random";
 
@@ -104,10 +104,6 @@ const Item: FC<{
   w,
 }) => {
   const ref = useRef<any>(null);
-  const { width, height } = useThree((state) => ({
-    width: state.viewport.width,
-    height: state.viewport.height,
-  }));
   const [hovered, hover] = useState(false);
   const scroll = useScroll();
   const click = useCallback(() => {
@@ -176,7 +172,7 @@ const Item: FC<{
   });
 
   return (
-    <Suspense fallback={<> </>}>
+    <Suspense fallback={<></>}>
       <Image_
         ref={ref}
         url={url}

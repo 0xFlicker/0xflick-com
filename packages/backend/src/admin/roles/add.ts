@@ -1,23 +1,23 @@
 import { v4 as createUuid } from "uuid";
-import { getDb } from "backend/db/dynamodb";
-import { RolePermissionsDAO } from "backend/db/rolePermissions";
+import { getDb } from "../../db/dynamodb";
+import { RolePermissionsDAO } from "../../db/rolePermissions";
 import {
   fetchTableNames,
   getAuthorizationToken,
   getOwner,
-} from "backend/helpers";
-import { EActions, EResource } from "models/permissions";
-import { verifyJwtToken } from "models/user";
+} from "../../helpers";
+import { EActions, EResource } from "@0xflick/models/permissions";
+import { verifyJwtToken } from "@0xflick/models/user";
 import type { NextApiRequest, NextApiResponse } from "next";
-import { RolesDAO } from "backend/db/roles";
+import { RolesDAO } from "../../db/roles";
 import {
   defaultAdminStrategyAll,
   isActionOnResource,
-} from "utils/allowedActions";
+} from "../../utils/allowedActions";
 import {
   IRolePermission,
   IRolePermissionsAddResponseSuccess,
-} from "models/rolePermissions";
+} from "@0xflick/models/rolePermissions";
 
 interface IDataError {
   error: string;

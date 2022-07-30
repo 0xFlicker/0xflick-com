@@ -67,7 +67,7 @@ export class IpfsStack extends cdk.Stack {
       }
     );
     const ipfsOrigin = new cloudfront.experimental.EdgeFunction(this, "ipfs", {
-      runtime: lambda.Runtime.NODEJS_14_X,
+      runtime: lambda.Runtime.NODEJS_16_X,
       code: lambda.Code.fromAsset(
         path.join(__dirname, "../.layers/ipfs-origin-layer.zip")
       ),

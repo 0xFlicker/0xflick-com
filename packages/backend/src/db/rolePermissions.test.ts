@@ -1,8 +1,8 @@
 import { getDb } from "./dynamodb";
 import { v4 as createUuid } from "uuid";
 import { RolePermissionsDAO } from "./rolePermissions";
-import { IRolePermission } from "models/rolePermissions";
-import { EActions, EResource } from "models/permissions";
+import { IRolePermission } from "@0xflick/models/rolePermissions";
+import { EActions, EResource } from "@0xflick/models/permissions";
 
 describe("#RolePermissions DAO", () => {
   it("can create a role permission", async () => {

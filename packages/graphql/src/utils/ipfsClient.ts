@@ -1,11 +1,11 @@
 import { create, IPFSHTTPClient } from "ipfs-http-client";
 
-if (!process.env.INFURA_IPFS_AUTH) {
-  throw new Error("INFURA_IPFS_AUTH is not set");
-}
-const INFURA_IPFS_AUTH = process.env.INFURA_IPFS_AUTH;
+export function createInfuraIpfsClient() {
+  if (!process.env.INFURA_IPFS_AUTH) {
+    throw new Error("INFURA_IPFS_AUTH is not set");
+  }
+  const INFURA_IPFS_AUTH = process.env.INFURA_IPFS_AUTH;
 
-export function createIpfsClient() {
   return create({
     host: "ipfs.infura.io:5001",
     protocol: "https",

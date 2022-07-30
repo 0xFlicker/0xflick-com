@@ -34,13 +34,13 @@
   "exclude": ["./node_modules"],
   "references": [
     {
-      "path": "../models"
+      "path": "../../packages/models"
     },
     {
-      "path": "../backend"
+      "path": "../../packages/backend"
     },
     {
-      "path": "../graphql"
+      "path": "../../packages/graphql"
     }
   ]
 }

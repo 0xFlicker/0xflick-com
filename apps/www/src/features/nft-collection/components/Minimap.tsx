@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { useRef, FC } from "react";
 import { useFrame, useThree, extend, Object3DNode } from "@react-three/fiber";
 import { useScroll } from "@react-three/drei";
-import { IOwnedToken } from "models/nfts";
+import { IOwnedToken } from "@0xflick/models";
 
 extend({ Line_: THREE.Line, Group_: THREE.Group });
 declare global {

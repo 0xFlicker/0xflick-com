@@ -2,7 +2,7 @@ import { GetStaticProps, NextPage } from "next";
 import { Nfts } from "layouts/Nfts";
 import { DefaultProvider } from "context/default";
 import nftCollection from "fixtures/nft-collection";
-import { INfts } from "models/nfts";
+import { INfts } from "@0xflick/models";
 
 interface IPageProps {
   serverSideNfts?: INfts[];

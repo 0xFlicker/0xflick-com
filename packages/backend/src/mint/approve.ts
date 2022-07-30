@@ -1,19 +1,19 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { jsonRpcProvider } from "utils/provider";
+import { jsonRpcProvider } from "../utils/provider";
 
-import { factory as erc721Factory } from "contracts/ERC721";
+import { NFT__factory } from "@0xflick/contracts";
 import { BigNumber, utils, Wallet } from "ethers";
-import { EActions, EResource } from "models/permissions";
-import { isActionOnResource } from "utils/allowedActions";
-import { allOf, not } from "utils/matcher";
-import { RolePermissionsDAO } from "backend/db/rolePermissions";
-import { getDb } from "backend/db/dynamodb";
-import { verifyJwtToken } from "models/user";
-import { fetchTableNames, getAuthorizationToken } from "backend/helpers";
-import { RolesDAO } from "backend/db/roles";
-import { UserRolesDAO } from "backend/db/userRoles";
-import { createJwtToken } from "backend/db/token";
-import { serializeSessionCookie } from "utils/cookie";
+import { EActions, EResource } from "@0xflick/models/permissions";
+import { isActionOnResource } from "../utils/allowedActions";
+import { allOf, not } from "../utils/matcher";
+import { RolePermissionsDAO } from "../db/rolePermissions";
+import { getDb } from "../db/dynamodb";
+import { verifyJwtToken } from "@0xflick/models/user";
+import { fetchTableNames, getAuthorizationToken } from "../helpers";
+import { RolesDAO } from "../db/roles";
+import { UserRolesDAO } from "../db/userRoles";
+import { createJwtToken } from "../db/token";
+import { serializeSessionCookie } from "../utils/cookie";
 
 interface IDataSuccess {
   approved: boolean;
@@ -87,7 +87,7 @@ export default async function handler(
     }
     console.log(`Sanity checking the contract to verify there is still a mint`);
     const provider = jsonRpcProvider(defaultProviderUrl(defaultChainId()));
-    const contract = erc721Factory(provider, nftContractAddress);
+    const contract = NFT__factory.connect(nftContractAddress, provider);
     const [maxSupplyBigNumber, totalSupplyNumber] = await Promise.all([
       contract.maxSupply(),
       contract.totalSupply(),

@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { INfts } from "models/nfts";
+import { INfts } from "@0xflick/models";
 
 type TGetNftCollectionQuery = INfts[];
 

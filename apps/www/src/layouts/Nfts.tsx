@@ -5,7 +5,7 @@ import { useAppDispatch } from "app/store";
 import { actions as appbarActions } from "features/appbar/redux";
 import { Carousel } from "features/nft-collection/components/Carousel";
 import { useGetNftCollectionQuery } from "features/nft-collection/api";
-import { INfts } from "models/nfts";
+import { INfts } from "@0xflick/models";
 
 export const Nfts: FC<{ serverSideNfts?: INfts[] }> = ({ serverSideNfts }) => {
   const targetRef = useRef<HTMLDivElement>(null);

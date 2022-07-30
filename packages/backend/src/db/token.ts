@@ -10,9 +10,9 @@ import {
   generateRolesFromIds,
   namespacedClaim,
   TokenModel,
-} from "models/token";
-import { IUserWithRoles } from "models/user";
-import { sessionExpiration } from "utils/cookie";
+  IUserWithRoles,
+} from "@0xflick/models";
+import { sessionExpiration } from "../utils/cookie";
 
 export async function decryptJweToken(
   jwe: string
@@ -46,10 +46,11 @@ export const promisePrivateKey = new Promise<KeyLike>(
     if ((global as any).promisePrivateKeys) {
       await (global as any).promisePrivateKeys;
     }
-    importPKCS8(process.env.JWT_PRIVATE_KEY ?? "", "ECDH-ES+A128KW").then(
-      resolve,
-      reject
-    );
+    process.env.JWT_PRIVATE_KEY &&
+      importPKCS8(process.env.JWT_PRIVATE_KEY, "ECDH-ES+A128KW").then(
+        resolve,
+        reject
+      );
   }
 );
 
@@ -57,10 +58,8 @@ export const jwkKey = new Promise<KeyLike>(async (resolve, reject) => {
   if ((global as any).promisePrivateKeys) {
     await (global as any).promisePrivateKeys;
   }
-  importJWK(JSON.parse(process.env.JWK ?? "{}"), "ECDH-ES+A128KW").then(
-    (k: any) => {
+  process.env.JWK &&
+    importJWK(JSON.parse(process.env.JWK), "ECDH-ES+A128KW").then((k: any) => {
       resolve(k);
-    },
-    reject
-  );
+    }, reject);
 });

@@ -2,18 +2,20 @@ import type {
   CloudFrontResponseCallback,
   CloudFrontResponseEvent,
 } from "aws-lambda";
-import AWS from "aws-sdk";
+import type { Readable } from "stream";
+import { cidPath as isCidPath } from "is-ipfs";
+import { S3 } from "@aws-sdk/client-s3";
+import { SSM } from "@aws-sdk/client-ssm";
 import {
-  CID,
   create as createIpfsHttpClient,
   IPFSHTTPClient,
 } from "ipfs-http-client";
 
-const S3 = new AWS.S3({
-  signatureVersion: "v4",
+const s3 = new S3({
+  region: "us-east-1",
 });
 
-const ssm = new AWS.SSM({
+const ssm = new SSM({
   region: "us-east-1",
 });
 
@@ -22,49 +24,17 @@ const cors = {
   allowCredentials: true,
 };
 
-const [bucketResult, ipfsApiAuth] = await Promise.all([
-  ssm.getParameter({ Name: "/edge/IpfsOriginBucket" }).promise(),
-  ssm.getParameter({ Name: "/edge/IpfsOriginIPFSApiAuth" }).promise(),
+const params = Promise.all([
+  ssm.getParameter({ Name: "/edge/IpfsOriginBucket" }),
+  ssm.getParameter({ Name: "/edge/IpfsOriginIPFSApiAuth" }),
 ]);
-
-const BUCKET = bucketResult.Parameter?.Value;
-const IPFS_AUTH = ipfsApiAuth.Parameter?.Value;
-
-if (!BUCKET) {
-  throw new Error("BUCKET is not set");
-}
-if (!IPFS_AUTH) {
-  throw new Error("IPFS_AUTH is not set");
-}
-
-const IPFS_API = "ipfs.infura.io:5001";
-
-const ipfsClient = createIpfsHttpClient({
-  host: IPFS_API,
-  protocol: "https",
-  headers: {
-    Authorization: IPFS_AUTH,
-  },
-});
-
-const s3Exists = async (key: string) => {
-  try {
-    await S3.headObject({
-      Bucket: BUCKET,
-      Key: key,
-    }).promise();
-    return true;
-  } catch (err) {
-    return false;
-  }
-};
 
 export async function loadIpfsContent(
   ipfsClient: IPFSHTTPClient,
   ipfsCid: string
 ) {
   const contents: Uint8Array[] = [];
-  for await (let metadataBuf of ipfsClient.cat(ipfsCid)) {
+  for await (const metadataBuf of ipfsClient.cat(ipfsCid)) {
     contents.push(metadataBuf);
   }
   return Buffer.concat(contents);
@@ -75,6 +45,39 @@ export const handler = async (
   _: void,
   callback: CloudFrontResponseCallback
 ): Promise<void> => {
+  const [bucketResult, ipfsApiAuth] = await params;
+
+  const BUCKET = bucketResult.Parameter?.Value;
+  const IPFS_AUTH = ipfsApiAuth.Parameter?.Value;
+
+  if (!BUCKET) {
+    throw new Error("BUCKET is not set");
+  }
+  if (!IPFS_AUTH) {
+    throw new Error("IPFS_AUTH is not set");
+  }
+
+  const IPFS_API = "ipfs.infura.io:5001";
+
+  const ipfsClient = createIpfsHttpClient({
+    host: IPFS_API,
+    protocol: "https",
+    headers: {
+      Authorization: IPFS_AUTH,
+    },
+  });
+
+  const s3Exists = async (key: string) => {
+    try {
+      await s3.headObject({
+        Bucket: BUCKET,
+        Key: key,
+      });
+      return true;
+    } catch (err) {
+      return false;
+    }
+  };
   const response = event.Records[0].cf.response;
   const request = event.Records[0].cf.request;
 
@@ -96,45 +99,58 @@ export const handler = async (
     }
     //check if image is not present
     if (Number(response.status) === 404 || Number(response.status) === 403) {
-      let request = event.Records[0].cf.request;
+      const request = event.Records[0].cf.request;
 
       // read the required path. Ex: uri /QM234234234/image.png
-      let path = request.uri;
+      const path = request.uri;
 
       // read the S3 key from the path variable.
       // Ex: path variable QM234234234/image.png
-      let key = path.substring(1);
+      const key = path.substring(1);
 
       // Check if the image does not exist in S3
       let buffer: Buffer;
+      if (!isCidPath(key)) {
+        return callback(null, {
+          status: "404",
+          body: "Not Found",
+          headers: {
+            ...response.headers,
+          },
+        });
+      }
       if (!(await s3Exists(key))) {
-        // Check if the key is a CID
-        const cid = CID.asCID(key);
-        if (!cid) {
-          console.log("not a CID ", key);
-          response.status = "404";
-          return callback(null, response);
-        }
-        console.log("CID found:", cid.toString());
-
         buffer = await loadIpfsContent(ipfsClient, key);
+        let isJson = false;
+        try {
+          JSON.parse(buffer.toString());
+          isJson = true;
+        } catch (_) {
+          // nothing
+        }
         // Cache the image in S3
-        await S3.putObject({
+        await s3.putObject({
           Body: buffer,
           Bucket: BUCKET,
-          ContentType: "application/octet-stream",
+          ContentType: isJson ? "application/json" : "application/octet-stream",
           CacheControl: "max-age=31536000",
           Key: key,
           StorageClass: "STANDARD",
-        }).promise();
+        });
       } else {
         // Fetch from S3
         console.log("Fetching from S3");
-        const response = await S3.getObject({
+        const response = await s3.getObject({
           Bucket: BUCKET,
           Key: key,
-        }).promise();
-        buffer = response.Body as Buffer;
+        });
+        const stream = response.Body as Readable;
+        buffer = await new Promise<Buffer>((resolve, reject) => {
+          const chunks: Buffer[] = [];
+          stream.on("data", (chunk) => chunks.push(chunk));
+          stream.once("end", () => resolve(Buffer.concat(chunks)));
+          stream.once("error", reject);
+        });
       }
 
       // generate a binary response
@@ -144,9 +160,6 @@ export const handler = async (
         bodyEncoding: "base64",
         headers: {
           ...response.headers,
-          "content-type": [
-            { key: "Content-Type", value: "application/octet-stream" },
-          ],
         },
       });
     } // end of if block checking response statusCode
@@ -154,7 +167,7 @@ export const handler = async (
       // allow the response to pass through
       return callback(null, response);
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error(err);
     return callback(null, {
       status: "500",
@@ -162,9 +175,7 @@ export const handler = async (
         ...response.headers,
       },
       statusDescription: "Internal Server Error",
-      body: JSON.stringify({
-        error: err.message,
-      }),
+      body: "Internal Server Error",
     });
   }
 };

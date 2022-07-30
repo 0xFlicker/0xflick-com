@@ -5,7 +5,6 @@ import {
   ScanCommand,
   UpdateCommand,
   BatchGetCommand,
-  QueryCommand,
   DeleteCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { RolePermissionsDAO } from "./rolePermissions";

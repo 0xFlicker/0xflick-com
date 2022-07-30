@@ -2,8 +2,8 @@ import type { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import type {
   IAccountProvider,
   TProviderTypes,
-} from "models/auth/accountProvider";
-import { IVerificationRequest } from "models/auth/verificationRequest";
+  IVerificationRequest,
+} from "@0xflick/models";
 import { AccountProviderDao } from "./accountProvider";
 import { AccountUserDao } from "./accountUser";
 import { VerificationRequestDao } from "./verificationRequest";
