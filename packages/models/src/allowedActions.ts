@@ -1,6 +1,6 @@
 import { createMatcher, and, or, Matcher, oneOf } from "./matcher";
-import { EActions, EResource } from "@0xflick/models/permissions";
-import { IRolePermission } from "@0xflick/models/rolePermissions";
+import { EActions, EResource } from "./permissions";
+import { IRolePermission } from "./rolePermissions";
 
 export type TAllowedAction = Omit<IRolePermission, "roleId">;
 

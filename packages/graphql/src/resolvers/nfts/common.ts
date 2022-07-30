@@ -1,4 +1,4 @@
-import type { IMetadata, INfts } from "@0xflick/models";
+import type { IMetadata } from "@0xflick/models";
 import {
   IERC721Metadata__factory,
   IERC721Enumerable__factory,
@@ -11,17 +11,7 @@ import fetch from "isomorphic-unfetch";
 import { MetadataError } from "../../errors/metadata";
 import { ContractError } from "../../errors/contract";
 import Logger from "bunyan";
-import { resolveNftTokenImage } from "./token";
-
-if (!process.env.NEXT_PUBLIC_IMAGE_RESIZER) {
-  throw new Error("NEXT_PUBLIC_IMAGE_RESIZER is not set");
-}
-export const NEXT_PUBLIC_IMAGE_RESIZER = process.env.NEXT_PUBLIC_IMAGE_RESIZER;
-
-if (!process.env.NEXT_PUBLIC_IPFS) {
-  throw new Error("NEXT_PUBLIC_IPFS is not set");
-}
-const NEXT_PUBLIC_IPFS = process.env.NEXT_PUBLIC_IPFS;
+import { publicImageResizerUrl, publicIpfsUrl } from "../../utils/config";
 
 export interface Nft {
   collectionName: string;
@@ -44,7 +34,7 @@ export const fetchMetadata = (
       if (metadataUrl.startsWith("ipfs://")) {
         logger.debug(`Fetching metadata from ${metadataUrl}`);
         const response = await fetch(
-          `${NEXT_PUBLIC_IPFS}/${metadataUrl.substring(7)}`,
+          `${publicIpfsUrl.get()}/${metadataUrl.substring(7)}`,
           {
             headers: {
               Accept: "application/json",
@@ -112,7 +102,7 @@ export async function getEnumerableNftTokens(
                 let resizedImage = metadata.image;
                 if (metadata.image.startsWith("ipfs://")) {
                   logger.debug(`Fetching image from ${metadata.image}`);
-                  resizedImage = `${NEXT_PUBLIC_IMAGE_RESIZER}/ipfs/${metadata.image.substring(
+                  resizedImage = `${publicImageResizerUrl.get()}/ipfs/${metadata.image.substring(
                     7
                   )}`;
                 }
@@ -161,7 +151,7 @@ export async function getEnumerableNftTokens(
                 let resizedImage = metadata.image;
                 if (metadata.image.startsWith("ipfs://")) {
                   logger.debug(`Fetching image from ${metadata.image}`);
-                  resizedImage = `${NEXT_PUBLIC_IMAGE_RESIZER}/ipfs/${metadata.image.substring(
+                  resizedImage = `${publicImageResizerUrl.get()}/ipfs/${metadata.image.substring(
                     7
                   )}`;
                 }

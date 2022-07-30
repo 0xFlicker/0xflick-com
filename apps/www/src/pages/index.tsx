@@ -1,10 +1,15 @@
 import Head from "next/head";
 import { Home } from "layouts/Home";
+import { getStaticProps } from "locales";
 import { DefaultProvider } from "context/default";
+import { InitOptions } from "i18next";
+import { NextPage } from "next";
 
-export default function HomePage() {
+export { getStaticProps };
+
+const HomePage: NextPage<{ i18n: InitOptions }> = ({ i18n }) => {
   return (
-    <DefaultProvider>
+    <DefaultProvider i18n={i18n}>
       <Head>
         <title>0xflick</title>
         <meta name="viewport" content="initial-scale=1.0, width=device-width" />
@@ -12,4 +17,5 @@ export default function HomePage() {
       <Home />
     </DefaultProvider>
   );
-}
+};
+export default HomePage;

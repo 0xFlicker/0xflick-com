@@ -2,9 +2,10 @@ import { IFieldResolver } from "@graphql-tools/utils";
 import { IOwnedToken, urlToShortUrl } from "@0xflick/models";
 import { createLogger } from "@0xflick/backend";
 import { TContext } from "../../context";
-import { fetchMetadata, NEXT_PUBLIC_IMAGE_RESIZER } from "./common";
+import { fetchMetadata } from "./common";
 import { IERC721Metadata__factory } from "@0xflick/contracts";
 import { BigNumber } from "ethers";
+import { publicImageResizerUrl } from "../../utils/config";
 
 const logger = createLogger({
   name: "graphql/resolvers/nfts/token",
@@ -47,7 +48,7 @@ export const resolveNftTokenImage: IFieldResolver<
   }
   if (image.startsWith("ipfs://")) {
     const ipfsFileHash = image.substring(7);
-    return `${NEXT_PUBLIC_IMAGE_RESIZER}/ipfs/${ipfsFileHash}${formatSizeParams(
+    return `${publicImageResizerUrl.get()}/ipfs/${ipfsFileHash}${formatSizeParams(
       params
     )}`;
   }
@@ -58,7 +59,7 @@ export const resolveNftTokenImage: IFieldResolver<
   );
   const urlShortened = await urlShortenerDao.create(shortUrlSource);
   logger.debug(`Shortened url is ${urlShortened.hash}`);
-  return `${NEXT_PUBLIC_IMAGE_RESIZER}/web/${
+  return `${publicImageResizerUrl.get()}/web/${
     urlShortened.hash
   }/${imageName}${formatSizeParams(params)}`;
 };
@@ -96,9 +97,9 @@ export const resolveImage: IFieldResolver<
   if (image.startsWith("ipfs://")) {
     const ipfsFileHash = image.substring(7);
 
-    return `${NEXT_PUBLIC_IMAGE_RESIZER}/ipfs/${ipfsFileHash}?${params.toString()}`;
+    return `${publicImageResizerUrl.get()}/ipfs/${ipfsFileHash}?${params.toString()}`;
   }
   const [shortUrlSource, imageName] = urlToShortUrl(image);
   const urlShortened = await urlShortenerDao.create(shortUrlSource);
-  return `${NEXT_PUBLIC_IMAGE_RESIZER}/web/${urlShortened}/${imageName}?${params.toString()}`;
+  return `${publicImageResizerUrl.get()}/web/${urlShortened}/${imageName}?${params.toString()}`;
 };

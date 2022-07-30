@@ -1,41 +1,73 @@
-if (!process.env.NFT_COLLECTIONS_OF_INTEREST) {
-  throw new Error("NFT_COLLECTIONS_OF_INTEREST is not set");
-}
+export const nftCollectionsOfInterest = {
+  get() {
+    if (!process.env.NFT_COLLECTIONS_OF_INTEREST) {
+      throw new Error("NFT_COLLECTIONS_OF_INTEREST is not set");
+    }
+    return JSON.parse(process.env.NFT_COLLECTIONS_OF_INTEREST) as {
+      address: string;
+      isEnumerable: boolean;
+    }[];
+  },
+};
 
-export const nftCollectionsOfInterest = JSON.parse(
-  process.env.NFT_COLLECTIONS_OF_INTEREST
-) as {
-  address: string;
-  isEnumerable: boolean;
-}[];
+export const flickEnsDomain = {
+  get() {
+    if (!process.env.FLICK_ENS_DOMAIN) {
+      throw new Error("FLICK_ENS_DOMAIN is not set");
+    }
+    return process.env.FLICK_ENS_DOMAIN;
+  },
+};
 
-if (!process.env.FLICK_ENS_DOMAIN) {
-  throw new Error("FLICK_ENS_DOMAIN is not set");
-}
+export const ensRpcUrl = {
+  get() {
+    if (!process.env.ENS_RPC_URL) {
+      throw new Error("ENS_RPC_URL is not set");
+    }
+    return process.env.ENS_RPC_URL;
+  },
+};
 
-export const flickEnsDomain = process.env.FLICK_ENS_DOMAIN;
-
-if (!process.env.ENS_RPC_URL) {
-  throw new Error("ENS_RPC_URL is not set");
-}
-export const ensRpcUrl = process.env.ENS_RPC_URL;
-
-if (!process.env.IPFS_API_URL) {
-  throw new Error("IPFS_API_URL is not set");
-}
-
-export const ipfsApiUrl = process.env.IPFS_API_URL;
-
-if (!process.env.IPFS_API_PROJECT) {
-  throw new Error("IPFS_API_PROJECT is not set");
-}
-
-if (!process.env.IPFS_API_SECRET) {
-  throw new Error("IPFS_API_SECRET is not set");
-}
+export const ipfsApiUrl = {
+  get() {
+    if (!process.env.IPFS_API_URL) {
+      throw new Error("IPFS_API_URL is not set");
+    }
+    return process.env.IPFS_API_URL;
+  },
+};
 
 export const ipfsApiHeaders = {
-  Authorization: `Basic ${Buffer.from(
-    `${process.env.IPFS_API_PROJECT}:${process.env.IPFS_API_SECRET}`
-  ).toString("base64")}`,
+  get() {
+    if (!process.env.IPFS_API_PROJECT) {
+      throw new Error("IPFS_API_PROJECT is not set");
+    }
+
+    if (!process.env.IPFS_API_SECRET) {
+      throw new Error("IPFS_API_SECRET is not set");
+    }
+    return {
+      Authorization: `Basic ${Buffer.from(
+        `${process.env.IPFS_API_PROJECT}:${process.env.IPFS_API_SECRET}`
+      ).toString("base64")}`,
+    };
+  },
+};
+
+export const publicImageResizerUrl = {
+  get() {
+    if (!process.env.NEXT_PUBLIC_IMAGE_RESIZER) {
+      throw new Error("NEXT_PUBLIC_IMAGE_RESIZER is not set");
+    }
+    return process.env.NEXT_PUBLIC_IMAGE_RESIZER;
+  },
+};
+
+export const publicIpfsUrl = {
+  get() {
+    if (!process.env.NEXT_PUBLIC_IPFS) {
+      throw new Error("NEXT_PUBLIC_IPFS is not set");
+    }
+    return process.env.NEXT_PUBLIC_IPFS;
+  },
 };

@@ -54,12 +54,16 @@ const ENS_RPC_URL = process.env.ENS_RPC_URL;
 const nextConfig = withTM({
   reactStrictMode: true,
   env: {
+    LOG_LEVEL: "debug",
     IPFS_API_URL,
     IPFS_API_PROJECT,
     IPFS_API_SECRET,
     INFURA_IPFS_AUTH,
-    WEB3_RPC,
+    WEB3_RPC_URL: WEB3_RPC,
     ENS_RPC_URL,
+    NEXT_PUBLIC_APP_NAME: "0xflick.com",
+    NEXT_PUBLIC_DEFAULT_CHAIN_ID: process.env.NEXT_PUBLIC_DEFAULT_CHAIN_ID || "1",
+    NEXT_PUBLIC_DEFAULT_CHAIN_NAME: process.env.NEXT_PUBLIC_DEFAULT_CHAIN_NAME || "mainnet",
     FLICK_ENS_DOMAIN: process.env.FLICK_ENS_DOMAIN,
     NEXT_PUBLIC_IMAGE_RESIZER: "https://image.0xflick.com",
     NEXT_PUBLIC_IPFS: "https://ipfs.0xflick.com",

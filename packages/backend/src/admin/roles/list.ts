@@ -6,14 +6,15 @@ import {
   paginationOptions,
   toPaginationResponse,
 } from "../../helpers";
-import { EActions, EResource } from "@0xflick/models/permissions";
-import { verifyJwtToken } from "@0xflick/models/user";
-import type { NextApiRequest, NextApiResponse } from "next";
 import {
+  EActions,
+  EResource,
   defaultAdminStrategyAll,
   isActionOnResource,
-} from "../../utils/allowedActions";
-import { IRoleListResponseSuccess } from "@0xflick/models/roles";
+  verifyJwtToken,
+  IRoleListResponseSuccess,
+} from "@0xflick/models";
+import type { NextApiRequest, NextApiResponse } from "next";
 import { RolesDAO } from "../../db/roles";
 
 interface IDataError {

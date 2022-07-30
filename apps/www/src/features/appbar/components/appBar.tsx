@@ -1,4 +1,4 @@
-import { FC, useCallback } from "react";
+import { FC, useCallback, useEffect } from "react";
 import {
   AppBar as MuiAppBar,
   Toolbar,
@@ -14,15 +14,24 @@ import {
   selectors as appbarSelectors,
   actions as appbarActions,
 } from "features/appbar/redux";
+import { Connect } from "features/web3";
+import { ETheme, useSavedTheme } from "../hooks";
 
 export const AppBar: FC = () => {
   const isDarkMode = useAppSelector(appbarSelectors.darkMode);
+  const [theme, setTheme] = useSavedTheme();
+  useEffect(() => {
+    if (theme && (theme === ETheme.DARK) !== isDarkMode) {
+      dispatch(appbarActions.setDarkMode(theme === ETheme.DARK));
+    }
+  });
   const dispatch = useAppDispatch();
   const handleChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      dispatch(appbarActions.setDarkMode(event.target.checked));
+      const isDarkModeSelected = event.target.checked;
+      setTheme(isDarkModeSelected ? ETheme.DARK : ETheme.LIGHT);
     },
-    [dispatch]
+    [setTheme]
   );
   return (
     <MuiAppBar color="default">
@@ -33,12 +42,14 @@ export const AppBar: FC = () => {
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           0xflick
         </Typography>
+
         <FormGroup>
           <FormControlLabel
             control={<Switch checked={isDarkMode} onChange={handleChange} />}
             label={isDarkMode ? "Dark" : "Light"}
           />
         </FormGroup>
+        <Connect />
       </Toolbar>
     </MuiAppBar>
   );

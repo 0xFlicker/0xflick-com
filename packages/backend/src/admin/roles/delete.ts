@@ -2,13 +2,14 @@ import { getDb } from "../../db/dynamodb";
 import { RolesDAO } from "../../db/roles";
 import { RolePermissionsDAO } from "../../db/rolePermissions";
 import { fetchTableNames, getAuthorizationToken } from "../../helpers";
-import { EActions, EResource } from "@0xflick/models/permissions";
-import { verifyJwtToken } from "@0xflick/models/user";
-import type { NextApiRequest, NextApiResponse } from "next";
 import {
+  EActions,
+  EResource,
   defaultAdminStrategyAll,
   isActionOnResource,
-} from "../../utils/allowedActions";
+  verifyJwtToken,
+} from "@0xflick/models";
+import type { NextApiRequest, NextApiResponse } from "next";
 import { UserRolesDAO } from "../../db/userRoles";
 
 interface IDataError {

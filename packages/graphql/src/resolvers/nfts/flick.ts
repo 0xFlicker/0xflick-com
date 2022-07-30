@@ -1,6 +1,6 @@
 import { IFieldResolver } from "@graphql-tools/utils";
 import { providers } from "ethers";
-import { createLogger, defaultProviderUrl } from "@0xflick/backend";
+import { createLogger } from "@0xflick/backend";
 import { INfts } from "@0xflick/models";
 import { EnsError } from "../../errors/ens";
 import { flickEnsDomain, nftCollectionsOfInterest } from "../../utils/config";
@@ -12,7 +12,7 @@ const logger = createLogger({
 });
 
 async function flickAddress(provider: providers.JsonRpcProvider) {
-  return await provider.resolveName(flickEnsDomain);
+  return await provider.resolveName(flickEnsDomain.get());
 }
 export const resolveFlick: IFieldResolver<
   { nfts: Nft[] },
@@ -33,7 +33,7 @@ export const resolveFlick: IFieldResolver<
   }
   logger.debug(`Resolved ENS to ${myAddress}`);
   const nfts = await Promise.all(
-    nftCollectionsOfInterest.map((collection) =>
+    nftCollectionsOfInterest.get().map((collection) =>
       getEnumerableNftTokens(
         logger,
         myAddress,

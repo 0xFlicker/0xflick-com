@@ -6,18 +6,17 @@ import {
   getAuthorizationToken,
   getOwner,
 } from "../../helpers";
-import { EActions, EResource } from "@0xflick/models/permissions";
-import { verifyJwtToken } from "@0xflick/models/user";
-import type { NextApiRequest, NextApiResponse } from "next";
-import { RolesDAO } from "../../db/roles";
 import {
+  EActions,
+  EResource,
+  verifyJwtToken,
   defaultAdminStrategyAll,
   isActionOnResource,
-} from "../../utils/allowedActions";
-import {
   IRolePermission,
   IRolePermissionsAddResponseSuccess,
-} from "@0xflick/models/rolePermissions";
+} from "@0xflick/models";
+import type { NextApiRequest, NextApiResponse } from "next";
+import { RolesDAO } from "../../db/roles";
 
 interface IDataError {
   error: string;

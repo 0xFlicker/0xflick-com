@@ -11,7 +11,7 @@ export interface IProviderContext {
 export function createProviderContext() {
   const rpc = defaultProviderUrl();
   const defaultProvider = jsonRpcProvider(rpc);
-  const ensProvider = jsonRpcProvider(ensRpcUrl);
+  const ensProvider = jsonRpcProvider(ensRpcUrl.get());
   return {
     defaultProvider,
     ensProvider,

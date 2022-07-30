@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { utils } from "ethers";
 import { getDb } from "../db/dynamodb";
 import { UserDAO } from "../db/user";
-import { authMessage } from "../utils/message";
+import { authMessage } from "@0xflick/models";
 import { createJwtToken, decryptJweToken } from "../db/token";
 import { UserRolesDAO } from "../db/userRoles";
 import { fetchTableNames, getOwner } from "../helpers";

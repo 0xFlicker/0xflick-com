@@ -7,14 +7,15 @@ import {
   getAuthorizationToken,
   getOwner,
 } from "../../helpers";
-import { EActions, EResource } from "@0xflick/models/permissions";
-import { verifyJwtToken } from "@0xflick/models/user";
-import type { NextApiRequest, NextApiResponse } from "next";
-import { RolesDAO } from "../../db/roles";
 import {
+  EActions,
+  EResource,
   defaultAdminStrategyAll,
   isActionOnResource,
-} from "../../utils/allowedActions";
+  verifyJwtToken,
+} from "@0xflick/models";
+import type { NextApiRequest, NextApiResponse } from "next";
+import { RolesDAO } from "../../db/roles";
 
 type TSuccess = "OK";
 

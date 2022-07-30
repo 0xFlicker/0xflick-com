@@ -120,10 +120,10 @@ export function defaultChainId() {
 }
 
 export function defaultProviderUrl(): string {
-  if (!process.env.WEB3_RPC) {
-    throw new Error("WEB3_RPC is not set");
+  if (!process.env.WEB3_RPC_URL) {
+    throw new Error("WEB3_RPC_URL is not set");
   }
-  return process.env.WEB3_RPC;
+  return process.env.WEB3_RPC_URL;
 }
 
 export function getOwner(): () => Promise<string> {

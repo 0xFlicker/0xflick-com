@@ -6,8 +6,7 @@ import {
   getAppTwitterClient,
   getAuthorizationToken,
 } from "../../helpers";
-import { verifyJwtToken } from "@0xflick/models/user";
-import { EProviderTypes } from "@0xflick/models/auth/accountProvider";
+import { verifyJwtToken, EProviderTypes } from "@0xflick/models";
 
 const db = getDb();
 const authOrchestrationDao = new AuthOrchestrationDao(db);

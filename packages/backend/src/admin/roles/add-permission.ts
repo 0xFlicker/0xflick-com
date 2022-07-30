@@ -10,14 +10,12 @@ import {
   EResource,
   isAction,
   isResource,
-} from "@0xflick/models/permissions";
-import { verifyJwtToken } from "@0xflick/models/user";
-import type { NextApiRequest, NextApiResponse } from "next";
-import { RolesDAO } from "../../db/roles";
-import {
+  verifyJwtToken,
   defaultAdminStrategyAll,
   isActionOnResource,
-} from "../../utils/allowedActions";
+} from "@0xflick/models";
+import type { NextApiRequest, NextApiResponse } from "next";
+import { RolesDAO } from "../../db/roles";
 
 type TSuccess = "OK";
 

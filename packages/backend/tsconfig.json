@@ -18,7 +18,7 @@
     "strictNullChecks": false
     // "strictPropertyInitialization": false
   },
-  "include": ["**/*.ts"],
+  "include": ["**/*.ts", "../models/src/message.ts"],
   "exclude": ["**/node_modules", "**/.*/", "dist", "build"],
   "references": [
     {

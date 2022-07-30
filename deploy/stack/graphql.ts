@@ -106,7 +106,7 @@ export class GraphqlStack extends cdk.Stack {
         ENS_RPC_URL: ensRpcUrl,
         NFT_COLLECTIONS_OF_INTEREST: nftCollectionsOfInterest,
         NFT_CONTRACT_ADDRESS: nftRootCollection,
-        WEB3_RPC: web3RpcUrl,
+        WEB3_RPC_URL: web3RpcUrl,
         CHAIN_ID: chainId,
         FLICK_ENS_DOMAIN: "0xflick.eth",
         IPFS_API_URL: ipfsApiUrl,

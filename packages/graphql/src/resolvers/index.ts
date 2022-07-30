@@ -1,9 +1,15 @@
 import { gql } from "apollo-server-core";
-import { IResolvers } from "@graphql-tools/utils";
 import { resolveFlick, resolveImage, resolveNftTokenImage } from "./nfts";
-import { TContext } from "../context";
+import {
+  typeSchema as typeSchemaAuth,
+  queries as queriesAuth,
+  querySchema as querySchemaAuth,
+  resolvers as resolversAuth,
+} from "./auth";
+import { TGraphqlResolver } from "../types";
 
 export const typeDefs = gql`
+  ${typeSchemaAuth}
   type MetadataProperties {
     name: String!
     value: String!
@@ -49,6 +55,7 @@ export const typeDefs = gql`
   type Query {
     flick: Flick
     image(contract: String!, tokenId: Int!, width: Int, height: Int): String
+    ${querySchemaAuth}
   }
 `;
 
@@ -56,8 +63,10 @@ export const resolvers = {
   Query: {
     flick: resolveFlick,
     image: resolveImage,
+    ...queriesAuth,
   },
   NftToken: {
     image: resolveNftTokenImage,
   },
-} as IResolvers<any, TContext, Record<string, any>, any>;
+  ...resolversAuth,
+} as TGraphqlResolver;
