@@ -186,5 +186,8 @@ export class GraphqlStack extends cdk.Stack {
     new cdk.CfnOutput(this, "apiEndpoint", {
       value: httpApi.url || "",
     });
+    new cdk.CfnOutput(this, "tableNameParam", {
+      value: tableNamesParam.parameterName,
+    });
   }
 }

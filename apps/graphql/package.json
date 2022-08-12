@@ -5,6 +5,7 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc --build",
+    "start:dev": "ts-node-dev -- src/index.ts | bunyan",
     "dev": "ts-node-dev --inspect -- src/index.ts | bunyan"
   },
   "dependencies": {

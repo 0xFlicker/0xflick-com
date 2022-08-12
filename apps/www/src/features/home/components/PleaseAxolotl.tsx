@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FC, useCallback, useMemo, useRef, useState } from "react";
 import {
   extend,
   Canvas as ThreeCanvas,
@@ -10,16 +10,10 @@ import {
   SpotLight,
   Environment,
   Plane,
-  MeshReflectorMaterial,
-  Box,
-  useTexture,
-  BBAnchor,
-  Sparkles,
 } from "@react-three/drei";
 import * as THREE from "three";
 import { useRelativeOrientationSensor } from "hooks/useDeviceMotion";
 import { FrameLimiter } from "threeFiber/FrameLimiter";
-import { Vector3 } from "three";
 import { useOffscreenCanvas } from "features/axolotlValley/hooks/useOffscreenCanvas";
 extend({
   ThreeCanvas,
@@ -178,6 +172,7 @@ const Content: FC<{ canvas: HTMLCanvasElement | null }> = ({ canvas }) => {
       <color attach="background" args={["#191920"]} />
       <fog attach="fog" args={["#191920", 0, 15]} />
       <Environment files={"/potsdamer_platz_1k.hdr"} />
+
       <group ref={imageRef} position={[0, 0, 0]}>
         <Plane args={[DIMENSIONS, DIMENSIONS]} position={[0, 0, 0.025]}>
           <meshPhysicalMaterial roughness={0.15} map={texture}>

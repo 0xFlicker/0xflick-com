@@ -13,12 +13,6 @@ import * as targets from "aws-cdk-lib/aws-route53-targets";
 import * as route53 from "aws-cdk-lib/aws-route53";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as cr from "aws-cdk-lib/custom-resources";
-import { HttpLambdaIntegration } from "@aws-cdk/aws-apigatewayv2-integrations-alpha";
-import {
-  CorsHttpMethod,
-  HttpApi,
-  HttpMethod,
-} from "@aws-cdk/aws-apigatewayv2-alpha";
 
 export interface ImageProps extends cdk.StackProps {
   readonly domain: [string, string] | string;
@@ -151,7 +145,25 @@ export class ImageStack extends cdk.Stack {
         allowedPattern: ".*",
         description: "The bucket name for the generative assets",
         parameterName: "/edge/PublicNextPage",
-        stringValue: infuraIpfsAuth,
+        stringValue: generativeAssetBucket.bucketName,
+        tier: ssm.ParameterTier.STANDARD,
+      }
+    );
+    // Bucket with a single image
+    const seedBucket = new s3.Bucket(this, "seed-bucket", {
+      publicReadAccess: true,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
+
+    // Create the origin lambda
+    const seedBucketParam = new ssm.StringParameter(
+      this,
+      "axolotl-seed-bucket",
+      {
+        allowedPattern: ".*",
+        description: "The bucket name cached seeds",
+        parameterName: "/edge/AxolotlSeedBucket",
+        stringValue: seedBucket.bucketName,
         tier: ssm.ParameterTier.STANDARD,
       }
     );
@@ -192,13 +204,16 @@ export class ImageStack extends cdk.Stack {
           {
             file: "../../docker/axolotl/Dockerfile",
             cmd: ["index.handler"],
+            extraHash: "3",
           }
         ),
         memorySize: 1536,
       }
     );
-    resizerBucket.grantRead(axolotlOrigin);
+    seedBucket.grantReadWrite(axolotlOrigin);
+    seedBucket.grantPutAcl(axolotlOrigin);
     generativeAssetBucket.grantRead(axolotlOrigin);
+    seedBucketParam.grantRead(axolotlOrigin);
     axolotlOriginPublicNextPage.grantRead(axolotlOrigin);
 
     const axolotlHttpApi = new apigateway.RestApi(this, "axolotlApi", {});

@@ -10,16 +10,11 @@ import {
   SpotLight,
   Environment,
   Plane,
-  MeshReflectorMaterial,
-  Box,
   useTexture,
-  BBAnchor,
-  Sparkles,
 } from "@react-three/drei";
 import * as THREE from "three";
 import { useRelativeOrientationSensor } from "hooks/useDeviceMotion";
 import { FrameLimiter } from "threeFiber/FrameLimiter";
-import { Vector3 } from "three";
 extend({
   ThreeCanvas,
   Image_,

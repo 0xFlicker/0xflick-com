@@ -5,7 +5,6 @@ export default async function createCanvas(width: number, height: number) {
     canvas.height = height;
     return canvas;
   }
-  throw new Error("createCanvas is not supported outside of the browser");
-  // const Canvas = await import("canvas");
-  // return Canvas.createCanvas(width, height);
+  const Canvas = await import("canvas");
+  return Canvas.createCanvas(width, height);
 }

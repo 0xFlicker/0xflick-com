@@ -1,4 +1,4 @@
-import { S3 } from "@aws-sdk/client-s3";
+import { GetObjectCommand, S3 } from "@aws-sdk/client-s3";
 import { Canvas, Image } from "canvas";
 import { generateAxolotlValleyFromSeed, renderCanvas } from "@0xflick/assets";
 import { utils } from "ethers";
@@ -18,18 +18,22 @@ const params = Promise.all([
   ssm
     .getParameter({ Name: "/edge/PublicNextPage" })
     .then((r) => r.Parameter?.Value),
-  ,
+  ssm
+    .getParameter({ Name: "/edge/AxolotlSeedBucket" })
+    .then((r) => r.Parameter?.Value),
 ]);
 
-const [publicNextPage] = await params;
-/**
- *
- * @param key {string}
- * @returns {Promise<boolean>}
- */
-async function s3Exists(key: string): Promise<boolean> {
+const [generativeAssetsBucket, seedImageBucket] = await params;
+
+async function s3Exists({
+  key,
+  bucket,
+}: {
+  key: string;
+  bucket: string;
+}): Promise<boolean> {
   const params = {
-    Bucket: publicNextPage,
+    Bucket: bucket,
     Key: key,
   };
   try {
@@ -56,8 +60,9 @@ function streamToBuffer(stream: Readable): Promise<Buffer> {
  * @returns {Promise<void>}
  */
 async function s3WriteObject(key: string, imageData: Buffer): Promise<void> {
+  console.log(`Writing to s3://${seedImageBucket}/${key}`);
   const params = {
-    Bucket: publicNextPage,
+    Bucket: seedImageBucket,
     Key: key,
     Body: imageData,
     ACL: "public-read",
@@ -69,68 +74,129 @@ async function s3WriteObject(key: string, imageData: Buffer): Promise<void> {
 
 // Handler
 export const handler: APIGatewayProxyHandler = async (event) => {
-  if (event.httpMethod !== "GET") {
-    return {
-      statusCode: 405,
-      body: "Method Not Allowed",
-    };
-  }
-  const { pathParameters } = event;
+  console.log("Received image request");
+  try {
+    if (event.httpMethod !== "GET") {
+      return {
+        statusCode: 405,
+        body: "Method Not Allowed",
+      };
+    }
+    const { pathParameters } = event;
 
-  const seedStr = pathParameters.seed;
+    const seedStr = pathParameters.seed;
+    console.log(`Seed: ${seedStr}`);
 
-  const s3Key = `seed/${seedStr}.jpg`;
-  const exists = await s3Exists(s3Key);
+    const s3Key = `seed/${seedStr}.jpg`;
+    const exists = await s3Exists({ key: s3Key, bucket: seedImageBucket });
 
-  if (!exists) {
-    // From seed, generate layers
-    const { layers } = await generateAxolotlValleyFromSeed(
-      utils.arrayify(seedStr),
-      async (imagePath) => {
-        const response = await s3.getObject({
-          Bucket: publicNextPage,
-          Key: imagePath,
-        });
+    if (!exists) {
+      console.log(`Seed image not found in S3: ${s3Key}`);
+      // From seed, generate layers
+      const { layers } = await generateAxolotlValleyFromSeed(
+        utils.arrayify(seedStr),
+        async (imagePath) => {
+          console.log(
+            `Fetching image from s3://${generativeAssetsBucket}/${imagePath}`
+          );
+          const getObjectCommand = new GetObjectCommand({
+            Bucket: generativeAssetsBucket,
+            Key: imagePath,
+          });
 
-        const img = new Image();
-        img.src = response.Body as any;
-        return img as any;
-      }
-    );
+          try {
+            const response = await s3.send(getObjectCommand);
+            console.log(
+              `Reading buffer from s3://${generativeAssetsBucket}/${imagePath}`
+            );
+            const stream = response.Body as Readable;
+            return new Promise<Image>((resolve, reject) => {
+              const img = new Image();
+              const responseDataChunks: Buffer[] = [];
 
-    // Render canvas
-    const canvas = new Canvas(569, 569);
-    await renderCanvas(canvas, layers);
+              // Handle an error while streaming the response body
+              stream.once("error", (err) => reject(err));
 
-    // Save canvas to S3
-    const imageData = canvas.toBuffer("image/jpeg", { quality: 0.8 });
-    await s3WriteObject(s3Key, imageData);
+              // Attach a 'data' listener to add the chunks of data to our array
+              // Each chunk is a Buffer instance
+              stream.on("data", (chunk) => responseDataChunks.push(chunk));
+
+              // Once the stream has no more data, join the chunks into a string and return the string
+              stream.once("end", () => {
+                console.log(
+                  `Finished reading buffer from s3://${generativeAssetsBucket}/${imagePath}`
+                );
+                img.onload = () => {
+                  console.log(
+                    `Image loaded from s3://${generativeAssetsBucket}/${imagePath}`
+                  );
+                  resolve(img);
+                };
+                img.onerror = (err) => reject(err);
+                img.src = Buffer.concat(responseDataChunks);
+              });
+            });
+          } catch (err) {
+            console.error(`Unable to fetch image ${imagePath}`, err);
+            throw err;
+          }
+        }
+      );
+
+      // Render canvas
+      console.log("Creating canvas");
+      const canvas = new Canvas(569, 569);
+      console.log("Rendering canvas");
+      await renderCanvas(canvas, layers);
+
+      // Save canvas to S3
+      console.log("Fetching image from canvas");
+      const imageData = canvas.toBuffer("image/jpeg", { quality: 0.8 });
+      console.log("Saving canvas to S3");
+      await s3WriteObject(s3Key, imageData);
+      console.log("Done");
+      return {
+        statusCode: 200,
+        body: imageData.toString("base64"),
+        bodyEncoding: "base64",
+        headers: {
+          ["content-type"]: "image/jpeg",
+        },
+      };
+    }
+    console.log(`Seed image found in S3: ${s3Key}`);
+    const response = await s3.getObject({
+      Bucket: seedImageBucket,
+      Key: s3Key,
+    });
+
+    if (!response.Body) {
+      console.log("No body");
+      return {
+        statusCode: 500,
+        body: "Internal Server Error",
+      };
+    }
+    console.log("Returning image");
     return {
       statusCode: 200,
-      body: imageData.toString("base64"),
+      body: (await streamToBuffer(response.Body as Readable)).toString(
+        "base64"
+      ),
       bodyEncoding: "base64",
       headers: {
         ["content-type"]: "image/jpeg",
       },
     };
-  }
-
-  const response = await s3.getObject({
-    Bucket: publicNextPage,
-    Key: s3Key,
-  });
-  if (!response.Body) {
+  } catch (err) {
+    console.error(err);
     return {
       statusCode: 500,
-      body: "Internal Server Error",
+      body: "Oops, something went wrong",
     };
   }
-  return {
-    statusCode: 200,
-    body: (await streamToBuffer(response.Body as Readable)).toString("base64"),
-    bodyEncoding: "base64",
-    headers: {
-      ["content-type"]: "image/jpeg",
-    },
-  };
 };
+
+process.on("uncaughtException", (err, origin) => {
+  console.error(err, origin);
+});

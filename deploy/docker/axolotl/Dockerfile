@@ -1,7 +1,5 @@
 FROM public.ecr.aws/lambda/nodejs:16
 
-WORKDIR /asset
-
 #install the dependencies
 RUN yum -y update \
   && yum -y groupinstall "Development Tools" \
