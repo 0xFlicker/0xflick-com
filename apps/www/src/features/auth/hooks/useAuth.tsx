@@ -11,7 +11,6 @@ import {
 import { selectors as authSelectors, actions as authActions } from "../redux";
 import { selectors as web3Selectors, useWeb3 } from "features/web3";
 import { useAppDispatch, useAppSelector } from "app/store";
-import { useLazySignInQuery, useLazySignOutQuery } from "../api";
 import useLocalStorage from "use-local-storage";
 import { useNonce } from "./useNonce";
 import {
@@ -21,6 +20,8 @@ import {
   TAllowedAction,
   Matcher,
 } from "@0xflick/models";
+import { useSignIn } from "./useSignIn";
+import { useSignOut } from "./useSignOut";
 // import { useListRolePermissionsQuery } from "features/admin/api";
 
 export function useSavedToken(token?: string) {
@@ -62,9 +63,12 @@ function useAuthContext() {
   );
   const isUserSigningOut = useAppSelector(authSelectors.isUserSigningOut);
   const { provider } = useWeb3();
-  const [requestSignOut] = useLazySignOutQuery();
+  const [requestSignOut] = useSignOut();
 
-  const [fetchNonce, { data: nonceData, loading: nonceIsLoading }] = useNonce();
+  const [
+    fetchNonce,
+    { data: nonceData, loading: nonceIsLoading, reset: nonceReset },
+  ] = useNonce();
   const nonceIsSuccess = !!nonceData;
 
   const [
@@ -72,15 +76,14 @@ function useAuthContext() {
     {
       data: tokenData,
       error: tokenError,
-      isLoading: tokenIsLoading,
-      isSuccess: tokenIsSuccess,
-      isError: tokenIsError,
-      isFetching: tokenIsFetching,
-      isUninitialized: tokenIsUninitialized,
+      loading: tokenIsLoading,
+      reset: tokenReset,
     },
-  ] = useLazySignInQuery();
+  ] = useSignIn();
+  const tokenIsSuccess = !!tokenData;
+  const tokenIsError = !!tokenError;
   const { user, savedToken, clearToken, setSavedToken } = useSavedToken(
-    tokenData?.token
+    tokenData?.signIn.token
   );
   const dispatch = useAppDispatch();
 
@@ -90,9 +93,11 @@ function useAuthContext() {
 
   const signOut = useCallback(() => {
     clearToken();
+    tokenReset();
+    nonceReset();
     requestSignOut();
     dispatch(authActions.userSignOut());
-  }, [dispatch, requestSignOut, clearToken]);
+  }, [clearToken, tokenReset, nonceReset, requestSignOut, dispatch]);
 
   useEffect(() => {
     if (isWeb3Connected && user && user.address !== address) {
@@ -101,6 +106,9 @@ function useAuthContext() {
   }, [user, address, signOut, isWeb3Connected]);
   useEffect(() => {
     if (!isAuthenticated && user && user.address === address) {
+      console.log(
+        "User is not authenticated, but we have a user and a matching address so signing in"
+      );
       dispatch(
         authActions.userSignInSuccess({
           roles: user.roleIds,
@@ -139,11 +147,14 @@ function useAuthContext() {
           createJweRequest(signature, nonceData.nonceForAddress.nonce)
             .then((jwe) => {
               return fetchToken({
-                address,
-                jwe,
-              }).unwrap();
+                variables: {
+                  address,
+                  jwe,
+                },
+              });
             })
-            .catch(() => {
+            .catch((err) => {
+              console.error(err);
               dispatch(authActions.userSignOut());
             });
         },
@@ -153,7 +164,7 @@ function useAuthContext() {
           dispatch(authActions.userSignatureError());
         }
       );
-      // .finally(() => dispatch(authActions.userSigningMessage(false)));
+      // .finally(() => dispatch(authActions.us));
     }
   }, [
     dispatch,
@@ -168,10 +179,15 @@ function useAuthContext() {
 
   useEffect(() => {
     if (nonceIsSuccess && nonceData && tokenIsSuccess && tokenData && address) {
-      const { token } = tokenData;
+      const {
+        signIn: { token },
+      } = tokenData;
       try {
         const authUser = decodeJwtToken(token);
-        if (authUser.address === address) {
+        if (authUser && authUser.address === address) {
+          console.log(
+            "Found a token and the token addresses matches the user, signing in"
+          );
           dispatch(
             authActions.userSignInSuccess({
               token,
@@ -201,9 +217,9 @@ function useAuthContext() {
     isAnonymous,
     isUserRequestingSignIn,
     isUserSigningMessage,
-    isUserWaiting: nonceIsLoading || tokenIsLoading || tokenIsFetching,
+    isUserWaiting: nonceIsLoading || tokenIsLoading,
     isUserSigningOut,
-    token: tokenData?.token,
+    token: tokenData?.signIn.token ?? savedToken,
     user,
     // permissions: rolePermissionsData,
     signIn,

@@ -10,13 +10,13 @@ export interface IGraphqlNonce {
   nonce: number;
 }
 
-export const querySchema = `
+export const mutationSchema = `
   nonceForAddress(address: String!): Nonce
 `;
 
 export const resolvers = {} as TGraphqlResolver;
 
-export const queries = {
+export const mutation = {
   async nonceForAddress(_, { address }, { userDao }) {
     const user = await userDao.getUser(address);
     if (!user) {

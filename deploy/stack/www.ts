@@ -8,9 +8,15 @@ import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
 import * as patterns from "aws-cdk-lib/aws-route53-patterns";
 import * as route53 from "aws-cdk-lib/aws-route53";
 import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
+import * as sqs from "aws-cdk-lib/aws-sqs";
+import * as ssm from "aws-cdk-lib/aws-ssm";
+import * as lambdaEventSources from "aws-cdk-lib/aws-lambda-event-sources";
 import * as targets from "aws-cdk-lib/aws-route53-targets";
 import { HttpApi } from "@aws-cdk/aws-apigatewayv2-alpha";
 import { fileURLToPath } from "url";
+import { Duration } from "aws-cdk-lib";
+import { readAssetsDirectory } from "./utils/readAssetsDir.js";
+import pathToPosix from "./utils/pathToPosix.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -28,11 +34,51 @@ export class WwwStack extends cdk.Stack {
     const staticAssets = new s3.Bucket(this, "StaticAssets", {
       transferAcceleration: true,
     });
-    new s3deploy.BucketDeployment(this, "AssetDeployment", {
+
+    const assetsDir = path.join(__dirname, "../.layers/assets");
+    const assets = readAssetsDirectory({
+      assetsDirectory: assetsDir,
+    });
+    new s3deploy.BucketDeployment(this, "AssetDeploymentBuildID", {
       sources: [
-        s3deploy.Source.asset(path.join(__dirname, "../.layers/assets")),
+        s3deploy.Source.asset(assetsDir, {
+          exclude: ["**", "!BUILD_ID"],
+        }),
       ],
       destinationBucket: staticAssets,
+      destinationKeyPrefix: "/BUILD_ID",
+    });
+    Object.keys(assets).forEach((key) => {
+      const { path: assetPath, cacheControl } = assets[key];
+      new s3deploy.BucketDeployment(this, `AssetDeployment_${key}`, {
+        destinationBucket: staticAssets,
+        sources: [s3deploy.Source.asset(assetPath)],
+        cacheControl: [s3deploy.CacheControl.fromString(cacheControl)],
+
+        // The source contents will be unzipped to and loaded into the S3 bucket
+        // at the root '/', we don't want this, we want to maintain the same
+        // path on S3 as their local path. Note that this should be a posix path.
+        destinationKeyPrefix: pathToPosix(path.relative(assetsDir, assetPath)),
+
+        // Source directories are uploaded with `--sync` this means that any
+        // files that don't exist in the source directory, but do in the S3
+        // bucket, will be removed.
+        prune: true,
+      });
+    });
+
+    const generativeAssetBucket = new s3.Bucket(this, "GenerativeAsset", {
+      transferAcceleration: true,
+    });
+
+    new s3deploy.BucketDeployment(this, "DeployWebsite", {
+      sources: [
+        s3deploy.Source.asset(
+          path.join(__dirname, "../../packages/assets/properties")
+        ),
+      ],
+      destinationBucket: generativeAssetBucket,
+      destinationKeyPrefix: "static/axolotl-valley/properties", // optional prefix in destination bucket
     });
 
     // Domain
@@ -57,6 +103,39 @@ export class WwwStack extends cdk.Stack {
       }
     );
 
+    const regenerationQueue = new sqs.Queue(this, "RegenerationQueue", {
+      fifo: true,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
+    const regenerationFunction = new lambda.Function(
+      this,
+      "RegenerationFunction",
+      {
+        handler: "index.handler",
+        code: lambda.Code.fromAsset(
+          path.join(__dirname, "../.layers/regeneration-lambda")
+        ),
+        runtime: lambda.Runtime.NODEJS_16_X,
+        memorySize: 256,
+        timeout: cdk.Duration.seconds(30),
+      }
+    );
+
+    regenerationFunction.addEventSource(
+      new lambdaEventSources.SqsEventSource(regenerationQueue)
+    );
+    const staticAssetRegenerationParams = new ssm.StringParameter(
+      this,
+      "StaticAssetRegenerationParams",
+      {
+        stringValue: JSON.stringify({
+          bucket: staticAssets.bucketName,
+          queueUrl: regenerationQueue.queueUrl,
+          queueName: regenerationQueue.queueName,
+        }),
+      }
+    );
+
     const apiHandler = new lambda.Function(this, "apiHandler", {
       runtime: lambda.Runtime.NODEJS_16_X,
       handler: "index.handler",
@@ -76,6 +155,10 @@ export class WwwStack extends cdk.Stack {
       memorySize: 512,
       timeout: cdk.Duration.seconds(10),
     });
+    staticAssets.grantReadWrite(defaultHandler);
+    staticAssets.grantReadWrite(regenerationFunction);
+    regenerationQueue.grantSendMessages(defaultHandler);
+    regenerationFunction.grantInvoke(defaultHandler);
 
     const imageHandler = new lambda.Function(this, "imageHandler", {
       runtime: lambda.Runtime.NODEJS_16_X,
@@ -129,6 +212,26 @@ export class WwwStack extends cdk.Stack {
         ),
       }
     );
+
+    const assetResponseHeadersPolicy = new cloudfront.ResponseHeadersPolicy(
+      this,
+      "AssetResponseHeadersPolicy",
+      {
+        corsBehavior: {
+          accessControlAllowCredentials: false,
+          accessControlAllowHeaders: ["*"],
+          accessControlAllowMethods: ["GET"],
+          accessControlAllowOrigins: [
+            domainName,
+            "http://localhost:3000",
+            "https://localhost:9000",
+          ],
+          accessControlExposeHeaders: [],
+          accessControlMaxAge: Duration.seconds(600),
+          originOverride: true,
+        },
+      }
+    );
     const distribution = new cloudfront.Distribution(this, "www", {
       certificate,
       domainNames: [domainName],
@@ -167,6 +270,13 @@ export class WwwStack extends cdk.Stack {
         "_next/static/*": {
           origin: new origins.S3Origin(staticAssets),
           cachePolicy: defaultCachePolicy,
+          viewerProtocolPolicy:
+            cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        },
+        "static/axolotl-valley/properties/*": {
+          origin: new origins.S3Origin(generativeAssetBucket),
+          cachePolicy: imageCachePolicy,
+          responseHeadersPolicy: assetResponseHeadersPolicy,
           viewerProtocolPolicy:
             cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         },

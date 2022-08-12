@@ -6,12 +6,19 @@ import * as s3 from "aws-cdk-lib/aws-s3";
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
 import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
 import * as acm from "aws-cdk-lib/aws-certificatemanager";
+import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
 import * as ssm from "aws-cdk-lib/aws-ssm";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as targets from "aws-cdk-lib/aws-route53-targets";
 import * as route53 from "aws-cdk-lib/aws-route53";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as cr from "aws-cdk-lib/custom-resources";
+import { HttpLambdaIntegration } from "@aws-cdk/aws-apigatewayv2-integrations-alpha";
+import {
+  CorsHttpMethod,
+  HttpApi,
+  HttpMethod,
+} from "@aws-cdk/aws-apigatewayv2-alpha";
 
 export interface ImageProps extends cdk.StackProps {
   readonly domain: [string, string] | string;
@@ -125,6 +132,29 @@ export class ImageStack extends cdk.Stack {
         tier: ssm.ParameterTier.STANDARD,
       }
     );
+    const generativeAssetBucket = new s3.Bucket(this, "GenerativeAsset", {
+      transferAcceleration: true,
+    });
+
+    new s3deploy.BucketDeployment(this, "DeployAssets", {
+      sources: [
+        s3deploy.Source.asset(
+          path.join(__dirname, "../../packages/assets/properties")
+        ),
+      ],
+      destinationBucket: generativeAssetBucket,
+    });
+    const axolotlOriginPublicNextPage = new ssm.StringParameter(
+      this,
+      "PublicNextPage",
+      {
+        allowedPattern: ".*",
+        description: "The bucket name for the generative assets",
+        parameterName: "/edge/PublicNextPage",
+        stringValue: infuraIpfsAuth,
+        tier: ssm.ParameterTier.STANDARD,
+      }
+    );
     const imageOrigin = new cloudfront.experimental.EdgeFunction(this, "io", {
       runtime: lambda.Runtime.NODEJS_16_X,
       code: lambda.Code.fromAsset(
@@ -152,6 +182,35 @@ export class ImageStack extends cdk.Stack {
     resizerBucket.grantPut(imageOrigin);
     resizerBucket.grantRead(imageOrigin);
 
+    const axolotlOrigin = new lambda.DockerImageFunction(
+      this,
+      "Image-Axolotl",
+      {
+        timeout: cdk.Duration.seconds(15),
+        code: lambda.DockerImageCode.fromImageAsset(
+          path.join(__dirname, "../.layers/axolotl"),
+          {
+            file: "../../docker/axolotl/Dockerfile",
+            cmd: ["index.handler"],
+          }
+        ),
+        memorySize: 1536,
+      }
+    );
+    resizerBucket.grantRead(axolotlOrigin);
+    generativeAssetBucket.grantRead(axolotlOrigin);
+    axolotlOriginPublicNextPage.grantRead(axolotlOrigin);
+
+    const axolotlHttpApi = new apigateway.RestApi(this, "axolotlApi", {});
+    const axolotlResource = axolotlHttpApi.root.addResource("{seed}");
+    axolotlResource.addCorsPreflight({
+      allowOrigins: ["http://localhost:3000", "https://localhost:9000"],
+      allowMethods: ["GET", "OPTION"],
+    });
+    axolotlResource.addMethod(
+      "GET",
+      new apigateway.LambdaIntegration(axolotlOrigin)
+    );
     const cf = new cloudfront.Distribution(this, "image-distribution", {
       defaultBehavior: {
         origin: new origins.S3Origin(resizerBucket),
@@ -179,6 +238,23 @@ export class ImageStack extends cdk.Stack {
           }
         ),
       },
+      // additionalBehaviors: {
+      //   "axolotl-seed/*": {
+      //     origin: new origins.HttpOrigin(axolotlHttpApi.apiEndpoint),
+
+      //     cachePolicy: new cloudfront.CachePolicy(
+      //       this,
+      //       "axolotl-origin-cache-policy",
+      //       {
+      //         minTtl: cdk.Duration.hours(72),
+      //         queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
+      //         cookieBehavior: cloudfront.CacheCookieBehavior.none(),
+      //         headerBehavior:
+      //           cloudfront.CacheHeaderBehavior.allowList("origin"),
+      //       }
+      //     ),
+      //   },
+      // },
       logBucket: new s3.Bucket(this, "log-image-distribution"),
       domainNames: [domainName],
       certificate,
@@ -199,6 +275,9 @@ export class ImageStack extends cdk.Stack {
     });
     new cdk.CfnOutput(this, "imageBucket", {
       value: resizerBucket.bucketName,
+    });
+    new cdk.CfnOutput(this, "axolotlHttpApi", {
+      value: axolotlHttpApi.url,
     });
   }
 }

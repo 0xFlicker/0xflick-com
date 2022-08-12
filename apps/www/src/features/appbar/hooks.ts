@@ -11,3 +11,8 @@ export function useSavedTheme() {
     syncData: true,
   });
 }
+export function useFancyMode() {
+  return useLocalStorage("fancyMode", true, {
+    syncData: true,
+  });
+}

@@ -65,7 +65,7 @@ ETH_NODE_URI_RINKEBY=https://eth-rinkeby.alchemyapi.io/v2/apikeyhere
 NFT_NAME_RINKEBY=TestToken
 # Can be anything
 NFT_SYMBOL_RINKEBY=TT
-# Can be anything, but nice for it to return real metadata (see https://github.com/souls-of-akaso/lambdas)
+# Can be anything, but nice for it to return real metadata
 METADATA_URI_RINKEBY=https://example.xyz/
 # Set a prive or 0 for free (price is in wei)
 MINT_PRICE_RINKEBY=0
@@ -75,50 +75,6 @@ Run:
 
 ```
 yarn deploy
-```
-
-### Using the contracts locally in development
-
-Inside this directory, run:
-
-If using yarn:
-
-```
-yarn link
-```
-
-If using npm:
-
-```
-npm link
-```
-
-Go to the project you want to use these contracts and run:
-
-Is using yarn
-
-```
-yarn link @souls-of-akaso/contracts
-```
-
-If using npm
-
-```
-npm link @souls-of-akaso/contracts
-```
-
-The contracts can now be imported into javascript:
-
-```
-import { SOA, SOA__factory } from "@souls-of-akaso/contracts";
-import { Signer, providers } from "ethers";
-
-export function factory(signerOrProvider: Signer | providers.Provider, address: string): SOA {
-  return SOA__factory.connect(
-    address,
-    signerOrProvider
-  );
-}
 ```
 
 # POCs

@@ -4,3 +4,4 @@ attributes
 generated
 dist
 properties
+tsconfig.tsbuildinfo

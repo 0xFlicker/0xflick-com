@@ -1,6 +1,7 @@
 import { FC, PropsWithChildren } from "react";
 import CssBaseline from "@mui/material/CssBaseline";
 import { Provider as Web3Provider } from "features/web3/Provider";
+import { Provider as AuthProvider } from "features/auth/hooks/useAuth";
 import { ThemeProvider } from "@mui/material/styles";
 import { Provider } from "react-redux";
 import { Provider as ApolloProvider } from "graphql/Provider";
@@ -19,7 +20,9 @@ export const StateAvailableContent: FC<PropsWithChildren<{}>> = ({
   return (
     <ApolloProvider>
       <ThemeProvider theme={isDarkMode ? dark : light}>
-        <Web3Provider>{children}</Web3Provider>
+        <Web3Provider>
+          <AuthProvider>{children}</AuthProvider>
+        </Web3Provider>
       </ThemeProvider>
     </ApolloProvider>
   );

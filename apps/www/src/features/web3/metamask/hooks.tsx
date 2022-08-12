@@ -34,7 +34,7 @@ export function useMetamaskProvider(): IContext {
       setDetectedChainId(chainIdNum);
       if (chainIdNum !== myChainId) {
         dispatch(web3Actions.wrongNetwork());
-      } else if (window.ethereum.isConnected()) {
+      } else if (window.ethereum?.isConnected()) {
         dispatch(web3Actions.connected());
       } else {
         dispatch(web3Actions.idle());
@@ -64,7 +64,7 @@ export function useMetamaskProvider(): IContext {
   }, [detectedChainId, chainId, walletType, status, dispatch]);
 
   useEffect(() => {
-    if (window.ethereum.isConnected()) {
+    if (window.ethereum?.isConnected()) {
       window.ethereum
         .request<string[]>({
           method: "eth_accounts",

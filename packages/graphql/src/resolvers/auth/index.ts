@@ -1,23 +1,44 @@
 import { gql } from "apollo-server-core";
 import {
-  queries as queriesNonce,
-  querySchema as querySchemaNonce,
-  resolvers as resolversQuery,
+  mutation as mutationNonce,
+  mutationSchema as mutationSchemaNonce,
+  resolvers as resolversNonce,
   typeSchema as typeSchemaNonce,
 } from "./nonce";
+import { typeSchema as typeSchemaPermissions } from "./permissions";
+import {
+  mutationSchema as mutationSchemaSignIn,
+  mutations as mutationsSignIn,
+} from "./signIn";
+import { resolvers as resolversWeb3Users } from "./web3User";
+import {
+  mutationSchema as mutationSchemaSignOut,
+  mutations as mutationSignOut,
+} from "./signOut";
 
 export const typeSchema = gql`
   ${typeSchemaNonce}
+  ${typeSchemaPermissions}
 `;
 
 export const querySchema = `
-${querySchemaNonce}
+`;
+
+export const mutationSchema = `
+${mutationSchemaNonce}
+${mutationSchemaSignIn}
+${mutationSchemaSignOut}
 `;
 
 export const resolvers = {
-  ...resolversQuery,
+  ...resolversNonce,
+  ...resolversWeb3Users,
 };
 
-export const queries = {
-  ...queriesNonce,
+export const queries = {};
+
+export const mutations = {
+  ...mutationNonce,
+  ...mutationsSignIn,
+  ...mutationSignOut,
 };

@@ -15,6 +15,7 @@ import { GraphqlStack } from "./graphql.js";
 import { DynamoDB } from "./dynamodb.js";
 
 const secretsJson = jsonFromSecret("deploy-secrets.json");
+const jwtJson = jsonFromSecret("jwt-secret.json");
 
 const app = new cdk.App();
 
@@ -38,6 +39,9 @@ const { api: graphqlApi } = new GraphqlStack(app, "Graphql", {
   ipfsApiUrl: secretsJson.infraIpfsUrl,
   ipfsApiProject: secretsJson.infraIpfsProjectId,
   ipfsApiSecret: secretsJson.infraIpfsSecret,
+  jwk: jwtJson.JWK,
+  jwtPublicKey: jwtJson.publicKey,
+  jwtClaimIssuer: jwtJson.issuer,
 });
 
 new ImageStack(app, "Image", {

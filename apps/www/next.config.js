@@ -1,5 +1,5 @@
 const path = require("path");
-const withTM = require('next-transpile-modules')(['@0xflick/backend', '@0xflick/models', '@0xflick/graphql', '@0xflick/contracts']);
+const withTM = require('next-transpile-modules')(['@0xflick/backend', '@0xflick/models', '@0xflick/graphql', '@0xflick/contracts', '@0xflick/assets']);
 const { spawnSync } = require("child_process");
 
 
@@ -18,6 +18,7 @@ function jsonFromSecret(file) {
 }
 
 const secretsJson = jsonFromSecret("deploy-secrets.json");
+const jwtJson = jsonFromSecret("jwt-secret.json");
 
 const INFURA_IPFS_AUTH = `Basic ${Buffer.from(
   `${secretsJson.infraIpfsProjectId}:${secretsJson.infraIpfsSecret}`
@@ -61,10 +62,14 @@ const nextConfig = withTM({
     INFURA_IPFS_AUTH,
     WEB3_RPC_URL: WEB3_RPC,
     ENS_RPC_URL,
+    NEXT_PUBLIC_JWT_CLAIM_ISSUER: jwtJson.issuer,
+    JWK: jwtJson.JWK,
     NEXT_PUBLIC_APP_NAME: "0xflick.com",
+    NEXT_PUBLIC_AXOLOTL_BASE_IMAGES: process.env.NEXT_PUBLIC_AXOLOTL_BASE_IMAGES,
     NEXT_PUBLIC_DEFAULT_CHAIN_ID: process.env.NEXT_PUBLIC_DEFAULT_CHAIN_ID || "1",
     NEXT_PUBLIC_DEFAULT_CHAIN_NAME: process.env.NEXT_PUBLIC_DEFAULT_CHAIN_NAME || "mainnet",
     FLICK_ENS_DOMAIN: process.env.FLICK_ENS_DOMAIN,
+    NEXT_PUBLIC_JWT_PUBLIC_KEY: jwtJson.publicKey,
     NEXT_PUBLIC_IMAGE_RESIZER: "https://image.0xflick.com",
     NEXT_PUBLIC_IPFS: "https://ipfs.0xflick.com",
     NFT_CONTRACT_ADDRESS: "0x0000000000000000000000000000000000000000",

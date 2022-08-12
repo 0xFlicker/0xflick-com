@@ -11,6 +11,9 @@
   "button_walletconnect": "Wallet Connect",
   "button_cancel": "cancel",
   "owned_tokens": "owned tokens",
+  "menu_share": "share",
+  "menu_theme": "theme",
+  "menu_fancy": "fancy",
   "menu_home": "home",
   "menu_presale_mint": "presale mint",
   "menu_mint": "mint",
@@ -35,5 +38,7 @@
   "approve_success_description": "You have been approved for the presale. Let's seal the deal!",
   "approve_must_be_connected": "wallet connected",
   "approve_presale_title": "Request presale approval",
-  "approve_auth_logged_in": "establish ownership of address"
+  "approve_auth_logged_in": "establish ownership of address",
+  "copied_to_clipboard": "copied to clipboard",
+  "menu_navigator_share": "share this"
 }

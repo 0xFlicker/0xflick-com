@@ -1,5 +1,6 @@
-import { Canvas, CanvasRenderingContext2D } from "canvas";
-import { getImage } from "./cache.js";
+import type { Canvas } from "canvas";
+import { getImage, IImageFetcher } from "./cache";
+import createCanvas from "./canvas";
 
 export interface ILayer {
   draw(ctx: CanvasRenderingContext2D): Promise<void>;
@@ -11,10 +12,10 @@ export interface IGeneratable {
   layers: ILayer[];
 }
 
-export function cachedDrawImage(imgPath: string) {
+export function cachedDrawImage(imgPath: string, imageFetcher: IImageFetcher) {
   return async (ctx: CanvasRenderingContext2D) => {
-    const img = await getImage(imgPath);
-    ctx.drawImage(img, 0, 0);
+    const img = await getImage(imgPath, imageFetcher);
+    ctx.drawImage(img as any, 0, 0);
   };
 }
 
@@ -28,11 +29,14 @@ export function composeDrawOps(
   };
 }
 
-export function composeWithCanvas(
+export async function composeWithCanvas(
   ...ops: ((ctx: CanvasRenderingContext2D) => Promise<void>)[]
 ) {
   return async (ctx: CanvasRenderingContext2D) => {
-    const canvas = new Canvas(ctx.canvas.width, ctx.canvas.height);
+    const canvas = (await createCanvas(
+      ctx.canvas.width,
+      ctx.canvas.height
+    )) as HTMLCanvasElement;
     const ctx2 = canvas.getContext("2d");
     ctx2.clearRect(0, 0, canvas.width, canvas.height);
     await composeDrawOps(...ops)(ctx2);
@@ -45,6 +49,26 @@ export async function renderCanvas(canvas: Canvas, layers: ILayer[]) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   for (const layer of [...layers].sort((a, b) => a.zIndex - b.zIndex)) {
-    await layer.draw(ctx);
+    await layer.draw(ctx as any);
+  }
+}
+
+export async function renderCanvasCtx(
+  ctx: CanvasRenderingContext2D,
+  layers: ILayer[],
+  top: number,
+  left: number,
+  width: number,
+  height: number,
+  progress?: (current: number, total: number) => void
+) {
+  ctx.clearRect(top, left, width, height);
+  const total = layers.length;
+  let current = 1;
+  for (const layer of [...layers].sort((a, b) => a.zIndex - b.zIndex)) {
+    await layer.draw(ctx as any);
+    if (progress) {
+      progress(current++, total);
+    }
   }
 }

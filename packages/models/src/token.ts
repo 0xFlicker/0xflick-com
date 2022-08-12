@@ -21,10 +21,10 @@ export function generateRolesFromIds(roles?: string[]) {
     : {};
 }
 
-export function decodeJwtToken(token: string): UserWithRolesModel {
+export function decodeJwtToken(token: string): null | UserWithRolesModel {
   const result = decodeJwt(token);
   if (result.iss !== TokenModel.JWT_CLAIM_ISSUER) {
-    throw new Error("Invalid issuer");
+    return null
   }
   const roleNamespace = namespacedClaim("role/");
   const roleIds = Object.entries(result)

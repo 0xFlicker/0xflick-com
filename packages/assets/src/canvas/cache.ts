@@ -1,16 +1,19 @@
-import fs from "fs";
-import canvas from "canvas";
+import type { Image } from "canvas";
 
-const imageBufferCache = new Map<string, canvas.Image>();
+const imageBufferCache = new Map<string, Image>();
 
-export async function getImage(imgPath: string): Promise<canvas.Image> {
+export interface IImageFetcher {
+  (key: string): Promise<Image>;
+}
+
+export async function getImage(
+  imgPath: string,
+  imageFetcher: IImageFetcher
+): Promise<Image> {
   if (imageBufferCache.has(imgPath)) {
-    return imageBufferCache.get(imgPath) as canvas.Image;
+    return imageBufferCache.get(imgPath) as Image;
   }
-
-  const imgData = await fs.promises.readFile(imgPath);
-  const img = new canvas.Image();
-  img.src = imgData;
+  const img = await imageFetcher(imgPath);
   imageBufferCache.set(imgPath, img);
   return img;
 }

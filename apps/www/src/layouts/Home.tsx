@@ -1,52 +1,74 @@
-import { FC, useEffect, useRef, useState } from "react";
-import { Box, Toolbar } from "@mui/material";
-import { AppBar } from "features/appbar/components/appBar";
-import { useAppDispatch } from "app/store";
-import { actions as appbarActions } from "features/appbar/redux";
-import { Please } from "features/home/components/Please";
+import {
+  Divider,
+  ListItemIcon,
+  ListItemText,
+  MenuItem,
+  MenuList,
+  Typography,
+} from "@mui/material";
+import { useAppSelector } from "app/store";
+import { DarkModeSwitch } from "features/appbar/components/DarkModeSwitch";
+import { FancyModeSwitch } from "features/appbar/components/FancyModeSwitch";
+import { randomUint8ArrayOfLength } from "features/axolotlValley/hooks/useOffscreenCanvas";
+import { PleaseAxolotl } from "features/home/components/PleaseAxolotl";
+import { useLocale } from "locales/hooks";
+import { FC, useCallback, useState } from "react";
+import { selectors as appbarSelectors } from "features/appbar/redux";
+import { Main } from "./Main";
+import { Preview } from "features/axolotlValley/components/Preview";
+import { utils } from "ethers";
+import { useRouter } from "next/router";
+import { Share } from "@mui/icons-material";
+import { CopyToClipboardMenuItem } from "components/CopyToClipboardMenuItem";
 
 export const Home: FC = () => {
-  const targetRef = useRef<HTMLDivElement>(null);
-  const toolbarRef = useRef<HTMLDivElement>(null);
-  const dispatch = useAppDispatch();
-  useEffect(() => {
-    dispatch(
-      appbarActions.setDarkMode(
-        window.matchMedia &&
-          window.matchMedia("(prefers-color-scheme: dark)").matches
-      )
-    );
-  }, [dispatch]);
-  const [height, setSize] = useState<number>(0);
-
-  useEffect(() => {
-    if (!toolbarRef.current) return;
-
-    const clintRect = toolbarRef.current.getClientRects();
-    setSize(window.innerHeight - clintRect[0].height);
-    function onResize() {
-      setSize(window.innerHeight - clintRect[0].height);
-    }
-    window.addEventListener("resize", onResize);
-    return () => {
-      window.removeEventListener("resize", onResize);
-    };
+  const { t } = useLocale("common");
+  const isFancyMode = useAppSelector(appbarSelectors.fancyMode);
+  const [seed, setSeed] = useState<Uint8Array>(randomUint8ArrayOfLength(32));
+  const onFlick = useCallback(() => {
+    const newSeed = randomUint8ArrayOfLength(32);
+    setSeed(newSeed);
   }, []);
-
   return (
-    <>
-      <AppBar />
-      <Box
-        ref={targetRef}
-        component="main"
-        display="flex"
-        sx={{ flexFlow: "column", height: "100%" }}
-      >
-        <Toolbar ref={toolbarRef} sx={{ flex: "0 1 auto" }} />
-        <Box component="div" display="flex" sx={{ flex: "1 1 auto", height }}>
-          <Please />
-        </Box>
-      </Box>
-    </>
+    <Main
+      onFlick={onFlick}
+      menu={
+        <>
+          <MenuList dense disablePadding>
+            <CopyToClipboardMenuItem
+              icon={<Share />}
+              text={`https://0xflick.com/seed/${utils.hexlify(seed)}`}
+            >
+              <Typography textAlign="right" flexGrow={1}>
+                {t("menu_share")}
+              </Typography>
+            </CopyToClipboardMenuItem>
+            <Divider />
+            <MenuItem>
+              <DarkModeSwitch />
+              <ListItemText
+                primary={
+                  <Typography textAlign="right" flexGrow={1}>
+                    {t("menu_theme")}
+                  </Typography>
+                }
+              />
+            </MenuItem>
+            <MenuItem>
+              <FancyModeSwitch />
+              <ListItemText
+                primary={
+                  <Typography textAlign="right" flexGrow={1}>
+                    {t("menu_fancy")}
+                  </Typography>
+                }
+              />
+            </MenuItem>
+          </MenuList>
+        </>
+      }
+    >
+      {isFancyMode ? <PleaseAxolotl seed={seed} /> : <Preview seed={seed} />}
+    </Main>
   );
 };

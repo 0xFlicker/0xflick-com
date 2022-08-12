@@ -161,6 +161,26 @@ export class DynamoDB extends cdk.Stack {
       parameterName: `UrlShortener_TableArn`,
       stringValue: urlShortenerTable.tableArn,
     });
+    new ssm.StringParameter(this, "UserRoles_TableArn", {
+      description: "The UserRoles table ARN",
+      parameterName: `UserRoles_TableArn`,
+      stringValue: userRolesTable.tableArn,
+    });
+    new ssm.StringParameter(this, "RolePermissions_TableArn", {
+      description: "The RolePermissions table ARN",
+      parameterName: `RolePermissions_TableArn`,
+      stringValue: rolesPermissionsTable.tableArn,
+    });
+    new ssm.StringParameter(this, "Roles_TableArn", {
+      description: "The Roles table ARN",
+      parameterName: `Roles_TableArn`,
+      stringValue: rolesTable.tableArn,
+    });
+    new ssm.StringParameter(this, "UserNonce_TableArn", {
+      description: "The UserNonce table ARN",
+      parameterName: `UserNonce_TableArn`,
+      stringValue: userNonceTable.tableArn,
+    });
 
     // // Create a new SSM Parameter holding the table name, because we can
     // // not pass env vars into edge lambdas

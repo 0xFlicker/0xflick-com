@@ -1,14 +1,11 @@
-import { resolve, dirname } from "path";
 import { zipObj } from "ramda";
-import { fileURLToPath } from "url";
-import { ILayer } from "./core.js";
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
+import { ILayer } from "./core";
 
 export const alwaysCompatible = (other: ILayer) => true;
 
 export function resolveProperties(path: string) {
-  return resolve(__dirname, "..", "..", "properties", path);
+  return path;
+  // return resolve(__dirname, "..", "..", "properties", path);
 }
 
 export function weightSampleFromWeights<T extends string>(

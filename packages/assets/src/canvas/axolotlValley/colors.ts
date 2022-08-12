@@ -1,4 +1,4 @@
-import { hexToVector3, Vector3 } from "../filters.js";
+import { hexToVector3, Vector3 } from "../filters";
 
 export const pureGreen: Vector3 = [0, 1, 0];
 export const baseBrown = hexToVector3("#906B4A");

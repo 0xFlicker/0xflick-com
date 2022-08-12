@@ -1,56 +1,63 @@
-import { FC, useCallback, useEffect } from "react";
+import {
+  FC,
+  MouseEventHandler,
+  MouseEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  ReactNode,
+} from "react";
 import {
   AppBar as MuiAppBar,
+  Button,
   Toolbar,
   Typography,
   Switch,
   FormGroup,
   FormControlLabel,
   Box,
+  IconButton,
 } from "@mui/material";
+import { Menu as MenuIcon } from "@mui/icons-material";
 import NextImage from "next/image";
 import { useAppDispatch, useAppSelector } from "app/store";
 import {
   selectors as appbarSelectors,
   actions as appbarActions,
 } from "features/appbar/redux";
-import { Connect } from "features/web3";
 import { ETheme, useSavedTheme } from "../hooks";
+import { Connect } from "features/web3";
+import { HomeMenu } from "./HomeMenu";
 
-export const AppBar: FC = () => {
-  const isDarkMode = useAppSelector(appbarSelectors.darkMode);
-  const [theme, setTheme] = useSavedTheme();
-  useEffect(() => {
-    if (theme && (theme === ETheme.DARK) !== isDarkMode) {
-      dispatch(appbarActions.setDarkMode(theme === ETheme.DARK));
-    }
-  });
-  const dispatch = useAppDispatch();
-  const handleChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const isDarkModeSelected = event.target.checked;
-      setTheme(isDarkModeSelected ? ETheme.DARK : ETheme.LIGHT);
-    },
-    [setTheme]
-  );
+export const AppBar: FC<{
+  onFlick?: MouseEventHandler;
+  menu: ReactNode;
+}> = ({ menu, onFlick }) => {
+  const [menuAnchorEl, setMenuAnchorEl] = useState<Element | null>(null);
+
+  const onMenuClose = useCallback(() => {
+    setMenuAnchorEl(null);
+  }, []);
+  const handleMenu = useCallback((event: MouseEvent) => {
+    setMenuAnchorEl(event.currentTarget);
+  }, []);
   return (
-    <MuiAppBar color="default">
-      <Toolbar>
-        <Box component="div" sx={{ mx: 2 }}>
-          <NextImage src="/flick.png" width={40} height={40} />
-        </Box>
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          0xflick
-        </Typography>
+    <>
+      <MuiAppBar color="default">
+        <Toolbar>
+          <MenuIcon onClick={handleMenu} />
+          <IconButton onClick={onFlick}>
+            <NextImage src="/flick.png" width={40} height={40} />
+          </IconButton>
+          <Box sx={{ flexGrow: 1 }} component="span" />
 
-        <FormGroup>
-          <FormControlLabel
-            control={<Switch checked={isDarkMode} onChange={handleChange} />}
-            label={isDarkMode ? "Dark" : "Light"}
-          />
-        </FormGroup>
-        <Connect />
-      </Toolbar>
-    </MuiAppBar>
+          <Connect />
+        </Toolbar>
+      </MuiAppBar>
+      <HomeMenu anchorEl={menuAnchorEl} handleClose={onMenuClose}>
+        {menu}
+      </HomeMenu>
+    </>
   );
 };

@@ -5,6 +5,8 @@ import {
   queries as queriesAuth,
   querySchema as querySchemaAuth,
   resolvers as resolversAuth,
+  mutationSchema as mutationSchemaAuth,
+  mutations as mutationsAuth,
 } from "./auth";
 import { TGraphqlResolver } from "../types";
 
@@ -57,6 +59,10 @@ export const typeDefs = gql`
     image(contract: String!, tokenId: Int!, width: Int, height: Int): String
     ${querySchemaAuth}
   }
+
+  type Mutation {
+    ${mutationSchemaAuth}
+  }
 `;
 
 export const resolvers = {
@@ -64,6 +70,9 @@ export const resolvers = {
     flick: resolveFlick,
     image: resolveImage,
     ...queriesAuth,
+  },
+  Mutation: {
+    ...mutationsAuth,
   },
   NftToken: {
     image: resolveNftTokenImage,

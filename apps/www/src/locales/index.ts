@@ -4,24 +4,26 @@ import enMint from "locales/en/mint.json";
 import enAdmin from "locales/en/admin.json";
 import { InitOptions } from "i18next";
 
+export const defaultI18nConfig = (): InitOptions => ({
+  lng: "en",
+  debug: false,
+  ns: ["common", "mint", "admin"],
+  defaultNS: "common",
+  resources: {
+    en: {
+      common: enCommon,
+      mint: enMint,
+      admin: enAdmin,
+    },
+  },
+});
+
 export const getStaticProps: GetStaticProps<{
   i18n: InitOptions;
 }> = async () => {
   return {
     props: {
-      i18n: {
-        lng: "en",
-        debug: false,
-        ns: ["common", "mint", "admin"],
-        defaultNS: "common",
-        resources: {
-          en: {
-            common: enCommon,
-            mint: enMint,
-            admin: enAdmin,
-          },
-        },
-      },
+      i18n: defaultI18nConfig(),
     },
   };
 };

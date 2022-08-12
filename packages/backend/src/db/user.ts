@@ -83,7 +83,7 @@ export class UserDAO {
     }
     // Fetch all roles
     const roleIds = await userRolesDao.getAllRoleIds(address);
-    console.log(`User ${address} has roles ${roleIds}`);
+    
     return new UserWithRolesModel({
       ...user,
       roleIds,

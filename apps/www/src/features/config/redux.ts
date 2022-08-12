@@ -8,6 +8,7 @@ interface IState {
   nftContractAddress: string;
   nftEnumeratorContractAddress: string;
   appName: string;
+  axolotlBaseImages: string;
 }
 const oneWeekMs = 60 * 60 * 24 * 7 * 1000;
 const initialState: IState = {
@@ -19,6 +20,9 @@ const initialState: IState = {
   nftEnumeratorContractAddress:
     process.env.NFT_ENUMERATOR_CONTRACT_ADDRESS ?? "",
   appName: process.env.NEXT_PUBLIC_APP_NAME ?? "",
+  axolotlBaseImages:
+    process.env.NEXT_PUBLIC_AXOLOTL_BASE_IMAGES ??
+    "/static/axolotl-valley/properties/",
 };
 const slice = createSlice({
   name: "config",
@@ -42,6 +46,10 @@ const selectNftEnumeratorContractAddress = createSelector(
   root,
   (state) => state.nftEnumeratorContractAddress
 );
+const selectAxolotlBaseImages = createSelector(
+  root,
+  (state) => state.axolotlBaseImages
+);
 const selectAppName = createSelector(root, (state) => state.appName);
 export const selectors = {
   chainId: selectChainId,
@@ -51,5 +59,6 @@ export const selectors = {
   nftContractAddress: selectNftContractAddress,
   nftEnumeratorContractAddress: selectNftEnumeratorContractAddress,
   appName: selectAppName,
+  axolotlBaseImages: selectAxolotlBaseImages,
 };
 export const { reducer } = slice;

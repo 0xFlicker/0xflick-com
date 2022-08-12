@@ -1,11 +1,11 @@
-import { createFilter, FilterOperations, hexToVector3 } from "../filters.js";
+import { createFilter, FilterOperations, hexToVector3 } from "../filters";
 import {
   cachedDrawImage,
   composeDrawOps,
   composeWithCanvas,
   ILayer,
-} from "../core.js";
-import { resolveProperties } from "../utils.js";
+} from "../core";
+import { resolveProperties } from "../utils";
 import {
   BackgroundColors,
   BaseColor,
@@ -18,7 +18,7 @@ import {
   IMouthType,
   ISpecialType,
   HoodieColor,
-} from "./types.js";
+} from "./types";
 import {
   accentBlack,
   accentBrown,
@@ -41,7 +41,8 @@ import {
   baseRed,
   baseWhite,
   pureGreen,
-} from "./colors.js";
+} from "./colors";
+import { IImageFetcher } from "../cache";
 
 type ApplyFilter = (o: FilterOperations) => unknown;
 interface Colorizer {
@@ -130,9 +131,12 @@ interface IBackgroundLayer {
   color: BackgroundColors;
 }
 
-export function makeBackgroundLayer({ color }: IBackgroundLayer) {
+export function makeBackgroundLayer(
+  { color }: IBackgroundLayer,
+  imageFetcher: IImageFetcher
+) {
   return {
-    draw: cachedDrawImage(resolveProperties(`${color}.PNG`)),
+    draw: cachedDrawImage(resolveProperties(`${color}.PNG`), imageFetcher),
     zIndex: -Infinity,
   };
 }
@@ -166,27 +170,33 @@ function applyColorFilters(colorDetails: Colorizer[], color: string) {
 function makeLegacySplitColorGenerator<
   PrimaryColor extends string,
   SecondaryColor extends string
->({
-  zIndex,
-  baseColor,
-  secondaryColor,
-  baseColorBasePath,
-  secondaryColorBasePath,
-}: ISplitLayer<PrimaryColor, SecondaryColor>) {
+>(
+  {
+    zIndex,
+    baseColor,
+    secondaryColor,
+    baseColorBasePath,
+    secondaryColorBasePath,
+  }: ISplitLayer<PrimaryColor, SecondaryColor>,
+  imageFetcher: IImageFetcher
+) {
   let drawOp: ILayer["draw"];
 
   if (secondaryColor) {
     drawOp = composeDrawOps(
       cachedDrawImage(
-        resolveProperties(`${baseColorBasePath}/${baseColor}.PNG`)
+        resolveProperties(`${baseColorBasePath}/${baseColor}.PNG`),
+        imageFetcher
       ),
       cachedDrawImage(
-        resolveProperties(`${secondaryColorBasePath}/${secondaryColor}.PNG`)
+        resolveProperties(`${secondaryColorBasePath}/${secondaryColor}.PNG`),
+        imageFetcher
       )
     );
   } else {
     drawOp = cachedDrawImage(
-      resolveProperties(`${baseColorBasePath}/${baseColor}.PNG`)
+      resolveProperties(`${baseColorBasePath}/${baseColor}.PNG`),
+      imageFetcher
     );
   }
 
@@ -196,16 +206,19 @@ function makeLegacySplitColorGenerator<
   };
 }
 
-function makeSplitColorGenerator<
+async function makeSplitColorGenerator<
   PrimaryColor extends string,
   SecondaryColor extends string
->({
-  zIndex,
-  baseColor,
-  secondaryColor,
-  baseColorBasePath,
-  secondaryColorBasePath,
-}: ISplitLayer<PrimaryColor, SecondaryColor>) {
+>(
+  {
+    zIndex,
+    baseColor,
+    secondaryColor,
+    baseColorBasePath,
+    secondaryColorBasePath,
+  }: ISplitLayer<PrimaryColor, SecondaryColor>,
+  imageFetcher: IImageFetcher
+) {
   let drawOp: ILayer["draw"];
 
   function applyColor(
@@ -219,7 +232,8 @@ function makeSplitColorGenerator<
       cachedDrawImage(
         resolveProperties(
           `${basePath}/${isSpecialColor ? color : baseColorPath}.PNG`
-        )
+        ),
+        imageFetcher
       ),
     ];
     if (!isSpecialColor) {
@@ -236,14 +250,17 @@ function makeSplitColorGenerator<
   );
   const secondaryColorOps = secondaryColor
     ? applyColor(
-        accentColorDetails,
+        baseColorDetails,
         secondaryColor,
         secondaryColorBasePath,
         "SplitColor"
       )
     : [];
 
-  drawOp = composeWithCanvas(...baseColorOps, ...secondaryColorOps);
+  drawOp = composeDrawOps(
+    await composeWithCanvas(...baseColorOps),
+    await composeWithCanvas(...secondaryColorOps)
+  );
 
   return {
     draw: drawOp,
@@ -254,22 +271,27 @@ function makeSplitColorGenerator<
 function makeConditionalColorGenerator<
   PrimaryColor extends string,
   SecondaryColor extends string
->({
-  zIndex,
-  baseColor,
-  secondaryColor,
-  baseColorBasePath,
-  secondaryColorBasePath,
-}: ISplitLayer<PrimaryColor, SecondaryColor>) {
+>(
+  {
+    zIndex,
+    baseColor,
+    secondaryColor,
+    baseColorBasePath,
+    secondaryColorBasePath,
+  }: ISplitLayer<PrimaryColor, SecondaryColor>,
+  imageFetcher: IImageFetcher
+) {
   let drawOp: ILayer["draw"];
 
   if (secondaryColor) {
     drawOp = cachedDrawImage(
-      resolveProperties(`${secondaryColorBasePath}/${secondaryColor}.PNG`)
+      resolveProperties(`${secondaryColorBasePath}/${secondaryColor}.PNG`),
+      imageFetcher
     );
   } else {
     drawOp = cachedDrawImage(
-      resolveProperties(`${baseColorBasePath}/${baseColor}.PNG`)
+      resolveProperties(`${baseColorBasePath}/${baseColor}.PNG`),
+      imageFetcher
     );
   }
 
@@ -284,39 +306,54 @@ interface IBaseLayer {
   splitColor?: BaseColor;
 }
 
-export function makeBaseLayer({ color, splitColor }: IBaseLayer) {
-  return makeSplitColorGenerator({
-    zIndex: -100000,
-    baseColor: color,
-    secondaryColor: splitColor,
-    baseColorBasePath: "BaseColor",
-    secondaryColorBasePath: "SplitColor",
-  });
+export function makeBaseLayer(
+  { color, splitColor }: IBaseLayer,
+  imageFetcher: IImageFetcher
+) {
+  return makeSplitColorGenerator(
+    {
+      zIndex: -100000,
+      baseColor: color,
+      secondaryColor: splitColor,
+      baseColorBasePath: "BaseColor",
+      secondaryColorBasePath: "SplitColor",
+    },
+    imageFetcher
+  );
 }
 
 interface ITailLayer extends IBaseLayer {
   tailType: TailTypes;
 }
 
-export function makeTailLayer({ color, splitColor, tailType }: ITailLayer) {
+export function makeTailLayer(
+  { color, splitColor, tailType }: ITailLayer,
+  imageFetcher: IImageFetcher
+) {
   return [
-    makeConditionalColorGenerator({
-      zIndex: -1000,
-      baseColor: color,
-      secondaryColor: splitColor,
-      baseColorBasePath: `Tails/${tailType}-Colors`,
-      secondaryColorBasePath: `Tails/${tailType}-Colors`,
-    }),
+    makeConditionalColorGenerator(
+      {
+        zIndex: -1000,
+        baseColor: color,
+        secondaryColor: splitColor,
+        baseColorBasePath: `Tails/${tailType}-Colors`,
+        secondaryColorBasePath: `Tails/${tailType}-Colors`,
+      },
+      imageFetcher
+    ),
     {
-      draw: cachedDrawImage(resolveProperties(`Tails/${tailType}.PNG`)),
+      draw: cachedDrawImage(
+        resolveProperties(`Tails/${tailType}.PNG`),
+        imageFetcher
+      ),
       zIndex: -500,
     },
   ];
 }
 
-export function makeOutlineLayer() {
+export function makeOutlineLayer(imageFetcher: IImageFetcher) {
   return {
-    draw: cachedDrawImage(resolveProperties("Base/Base.PNG")),
+    draw: cachedDrawImage(resolveProperties("Base/Base.PNG"), imageFetcher),
     zIndex: 1700,
   };
 }
@@ -341,78 +378,109 @@ type ISpecialLayer = {
   IMouthLayer &
   IFaceLayer &
   IHeadLayer;
-export function makeSpecialOrHeadThingsLayer({
-  color,
-  faceType,
-  frillType,
-  mouthType,
-  headType,
-  specialType,
-  splitColor,
-}: ISpecialLayer) {
+export async function makeSpecialOrHeadThingsLayer(
+  {
+    color,
+    faceType,
+    frillType,
+    mouthType,
+    headType,
+    specialType,
+    splitColor,
+  }: ISpecialLayer,
+  imageFetcher: IImageFetcher
+) {
   if (specialType === "None") {
     return [
-      ...makeEarsLayer({
-        color,
-        frillType,
-        splitColor,
-      }),
-      makeMouthLayer({
-        mouthType,
-      }),
-      makeEyeLayer({
-        faceType,
-      }),
-      makeHeadLayer({
-        color,
-        splitColor,
-        headType,
-      }),
+      ...(await makeEarsLayer(
+        {
+          color,
+          frillType,
+          splitColor,
+        },
+        imageFetcher
+      )),
+      makeMouthLayer(
+        {
+          mouthType,
+        },
+        imageFetcher
+      ),
+      makeEyeLayer(
+        {
+          faceType,
+        },
+        imageFetcher
+      ),
+      makeHeadLayer(
+        {
+          color,
+          splitColor,
+          headType,
+        },
+        imageFetcher
+      ),
     ];
   }
   if (specialType === "TV Head") {
     return [
       {
-        draw: cachedDrawImage(resolveProperties(`Special/${specialType}.PNG`)),
+        draw: cachedDrawImage(
+          resolveProperties(`Special/${specialType}.PNG`),
+          imageFetcher
+        ),
         zIndex: 1000000000,
       },
     ];
   }
   return [
     {
-      draw: cachedDrawImage(resolveProperties(`Special/${specialType}.PNG`)),
+      draw: cachedDrawImage(
+        resolveProperties(`Special/${specialType}.PNG`),
+        imageFetcher
+      ),
       zIndex: 1000000000,
     },
-    ...makeEarsLayer({
-      color,
-      frillType,
-      splitColor,
-    }),
+    ...(await makeEarsLayer(
+      {
+        color,
+        frillType,
+        splitColor,
+      },
+      imageFetcher
+    )),
   ];
 }
 
-function makeEarsLayer({ color, splitColor, frillType }: IEarsLayer) {
+async function makeEarsLayer(
+  { color, splitColor, frillType }: IEarsLayer,
+  imageFetcher: IImageFetcher
+) {
   const ops: ILayer["draw"][] = [];
   if (isSpecialColor(color)) {
     ops.push(
       cachedDrawImage(
-        resolveProperties(`Ears/${frillType}-Colors/Base/${color}.PNG`)
+        resolveProperties(`Ears/${frillType}-Colors/Base/${color}.PNG`),
+        imageFetcher
       )
     );
   } else {
     const colorFilters = applyColorFilters(baseColorDetails, color);
+    const accentColorFilters = applyColorFilters(accentColorDetails, color);
     ops.push(
-      composeWithCanvas(
+      await composeWithCanvas(
         cachedDrawImage(
-          resolveProperties(`Ears/${frillType}-Colors/${frillType}-Base.PNG`)
+          resolveProperties(`Ears/${frillType}-Colors/${frillType}-Base.PNG`),
+          imageFetcher
         ),
         ...colorFilters
       ),
-      composeWithCanvas(
+      await composeWithCanvas(
         cachedDrawImage(
-          resolveProperties(`Ears/${frillType}-Colors/${frillType}-Accent.PNG`)
+          resolveProperties(`Ears/${frillType}-Colors/${frillType}-Accent.PNG`),
+          imageFetcher
         ),
-        ...colorFilters
+        ...accentColorFilters
       )
     );
   }
@@ -420,66 +488,91 @@ function makeEarsLayer({ color, splitColor, frillType }: IEarsLayer) {
     if (isSpecialColor(splitColor)) {
       ops.push(
         cachedDrawImage(
-          resolveProperties(`Ears/${frillType}-Colors/Base/${splitColor}.PNG`)
+          resolveProperties(`Ears/${frillType}-Colors/Base/${splitColor}.PNG`),
+          imageFetcher
         )
       );
     } else {
-      const colorFilters = applyColorFilters(accentColorDetails, splitColor);
+      const colorFilters = applyColorFilters(baseColorDetails, splitColor);
+      const accentColorFilters = applyColorFilters(
+        accentColorDetails,
+        splitColor
+      );
       ops.push(
-        composeWithCanvas(
+        await composeWithCanvas(
           cachedDrawImage(
             resolveProperties(
               `Ears/${frillType}-Colors/${frillType}-Base-Split.PNG`
-            )
+            ),
+            imageFetcher
           ),
           ...colorFilters
         ),
-        composeWithCanvas(
+        await composeWithCanvas(
           cachedDrawImage(
             resolveProperties(
               `Ears/${frillType}-Colors/${frillType}-Accent-Split.PNG`
-            )
+            ),
+            imageFetcher
           ),
-          ...colorFilters
+          ...accentColorFilters
         )
       );
     }
   }
-  ops.push(cachedDrawImage(resolveProperties(`Ears/${frillType}.PNG`)));
+  ops.push(
+    cachedDrawImage(resolveProperties(`Ears/${frillType}.PNG`), imageFetcher)
+  );
   return [
     {
-      draw: composeWithCanvas(...ops),
+      draw: await composeWithCanvas(...ops),
       zIndex: 1500,
     },
   ];
 }
 
-function makeMouthLayer({ mouthType }: IMouthLayer) {
+function makeMouthLayer(
+  { mouthType }: IMouthLayer,
+  imageFetcher: IImageFetcher
+) {
   return {
-    draw: cachedDrawImage(resolveProperties(`Mouths/${mouthType}.PNG`)),
-    zIndex: 10000010,
+    draw: cachedDrawImage(
+      resolveProperties(`Mouths/${mouthType}.PNG`),
+      imageFetcher
+    ),
+    zIndex: 9999990,
   };
 }
 
-function makeEyeLayer({ faceType }: IFaceLayer) {
+function makeEyeLayer({ faceType }: IFaceLayer, imageFetcher: IImageFetcher) {
   return {
-    draw: cachedDrawImage(resolveProperties(`Eyes/${faceType}.PNG`)),
+    draw: cachedDrawImage(
+      resolveProperties(`Eyes/${faceType}.PNG`),
+      imageFetcher
+    ),
     zIndex: 10000000,
   };
 }
 
-function makeHeadLayer({ headType, color, splitColor }: IHeadLayer) {
+function makeHeadLayer(
+  { headType, color, splitColor }: IHeadLayer,
+  imageFetcher: IImageFetcher
+) {
   let drawOp: ILayer["draw"];
 
   if (["Side", "Tuft"].includes(headType)) {
     drawOp = composeDrawOps(
       cachedDrawImage(
-        resolveProperties(`Head/${headType}-Color/${splitColor || color}.PNG`)
+        resolveProperties(`Head/${headType}-Color/${splitColor || color}.PNG`),
+        imageFetcher
       ),
-      cachedDrawImage(resolveProperties(`Head/${headType}.PNG`))
+      cachedDrawImage(resolveProperties(`Head/${headType}.PNG`), imageFetcher)
     );
   } else {
-    drawOp = cachedDrawImage(resolveProperties(`Head/${headType}.PNG`));
+    drawOp = cachedDrawImage(
+      resolveProperties(`Head/${headType}.PNG`),
+      imageFetcher
+    );
   }
 
   return {
@@ -493,83 +586,132 @@ interface IArmsLayer {
   color: BaseColor;
   splitColor?: BaseColor;
 }
-export function makeArmsLayer({ armType, color, splitColor }: IArmsLayer) {
+export async function makeArmsLayer(
+  { armType, color, splitColor }: IArmsLayer,
+  imageFetcher: IImageFetcher
+): Promise<ILayer[]> {
+  const ops: ILayer["draw"][] = [];
+  if (isSpecialColor(color)) {
+    ops.push(
+      cachedDrawImage(
+        resolveProperties(`Arms/${armType}-Colors/Base/${color}.PNG`),
+        imageFetcher
+      )
+    );
+  } else {
+    ops.push(
+      await composeWithCanvas(
+        cachedDrawImage(
+          resolveProperties(`Arms/${armType}-Colors/${armType}-Base.PNG`),
+          imageFetcher
+        ),
+        ...applyColorFilters(baseColorDetails, color)
+      )
+    );
+    if (splitColor) {
+      const splitColorFilters = applyColorFilters(baseColorDetails, splitColor);
+      ops.push(
+        await composeWithCanvas(
+          cachedDrawImage(
+            resolveProperties(`Arms/${armType}-Colors/${armType}-Split.PNG`),
+            imageFetcher
+          ),
+          ...splitColorFilters
+        )
+      );
+    }
+  }
+
   return [
     {
-      draw: cachedDrawImage(resolveProperties(`Arms/${armType}.PNG`)),
+      draw: composeDrawOps(
+        await composeWithCanvas(...ops),
+        cachedDrawImage(resolveProperties(`Arms/${armType}.PNG`), imageFetcher)
+      ),
       zIndex: 1000105,
     },
-    makeLegacySplitColorGenerator({
-      zIndex: 1000100,
-      baseColor: color,
-      secondaryColor: splitColor,
-      baseColorBasePath: `Arms/${armType}-Colors/Base`,
-      secondaryColorBasePath: `Arms/${armType}-Colors/Split`,
-    }),
   ];
 }
 interface IAccessoriesLayer {
   accessoryType: IAccessoriesType;
   color: HoodieColor;
 }
-export function makeAccessoriesLayer({
-  accessoryType,
-  color,
-}: IAccessoriesLayer) {
+export async function makeAccessoriesLayer(
+  { accessoryType, color }: IAccessoriesLayer,
+  imageFetcher: IImageFetcher
+) {
   const ops: ILayer[] = [];
   if (accessoryType === "Flamingo") {
     ops.push({
       draw: cachedDrawImage(
-        resolveProperties(`Accessories/${accessoryType}B.PNG`)
+        resolveProperties(`Accessories/${accessoryType}B.PNG`),
+        imageFetcher
       ),
       zIndex: 50000,
     });
     ops.push({
       draw: cachedDrawImage(
-        resolveProperties(`Accessories/${accessoryType}T.PNG`)
+        resolveProperties(`Accessories/${accessoryType}T.PNG`),
+        imageFetcher
       ),
-      zIndex: 1000000,
+      zIndex: 1000500,
     });
   } else if (accessoryType === "Hoodie") {
     ops.push({
-      draw: composeWithCanvas(
-        cachedDrawImage(resolveProperties(`Accessories/HoodieBase.PNG`)),
+      draw: await composeWithCanvas(
+        cachedDrawImage(
+          resolveProperties(`Accessories/HoodieBase.PNG`),
+          imageFetcher
+        ),
         ...applyColorFilters(hoodieBaseDetails, color)
       ),
       zIndex: 1000000,
     });
     ops.push({
-      draw: composeWithCanvas(
-        cachedDrawImage(resolveProperties(`Accessories/HoodieLine.PNG`))
+      draw: await composeWithCanvas(
+        cachedDrawImage(
+          resolveProperties(`Accessories/HoodieLine.PNG`),
+          imageFetcher
+        )
       ),
       zIndex: 1000030,
     });
     ops.push({
-      draw: composeWithCanvas(
-        cachedDrawImage(resolveProperties(`Accessories/SleevesColor.PNG`)),
+      draw: await composeWithCanvas(
+        cachedDrawImage(
+          resolveProperties(`Accessories/SleevesColor.PNG`),
+          imageFetcher
+        ),
         ...applyColorFilters(hoodieBaseDetails, color)
       ),
       zIndex: 1000500,
     });
     ops.push({
-      draw: composeWithCanvas(
-        cachedDrawImage(resolveProperties(`Accessories/HoodieAccent.PNG`)),
+      draw: await composeWithCanvas(
+        cachedDrawImage(
+          resolveProperties(`Accessories/HoodieAccent.PNG`),
+          imageFetcher
+        ),
         ...applyColorFilters(hoodieAccentDetails, color)
       ),
       zIndex: 1000020,
     });
     ops.push({
-      draw: composeWithCanvas(
-        cachedDrawImage(resolveProperties(`Accessories/SleevesLine.PNG`))
+      draw: await composeWithCanvas(
+        cachedDrawImage(
+          resolveProperties(`Accessories/SleevesLine.PNG`),
+          imageFetcher
+        )
       ),
       zIndex: 1000530,
     });
   } else {
     ops.push({
       draw: cachedDrawImage(
-        resolveProperties(`Accessories/${accessoryType}.PNG`)
+        resolveProperties(`Accessories/${accessoryType}.PNG`),
+        imageFetcher
       ),
-      zIndex: 1000000,
+      zIndex: 1000500,
     });
   }
   return ops;

@@ -21,6 +21,9 @@ export interface ApiProps extends cdk.StackProps {
   readonly ipfsApiUrl: string;
   readonly ipfsApiProject: string;
   readonly ipfsApiSecret: string;
+  readonly jwk: string;
+  readonly jwtPublicKey: string;
+  readonly jwtClaimIssuer: string;
 }
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -37,38 +40,60 @@ export class GraphqlStack extends cdk.Stack {
       ipfsApiSecret,
       ipfsApiUrl,
       nftRootCollection,
+      jwk,
+      jwtClaimIssuer,
+      jwtPublicKey,
       ...rest
     } = props;
     super(scope, id, rest);
-    // Fetch table names from SSM Parameter Store
-    const urlShortenerTableArnParam = new cr.AwsCustomResource(
-      this,
-      "UrlShortenerTableArnParam",
-      {
-        onUpdate: {
-          // will also be called for a CREATE event
-          service: "SSM",
-          action: "getParameter",
-          parameters: {
-            Name: "UrlShortener_TableArn",
-            WithDecryption: true,
-          },
-          region: "us-east-2",
-          physicalResourceId: cr.PhysicalResourceId.of(Date.now().toString()), // Update physical id to always fetch the latest version
-        },
-        policy: cr.AwsCustomResourcePolicy.fromSdkCalls({
-          resources: cr.AwsCustomResourcePolicy.ANY_RESOURCE,
-        }),
-      }
-    );
 
-    const urlShortenerTableArn =
-      urlShortenerTableArnParam.getResponseField("Parameter.Value");
-    const urlShortenerTable = dynamodb.Table.fromTableArn(
-      this,
-      "UrlShortener",
-      urlShortenerTableArn
-    );
+    const getTable = (
+      tableName: string,
+      {
+        globalIndexes,
+        localIndexes,
+      }: { globalIndexes?: string[]; localIndexes?: string[] } = {}
+    ) => {
+      const tableArnParam = new cr.AwsCustomResource(
+        this,
+        `${tableName}ArnParam`,
+        {
+          onUpdate: {
+            // will also be called for a CREATE event
+            service: "SSM",
+            action: "getParameter",
+            parameters: {
+              Name: `${tableName}_TableArn`,
+              WithDecryption: true,
+            },
+            region: "us-east-2",
+            physicalResourceId: cr.PhysicalResourceId.of(Date.now().toString()), // Update physical id to always fetch the latest version
+          },
+          policy: cr.AwsCustomResourcePolicy.fromSdkCalls({
+            resources: cr.AwsCustomResourcePolicy.ANY_RESOURCE,
+          }),
+        }
+      );
+
+      const tableArn = tableArnParam.getResponseField("Parameter.Value");
+      const table = dynamodb.Table.fromTableAttributes(this, tableName, {
+        tableArn,
+        globalIndexes,
+        localIndexes,
+      });
+
+      return table;
+    };
+    // Fetch table names from SSM Parameter Store
+    const urlShortenerTable = getTable("UrlShortener");
+    const userNonceTable = getTable("UserNonce");
+    const rolePermissionsTable = getTable("RolePermissions");
+    const rolesTable = getTable("Roles", {
+      globalIndexes: ["RolesByNameIndex"],
+    });
+    const userRolesTable = getTable("UserRoles", {
+      globalIndexes: ["RoleIDIndex", "AddressIndex"],
+    });
 
     // Fetch table names from SSM Parameter Store
     const tableNamesParamResource = new cr.AwsCustomResource(
@@ -103,11 +128,13 @@ export class GraphqlStack extends cdk.Stack {
       timeout: cdk.Duration.seconds(120),
       memorySize: 512,
       environment: {
+        LOG_LEVEL: "debug",
         ENS_RPC_URL: ensRpcUrl,
         NFT_COLLECTIONS_OF_INTEREST: nftCollectionsOfInterest,
         NFT_CONTRACT_ADDRESS: nftRootCollection,
         WEB3_RPC_URL: web3RpcUrl,
         CHAIN_ID: chainId,
+        NEXT_PUBLIC_APP_NAME: "0xflick.com",
         FLICK_ENS_DOMAIN: "0xflick.eth",
         IPFS_API_URL: ipfsApiUrl,
         IPFS_API_PROJECT: ipfsApiProject,
@@ -116,9 +143,17 @@ export class GraphqlStack extends cdk.Stack {
         NEXT_PUBLIC_IPFS: "https://ipfs.0xflick.com",
         SSM_PARAM_NAME: tableNamesParam.parameterName,
         SSM_REGION: "us-east-2",
+        NEXT_PUBLIC_JWT_PUBLIC_KEY: jwtPublicKey,
+        JWK: jwk,
+        NEXT_PUBLIC_JWT_CLAIM_ISSUER: jwtClaimIssuer,
       },
     });
     urlShortenerTable.grantReadWriteData(graphqlHandler);
+    userNonceTable.grantReadWriteData(graphqlHandler);
+    rolePermissionsTable.grantReadWriteData(graphqlHandler);
+    rolesTable.grantReadWriteData(graphqlHandler);
+    userRolesTable.grantReadWriteData(graphqlHandler);
+
     tableNamesParam.grantRead(graphqlHandler);
 
     const httpApi = new HttpApi(this, "http-api-example", {

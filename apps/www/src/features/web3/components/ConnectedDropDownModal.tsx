@@ -2,80 +2,106 @@ import { FC } from "react";
 import {
   Backdrop,
   Box,
-  List,
-  ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Modal,
+  Menu,
+  MenuItem,
+  MenuList,
+  Typography,
 } from "@mui/material";
 import { Logout as LogoutIcon, Login as LoginIcon } from "@mui/icons-material";
-import { Fade } from "transitions/Fade";
 import { useLocale } from "locales/hooks";
 
 interface IProps {
-  open: boolean;
+  anchorEl: Element;
   handleClose: () => void;
   handleDisconnect: () => void;
-  top: number;
-  left: number;
-  width: number;
+  handleLogin: () => void;
+  handleLogout: () => void;
+  isLoggedIn: boolean;
 }
 
 export const ConnectedDropDownModal: FC<IProps> = ({
-  open,
+  anchorEl,
   handleClose,
   handleDisconnect,
-  top,
-  left,
-  width,
+  handleLogin,
+  handleLogout,
+  isLoggedIn,
 }) => {
   const { t } = useLocale("common");
+  const open = Boolean(anchorEl);
   return (
-    <Modal
-      aria-labelledby="connected-drop-down-title"
-      aria-describedby="connected-drop-down-description"
+    <Menu
+      anchorEl={anchorEl}
       open={open}
+      anchorOrigin={{
+        vertical: "bottom",
+        horizontal: "right",
+      }}
       onClose={handleClose}
-      closeAfterTransition
+      keepMounted
       BackdropComponent={Backdrop}
       BackdropProps={{
         timeout: 500,
       }}
+      transformOrigin={{
+        vertical: "top",
+        horizontal: "right",
+      }}
     >
-      <Fade in={open}>
-        <Box
-          sx={{
-            position: "absolute" as "absolute",
-            top,
-            left,
-            width,
-            bgcolor: "background.paper",
-            border: "2px solid #000",
-            boxShadow: 24,
-            marginRight: "0.5rem",
-          }}
-        >
-          <List>
-            <ListItem disablePadding>
-              <ListItemButton>
+      <Box sx={{ width: 320 }}>
+        <MenuList disablePadding>
+          {isLoggedIn ? (
+            <MenuItem>
+              <ListItemButton onClick={handleLogout}>
+                <ListItemIcon>
+                  <LogoutIcon />
+                </ListItemIcon>
+                <ListItemText
+                  primary={
+                    <Typography textAlign="right">
+                      {t("auth_button_logout")}
+                    </Typography>
+                  }
+                />
+              </ListItemButton>
+            </MenuItem>
+          ) : (
+            <MenuItem>
+              <ListItemButton onClick={handleLogin}>
                 <ListItemIcon>
                   <LoginIcon />
                 </ListItemIcon>
-                <ListItemText primary={t("auth_button_login")} />
+                <ListItemText
+                  primary={
+                    <Typography textAlign="right">
+                      {t("auth_button_login")}
+                    </Typography>
+                  }
+                />
               </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
+            </MenuItem>
+          )}
+          {!isLoggedIn && (
+            <MenuItem>
               <ListItemButton onClick={handleDisconnect}>
                 <ListItemIcon>
                   <LogoutIcon />
                 </ListItemIcon>
-                <ListItemText primary={t("connect_disconnect")} />
+                <ListItemText
+                  primary={
+                    <Typography textAlign="right">
+                      {t("connect_disconnect")}
+                    </Typography>
+                  }
+                />
               </ListItemButton>
-            </ListItem>
-          </List>
-        </Box>
-      </Fade>
-    </Modal>
+            </MenuItem>
+          )}
+        </MenuList>
+      </Box>
+    </Menu>
   );
 };

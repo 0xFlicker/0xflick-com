@@ -5,7 +5,6 @@ export const sessionExpiration =
   Number(process.env.SESSION_EXPIRATION_SECONDS) || 60 * 60 * 24 * 7;
 export function serializeSessionCookie(value: string, path: string) {
   return serialize(cookieName, value, {
-    httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     expires: new Date(Date.now() + 1000 * sessionExpiration),
@@ -15,7 +14,6 @@ export function serializeSessionCookie(value: string, path: string) {
 
 export function expireSessionCookie(path: string) {
   return serialize(cookieName, "", {
-    httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     expires: new Date(0),

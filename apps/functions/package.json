@@ -10,7 +10,7 @@
     "image:origin:build": "esbuild src/lambda/image/origin.ts --banner:js=\"import { createRequire } from 'module';const require = createRequire(import.meta.url);\" --platform=node --format=esm --target=node14.19 --bundle --external:sharp --external:ipfs-http-client --outfile=../../deploy/.layers/image/origin/index.mjs",
     "image:build": "yarn image:origin:build && yarn image:accept:build && cd ../../deploy && yarn build:layer:sharp",
     "ipfs:origin:build": "esbuild src/lambda/ipfs/origin.ts --banner:js=\"import { createRequire } from 'module';const require = createRequire(import.meta.url);\" --platform=node --format=esm --bundle --target=node16.14 --external:ipfs-http-client --outfile=../../deploy/.layers/ipfs/origin/index.mjs  && cd ../../deploy && yarn build:layer:ipfs",
-    "axolotl:origin:build": "esbuild src/lambda/axolotl/index.ts --platform=node --target=node14.19 --bundle --external:canvas --outfile=../../deploy/.layers/axolotl/index.mjs",
+    "axolotl:origin:build": "esbuild src/lambda/axolotl/index.ts --banner:js=\"import { createRequire } from 'module';const require = createRequire(import.meta.url);\" --platform=node --format=esm --target=node16.14 --bundle --external:canvas --outfile=../../deploy/.layers/axolotl/index.mjs",
     "graphql:build": "esbuild src/lambda/graphql.ts --banner:js=\"import { createRequire } from 'module';const require = createRequire(import.meta.url);\" --platform=node --format=esm --target=node16.14 --bundle --outfile=../../deploy/.layers/graphql/index.mjs"
   },
   "devDependencies": {

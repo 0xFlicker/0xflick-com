@@ -1,56 +1,47 @@
-import { FC, useEffect, useRef, useState } from "react";
-import { Box, Toolbar } from "@mui/material";
-import { AppBar } from "features/appbar/components/appBar";
-import { useAppDispatch } from "app/store";
-import { actions as appbarActions } from "features/appbar/redux";
+import { FC, useCallback, useState } from "react";
+import { ListItemText, MenuItem, MenuList, Typography } from "@mui/material";
+import { useAppSelector } from "app/store";
 import { Carousel } from "features/nft-collection/components/Carousel";
 import { useGetNftCollectionQuery } from "features/nft-collection/api";
 import { INfts } from "@0xflick/models";
+import { Main } from "./Main";
+import { DarkModeSwitch } from "features/appbar/components/DarkModeSwitch";
+import { useLocale } from "locales/hooks";
+import { selectors as appbarSelectors } from "features/appbar/redux";
+import { randomUint8ArrayOfLength } from "features/axolotlValley/hooks/useOffscreenCanvas";
 
 export const Nfts: FC<{ serverSideNfts?: INfts[] }> = ({ serverSideNfts }) => {
-  const targetRef = useRef<HTMLDivElement>(null);
-  const toolbarRef = useRef<HTMLDivElement>(null);
-  const dispatch = useAppDispatch();
-  useEffect(() => {
-    dispatch(
-      appbarActions.setDarkMode(
-        window.matchMedia &&
-          window.matchMedia("(prefers-color-scheme: dark)").matches
-      )
-    );
-  }, [dispatch]);
-  const [height, setSize] = useState<number>(0);
+  const { t } = useLocale("common");
+  const isFancyMode = useAppSelector(appbarSelectors.fancyMode);
+  const [seed, setSeed] = useState<Uint8Array>(randomUint8ArrayOfLength(32));
+  const onFlick = useCallback(() => {
+    const newSeed = randomUint8ArrayOfLength(32);
+    setSeed(newSeed);
+  }, []);
   const { data, isLoading, isError } = useGetNftCollectionQuery(undefined, {
     skip: !!serverSideNfts,
   });
-  useEffect(() => {
-    if (!toolbarRef.current) return;
-
-    const clintRect = toolbarRef.current.getClientRects();
-    setSize(window.innerHeight - clintRect[0].height);
-    function onResize() {
-      setSize(window.innerHeight - clintRect[0].height);
-    }
-    window.addEventListener("resize", onResize);
-    return () => {
-      window.removeEventListener("resize", onResize);
-    };
-  }, []);
-
   return (
-    <>
-      <AppBar />
-      <Box
-        ref={targetRef}
-        component="main"
-        display="flex"
-        sx={{ flexFlow: "column", height: "100%" }}
-      >
-        <Toolbar ref={toolbarRef} sx={{ flex: "0 1 auto" }} />
-        <Box component="div" display="flex" sx={{ flex: "1 1 auto", height }}>
-          <Carousel nfts={serverSideNfts || data} />
-        </Box>
-      </Box>
-    </>
+    <Main
+      onFlick={onFlick}
+      menu={
+        <>
+          <MenuList dense disablePadding>
+            <MenuItem>
+              <DarkModeSwitch />
+              <ListItemText
+                primary={
+                  <Typography textAlign="right" flexGrow={1}>
+                    {t("menu_theme")}
+                  </Typography>
+                }
+              />
+            </MenuItem>
+          </MenuList>
+        </>
+      }
+    >
+      <Carousel nfts={serverSideNfts || data} />
+    </Main>
   );
 };

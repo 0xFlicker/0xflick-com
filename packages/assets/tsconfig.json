@@ -7,7 +7,7 @@
     "outDir": "dist" /* Specify an output folder for all emitted files. */,
     "paths": {
       "@0xflick/contracts": ["../../packages/contracts/src/index"],
-      "@0xflick/contracts/*": ["../../package/contracts/src/*"]
+      "@0xflick/models": ["../../packages/models/src/index"]
     },
     "noErrorTruncation": true,
     "noImplicitAny": true,
@@ -20,5 +20,9 @@
   },
   "include": ["**/*.ts"],
   "exclude": ["**/node_modules", "**/.*/", "dist", "build"],
-  "references": []
+  "references": [
+    {
+      "path": "../../packages/models"
+    }
+  ]
 }

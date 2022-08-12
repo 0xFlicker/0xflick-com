@@ -24,10 +24,9 @@
     "strictPropertyInitialization": false,
     "paths": {
       "@0xflick/models": ["../../packages/models/src/index"],
-      "@0xflick/models/*": ["../../packages/models/src/*"],
       "@0xflick/backend": ["../../packages/backend/src/index"],
-      "@0xflick/backend/*": ["../../packages/backend/src/*"],
-      "@0xflick/graphql": ["../../packages/backend/src/index"]
+      "@0xflick/graphql": ["../../packages/backend/src/index"],
+      "@0xflick/assets": ["../../packages/assets/src/index"]
     },
     "plugins": [
       {
@@ -48,6 +47,9 @@
     },
     {
       "path": "../../packages/graphql"
+    },
+    {
+      "path": "../../packages/assets"
     }
   ]
 }

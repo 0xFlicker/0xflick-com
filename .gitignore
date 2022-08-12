@@ -7,3 +7,4 @@ docker/sharp/origin-response-function.zip
 cdk.context.json
 yarn-error.log
 tsconfig.tsbuildinfo
+.envrc

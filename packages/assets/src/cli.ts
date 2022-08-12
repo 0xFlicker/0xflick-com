@@ -1,10 +1,12 @@
 import fs from "fs";
 import { Command, InvalidArgumentError } from "commander";
 import { utils } from "ethers";
+import { Image } from "canvas";
 import cliProgress from "cli-progress";
-import operations from "./canvas/axolotlValley/generate.js";
-import createCanvas from "./canvas/canvas.js";
-import { renderCanvas } from "./canvas/core.js";
+import operations from "./canvas/axolotlValley/generate";
+import createCanvas from "./canvas/canvas";
+import { renderCanvas } from "./canvas/core";
+import { resolve } from "path";
 
 const program = new Command();
 
@@ -22,7 +24,7 @@ program
   .command("one")
   .option("-s, --seed <seed>", "Seed for random number generation")
   .action(async ({ seed }) => {
-    const canvas = createCanvas(569, 569);
+    const canvas = await createCanvas(569, 569);
 
     let seedBytes: Uint8Array;
     if (seed) {
@@ -30,7 +32,17 @@ program
     } else {
       seedBytes = randomUint8ArrayOfLength(32);
     }
-    const { metadata, layers } = operations(seedBytes);
+    const { metadata, layers } = await operations(
+      seedBytes,
+      async (imagePath) => {
+        const imgData = await fs.promises.readFile(
+          resolve(__dirname, "..", "..", "properties", imagePath)
+        );
+        const img = new Image();
+        img.src = imgData;
+        return img;
+      }
+    );
     await renderCanvas(canvas, layers);
 
     // Save canvas image to file
@@ -75,7 +87,14 @@ program
     await fs.promises.mkdir("./generated/metadata", { recursive: true });
     for (let i = 0; i < count; i++) {
       const seedBytes: Uint8Array = randomUint8ArrayOfLength(32);
-      const { metadata, layers } = operations(seedBytes);
+      const { metadata, layers } = operations(seedBytes, async (imagePath) => {
+        const imgData = await fs.promises.readFile(
+          resolve(__dirname, "..", "..", "properties", imagePath)
+        );
+        const img = new Image();
+        img.src = imgData;
+        return img;
+      });
       await renderCanvas(canvas, layers);
       const outData = canvas.toBuffer("image/png");
 

@@ -1,4 +1,4 @@
-import { mapWeightedValuesToRange } from "../utils.js";
+import { mapWeightedValuesToRange } from "../utils";
 import {
   BackgroundColors,
   BaseColor,
@@ -11,7 +11,7 @@ import {
   IMouthType,
   ISpecialType,
   TailTypes,
-} from "./types.js";
+} from "./types";
 
 export type IWeights<AttributeType extends string> = {
   [key in AttributeType]: number;

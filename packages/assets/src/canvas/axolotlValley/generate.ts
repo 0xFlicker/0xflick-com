@@ -1,7 +1,7 @@
 import { omit } from "ramda";
-import type { IMetadata } from "@creaturenft/web3";
+import type { IMetadata } from "@0xflick/models";
 import { ILayer } from "../core";
-import { mapWeightedValuesToRange, weightSampleFromWeights } from "../utils.js";
+import { mapWeightedValuesToRange, weightSampleFromWeights } from "../utils";
 import {
   makeAccessoriesLayer,
   makeArmsLayer,
@@ -10,10 +10,11 @@ import {
   makeSpecialOrHeadThingsLayer,
   makeOutlineLayer,
   makeTailLayer,
-} from "./operations.js";
+} from "./operations";
 import { BaseColor } from "./types";
-import * as weights from "./weights.js";
+import * as weights from "./weights";
 import { utils } from "ethers";
+import { IImageFetcher } from "../cache";
 
 function chompLast256bits(inNum: number): number {
   return inNum % 256;
@@ -23,10 +24,13 @@ type IAttributeMetadata = Omit<IMetadata, "name" | "image" | "tokenId"> & {
   seed: string;
 };
 
-export default function (_seed: Uint8Array): {
+export default async function (
+  _seed: Uint8Array,
+  imageFetcher: IImageFetcher
+): Promise<{
   metadata: IAttributeMetadata;
   layers: ILayer[];
-} {
+}> {
   let seed = _seed;
   const seedChomper = (range: number) => {
     if (range != 255) {
@@ -133,32 +137,47 @@ export default function (_seed: Uint8Array): {
   return {
     metadata,
     layers: [
-      makeBackgroundLayer({ color: backgroundColor }),
-      makeBaseLayer({ color: baseColor, splitColor: secondaryColor }),
-      ...makeAccessoriesLayer({
-        accessoryType: accessory,
-        color: accessoryColor,
-      }),
-      ...makeArmsLayer({
-        armType: arm,
-        color: baseColor,
-        splitColor: secondaryColor,
-      }),
-      ...makeSpecialOrHeadThingsLayer({
-        frillType: frills,
-        faceType: face,
-        mouthType: mouth,
-        headType: head,
-        specialType: special,
-        color: baseColor,
-        splitColor: secondaryColor,
-      }),
-      makeOutlineLayer(),
-      ...makeTailLayer({
-        color: baseColor,
-        splitColor: secondaryColor,
-        tailType: tail,
-      }),
+      makeBackgroundLayer({ color: backgroundColor }, imageFetcher),
+      await makeBaseLayer(
+        { color: baseColor, splitColor: secondaryColor },
+        imageFetcher
+      ),
+      ...(await makeAccessoriesLayer(
+        {
+          accessoryType: accessory,
+          color: accessoryColor,
+        },
+        imageFetcher
+      )),
+      ...(await makeArmsLayer(
+        {
+          armType: arm,
+          color: baseColor,
+          splitColor: secondaryColor,
+        },
+        imageFetcher
+      )),
+      ...(await makeSpecialOrHeadThingsLayer(
+        {
+          frillType: frills,
+          faceType: face,
+          mouthType: mouth,
+          headType: head,
+          specialType: special,
+          color: baseColor,
+          splitColor: secondaryColor,
+        },
+        imageFetcher
+      )),
+      makeOutlineLayer(imageFetcher),
+      ...makeTailLayer(
+        {
+          color: baseColor,
+          splitColor: secondaryColor,
+          tailType: tail,
+        },
+        imageFetcher
+      ),
     ],
   };
 }
