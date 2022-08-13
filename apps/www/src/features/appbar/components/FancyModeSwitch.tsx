@@ -1,29 +1,10 @@
-import { FC, useEffect, useCallback } from "react";
+import { FC } from "react";
 import { FormControlLabel, FormGroup, Switch } from "@mui/material";
-import { useAppDispatch, useAppSelector } from "app/store";
-import {
-  selectors as appbarSelectors,
-  actions as appbarActions,
-} from "features/appbar/redux";
 
-import { ETheme, useFancyMode, useSavedTheme } from "../hooks";
+import { useFancyMode } from "../hooks";
 
 export const FancyModeSwitch: FC = () => {
-  const isFancyMode = useAppSelector(appbarSelectors.fancyMode);
-  const [savedFancyMode, setFancyMode] = useFancyMode();
-  const dispatch = useAppDispatch();
-  useEffect(() => {
-    if (savedFancyMode !== isFancyMode) {
-      dispatch(appbarActions.setFancyMode(savedFancyMode));
-    }
-  }, [dispatch, savedFancyMode, isFancyMode]);
-  const handleChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const isFancyModeSelected = event.target.checked;
-      setFancyMode(isFancyModeSelected);
-    },
-    [setFancyMode]
-  );
+  const { isFancyMode, handleChange } = useFancyMode();
   return (
     <FormGroup>
       <FormControlLabel

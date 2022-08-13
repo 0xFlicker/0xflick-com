@@ -10,30 +10,32 @@ import { selectors as appbarSelectors } from "features/appbar/redux";
 import { Main } from "./Main";
 import { Preview } from "features/axolotlValley/components/Preview";
 import { useRouter } from "next/router";
-import { BigNumber, utils } from "ethers";
+import { utils } from "ethers";
+import { useSavedTheme, useFancyMode } from "features/appbar/hooks";
 
 export const Seed: FC<{ seed: Uint8Array }> = ({ seed }) => {
   const { t } = useLocale("common");
-  const isFancyMode = useAppSelector(appbarSelectors.fancyMode);
   const router = useRouter();
   const onFlick = useCallback(() => {
     const newSeed = randomUint8ArrayOfLength(32);
     const newSeedStr = utils.hexlify(newSeed);
     router.push("/seed/[seedId]", `/seed/${newSeedStr}`);
   }, [router]);
+  const { handleChange: handleThemeChange } = useSavedTheme();
+  const { isFancyMode, handleChange: handleFancyChange } = useFancyMode();
   return (
     <Main
       onFlick={onFlick}
       menu={
         <>
           <MenuList dense disablePadding>
-            <MenuItem>
+            <MenuItem onClick={handleThemeChange}>
               <ListItemText primary={t("menu_theme")} />
               <DarkModeSwitch />
             </MenuItem>
           </MenuList>
           <MenuList dense disablePadding>
-            <MenuItem>
+            <MenuItem onClick={handleFancyChange}>
               <ListItemText primary={t("menu_fancy")} />
               <FancyModeSwitch />
             </MenuItem>

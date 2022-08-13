@@ -1,97 +1,22 @@
-const path = require("path");
-const withTM = require('next-transpile-modules')(['@0xflick/backend', '@0xflick/models', '@0xflick/graphql', '@0xflick/contracts', '@0xflick/assets']);
-const { spawnSync } = require("child_process");
-
-
-/**
- * @param {string} file
- */
-function jsonFromSecret(file) {
-  const { stdout, stderr } = spawnSync("sops", ["--decrypt", file], {
-    cwd: path.join(__dirname, "../../secrets"),
-    encoding: "utf8",
-  });
-  if (stderr) {
-    throw new Error(stderr);
+module.exports = function(...args) {
+  let original = require('./next.config.original.1660356949490.js');
+  const finalConfig = {};
+  const target = { target: 'serverless' };
+  if (typeof original === 'function' && original.constructor.name === 'AsyncFunction') {
+    // AsyncFunctions will become promises
+    original = original(...args);
   }
-  return JSON.parse(stdout);
-}
-
-const secretsJson = jsonFromSecret("deploy-secrets.json");
-const jwtJson = jsonFromSecret("jwt-secret.json");
-
-const INFURA_IPFS_AUTH = `Basic ${Buffer.from(
-  `${secretsJson.infraIpfsProjectId}:${secretsJson.infraIpfsSecret}`
-).toString("base64")}`
-
-
-if (!process.env.IPFS_API_URL) {
-  process.env.IPFS_API_URL = secretsJson.ipfsApiUrl;
-}
-const IPFS_API_URL = process.env.IPFS_API_URL;
-
-if (!process.env.IPFS_API_PROJECT) {
-  process.env.IPFS_API_PROJECT = secretsJson.infraIpfsProjectId;
-}
-const IPFS_API_PROJECT = process.env.IPFS_API_PROJECT;
-
-if (!process.env.IPFS_API_SECRET) {
-  process.env.IPFS_API_SECRET = secretsJson.infraIpfsSecret;
-}
-const IPFS_API_SECRET = process.env.IPFS_API_SECRET;
-
-if (!process.env.WEB3_RPC) {
-  throw new Error('WEB3_RPC is not defined')
-}
-const WEB3_RPC = process.env.WEB3_RPC
-
-
-if (!process.env.ENS_RPC_URL) {
-  throw new Error('ENS_RPC_URL is not defined')
-}
-const ENS_RPC_URL = process.env.ENS_RPC_URL;
-
-/** @type {import('next').NextConfig} */
-const nextConfig = withTM({
-  reactStrictMode: true,
-  env: {
-    LOG_LEVEL: "debug",
-    IPFS_API_URL,
-    IPFS_API_PROJECT,
-    IPFS_API_SECRET,
-    INFURA_IPFS_AUTH,
-    WEB3_RPC_URL: WEB3_RPC,
-    ENS_RPC_URL,
-    NEXT_PUBLIC_JWT_CLAIM_ISSUER: jwtJson.issuer,
-    JWK: jwtJson.JWK,
-    NEXT_PUBLIC_APP_NAME: "0xflick.com",
-    NEXT_PUBLIC_AXOLOTL_BASE_IMAGES: process.env.NEXT_PUBLIC_AXOLOTL_BASE_IMAGES,
-    NEXT_PUBLIC_DEFAULT_CHAIN_ID: process.env.NEXT_PUBLIC_DEFAULT_CHAIN_ID || "1",
-    NEXT_PUBLIC_DEFAULT_CHAIN_NAME: process.env.NEXT_PUBLIC_DEFAULT_CHAIN_NAME || "mainnet",
-    FLICK_ENS_DOMAIN: process.env.FLICK_ENS_DOMAIN,
-    NEXT_PUBLIC_JWT_PUBLIC_KEY: jwtJson.publicKey,
-    NEXT_PUBLIC_IMAGE_RESIZER: "https://image.0xflick.com",
-    NEXT_PUBLIC_IPFS: "https://ipfs.0xflick.com",
-    NFT_CONTRACT_ADDRESS: "0x0000000000000000000000000000000000000000",
-    NFT_COLLECTIONS_OF_INTEREST: JSON.stringify([{
-      address: "0x71eaa691b6e5d5e75a3ebb36d4f87cbfb23c87b0",
-      name: "The Odd Dystrict",
-      isEnumerable: true,
-    }, {
-      address: "0x5dfeb75abae11b138a16583e03a2be17740eaded",
-      name: "Hunnys",
-      isEnumerable: true,
-    }, {
-      address: "0xac9695369a51dad554d296885758c4af35f77e94",
-      isEnumerable: false,
-    }, {
-      address: "0xee55ea1f33196a8e4321c949d08489d1727defe0",
-      isEnumerable: true,
-    }, {
-      address: "0xbd1d2ea3127587f4ecfd271e1dadfc95320b8dea",
-      isEnumerable: true,
-    }]),
+  if (original instanceof Promise) {
+    // Special case for promises, as it's currently not supported
+    // and will just error later on
+    return original
+      .then((originalConfig) => Object.assign(finalConfig, originalConfig))
+      .then((config) => Object.assign(config, target));
+  } else if (typeof original === 'function') {
+    Object.assign(finalConfig, original(...args));
+  } else if (typeof original === 'object') {
+    Object.assign(finalConfig, original);
   }
-})
-
-module.exports = nextConfig
+  Object.assign(finalConfig, target);
+  return finalConfig;
+}

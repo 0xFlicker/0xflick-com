@@ -44,15 +44,6 @@ async function s3Exists({
   }
 }
 
-function streamToBuffer(stream: Readable): Promise<Buffer> {
-  return new Promise<Buffer>((resolve, reject) => {
-    const chunks: Buffer[] = [];
-    stream.on("data", (chunk) => chunks.push(chunk));
-    stream.once("end", () => resolve(Buffer.concat(chunks)));
-    stream.once("error", reject);
-  });
-}
-
 /**
  *
  * @param key {string}
@@ -87,7 +78,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     const seedStr = pathParameters.seed;
     console.log(`Seed: ${seedStr}`);
 
-    const s3Key = `seed/${seedStr}.jpg`;
+    const s3Key = `axolotl/${seedStr}.png`;
     const exists = await s3Exists({ key: s3Key, bucket: seedImageBucket });
 
     if (!exists) {
@@ -151,42 +142,26 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 
       // Save canvas to S3
       console.log("Fetching image from canvas");
-      const imageData = canvas.toBuffer("image/jpeg", { quality: 0.8 });
+      const imageData = canvas.toBuffer("image/png", { compressionLevel: 8 });
       console.log("Saving canvas to S3");
       await s3WriteObject(s3Key, imageData);
       console.log("Done");
       return {
-        statusCode: 200,
-        body: imageData.toString("base64"),
-        bodyEncoding: "base64",
+        statusCode: 302,
         headers: {
-          ["content-type"]: "image/jpeg",
+          ["Location"]: `https://image.0xflick.com/${s3Key}`,
         },
+        body: "",
       };
     }
     console.log(`Seed image found in S3: ${s3Key}`);
-    const response = await s3.getObject({
-      Bucket: seedImageBucket,
-      Key: s3Key,
-    });
-
-    if (!response.Body) {
-      console.log("No body");
-      return {
-        statusCode: 500,
-        body: "Internal Server Error",
-      };
-    }
     console.log("Returning image");
     return {
-      statusCode: 200,
-      body: (await streamToBuffer(response.Body as Readable)).toString(
-        "base64"
-      ),
-      bodyEncoding: "base64",
+      statusCode: 302,
       headers: {
-        ["content-type"]: "image/jpeg",
+        ["Location"]: `https://image.0xflick.com/${s3Key}`,
       },
+      body: "",
     };
   } catch (err) {
     console.error(err);

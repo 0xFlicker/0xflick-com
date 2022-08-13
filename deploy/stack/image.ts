@@ -217,9 +217,15 @@ export class ImageStack extends cdk.Stack {
     axolotlOriginPublicNextPage.grantRead(axolotlOrigin);
 
     const axolotlHttpApi = new apigateway.RestApi(this, "axolotlApi", {});
-    const axolotlResource = axolotlHttpApi.root.addResource("{seed}");
+    const axolotlResource = axolotlHttpApi.root
+      .addResource("axolotl-seed")
+      .addResource("{seed}");
     axolotlResource.addCorsPreflight({
-      allowOrigins: ["http://localhost:3000", "https://localhost:9000"],
+      allowOrigins: [
+        "http://localhost:3000",
+        "https://localhost:9000",
+        "https://0xflick.com",
+      ],
       allowMethods: ["GET", "OPTION"],
     });
     axolotlResource.addMethod(
@@ -227,6 +233,34 @@ export class ImageStack extends cdk.Stack {
       new apigateway.LambdaIntegration(axolotlOrigin)
     );
     const cf = new cloudfront.Distribution(this, "image-distribution", {
+      additionalBehaviors: {
+        "axolotl/*": {
+          origin: new origins.S3Origin(seedBucket),
+          cachePolicy: new cloudfront.CachePolicy(
+            this,
+            "axolotl-cache-policy",
+            {
+              defaultTtl: cdk.Duration.days(60),
+              minTtl: cdk.Duration.seconds(0),
+              maxTtl: cdk.Duration.days(30),
+            }
+          ),
+        },
+        "axolotl-seed/*": {
+          origin: new origins.RestApiOrigin(axolotlHttpApi),
+          cachePolicy: new cloudfront.CachePolicy(
+            this,
+            "axolotl-origin-cache-policy",
+            {
+              minTtl: cdk.Duration.hours(72),
+              queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
+              cookieBehavior: cloudfront.CacheCookieBehavior.none(),
+              headerBehavior:
+                cloudfront.CacheHeaderBehavior.allowList("origin"),
+            }
+          ),
+        },
+      },
       defaultBehavior: {
         origin: new origins.S3Origin(resizerBucket),
         allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
@@ -253,23 +287,6 @@ export class ImageStack extends cdk.Stack {
           }
         ),
       },
-      // additionalBehaviors: {
-      //   "axolotl-seed/*": {
-      //     origin: new origins.HttpOrigin(axolotlHttpApi.apiEndpoint),
-
-      //     cachePolicy: new cloudfront.CachePolicy(
-      //       this,
-      //       "axolotl-origin-cache-policy",
-      //       {
-      //         minTtl: cdk.Duration.hours(72),
-      //         queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
-      //         cookieBehavior: cloudfront.CacheCookieBehavior.none(),
-      //         headerBehavior:
-      //           cloudfront.CacheHeaderBehavior.allowList("origin"),
-      //       }
-      //     ),
-      //   },
-      // },
       logBucket: new s3.Bucket(this, "log-image-distribution"),
       domainNames: [domainName],
       certificate,

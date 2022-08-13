@@ -20,17 +20,14 @@ function chompLast256bits(inNum: number): number {
   return inNum % 256;
 }
 
-type IAttributeMetadata = Omit<IMetadata, "name" | "image" | "tokenId"> & {
+export type IAttributeMetadata = Omit<
+  IMetadata,
+  "name" | "image" | "tokenId"
+> & {
   seed: string;
 };
 
-export default async function (
-  _seed: Uint8Array,
-  imageFetcher: IImageFetcher
-): Promise<{
-  metadata: IAttributeMetadata;
-  layers: ILayer[];
-}> {
+export function generateTraits(_seed: Uint8Array) {
   let seed = _seed;
   const seedChomper = (range: number) => {
     if (range != 255) {
@@ -91,10 +88,10 @@ export default async function (
         trait_type: "Base Color",
         value: baseColor,
       },
-      {
-        trait_type: "Split Color",
-        value: split === "Split" && secondaryColor ? secondaryColor : "None",
-      },
+      ...(split === "Split"
+        ? [{ trait_type: "Secondary Color", value: secondaryColor }]
+        : []),
+      ...(special ? [{ trait_type: "Special Feature", value: special }] : []),
       {
         trait_type: "Accessory",
         value: accessory,
@@ -133,7 +130,46 @@ export default async function (
       },
     ],
   };
+  return {
+    metadata,
+    arm,
+    special,
+    accessory,
+    accessoryColor,
+    backgroundColor,
+    baseColor,
+    split,
+    secondaryColor,
+    tail,
+    face,
+    frills,
+    mouth,
+    head,
+  };
+}
 
+export default async function (
+  _seed: Uint8Array,
+  imageFetcher: IImageFetcher
+): Promise<{
+  metadata: IAttributeMetadata;
+  layers: ILayer[];
+}> {
+  const {
+    metadata,
+    arm,
+    special,
+    accessory,
+    accessoryColor,
+    backgroundColor,
+    baseColor,
+    secondaryColor,
+    tail,
+    face,
+    frills,
+    mouth,
+    head,
+  } = generateTraits(_seed);
   return {
     metadata,
     layers: [

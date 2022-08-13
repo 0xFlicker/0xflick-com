@@ -3,30 +3,13 @@ import {
   MouseEventHandler,
   MouseEvent,
   useCallback,
-  useEffect,
-  useRef,
   useState,
   ReactNode,
 } from "react";
-import {
-  AppBar as MuiAppBar,
-  Button,
-  Toolbar,
-  Typography,
-  Switch,
-  FormGroup,
-  FormControlLabel,
-  Box,
-  IconButton,
-} from "@mui/material";
+import { AppBar as MuiAppBar, Toolbar, Box, IconButton } from "@mui/material";
 import { Menu as MenuIcon } from "@mui/icons-material";
 import NextImage from "next/image";
-import { useAppDispatch, useAppSelector } from "app/store";
-import {
-  selectors as appbarSelectors,
-  actions as appbarActions,
-} from "features/appbar/redux";
-import { ETheme, useSavedTheme } from "../hooks";
+import { ETheme } from "../hooks";
 import { Connect } from "features/web3";
 import { HomeMenu } from "./HomeMenu";
 
