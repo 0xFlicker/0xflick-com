@@ -153,7 +153,7 @@ export class WwwStack extends cdk.Stack {
         path.join(__dirname, "../.layers/default-lambda")
       ),
       memorySize: 512,
-      timeout: cdk.Duration.seconds(10),
+      timeout: cdk.Duration.seconds(30),
     });
     staticAssets.grantReadWrite(defaultHandler);
     staticAssets.grantReadWrite(regenerationFunction);

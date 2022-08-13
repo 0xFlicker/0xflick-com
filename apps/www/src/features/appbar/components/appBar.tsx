@@ -30,7 +30,7 @@ export const AppBar: FC<{
       <MuiAppBar color="default">
         <Toolbar>
           <MenuIcon onClick={handleMenu} />
-          <IconButton onClick={onFlick}>
+          <IconButton onClick={onFlick} title={onFlick ? "flick me" : ""}>
             <NextImage src="/flick.png" width={40} height={40} />
           </IconButton>
           <Box sx={{ flexGrow: 1 }} component="span" />

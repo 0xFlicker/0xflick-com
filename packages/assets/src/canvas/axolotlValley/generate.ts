@@ -91,7 +91,9 @@ export function generateTraits(_seed: Uint8Array) {
       ...(split === "Split"
         ? [{ trait_type: "Secondary Color", value: secondaryColor }]
         : []),
-      ...(special ? [{ trait_type: "Special Feature", value: special }] : []),
+      ...(special !== "None"
+        ? [{ trait_type: "Special Feature", value: special }]
+        : []),
       {
         trait_type: "Accessory",
         value: accessory,

@@ -27,17 +27,17 @@ export const getStaticPaths: GetStaticPaths = async () => {
   };
 };
 
-const HomePage: NextPage<{ seed: string; metadata: IAttributeMetadata }> = ({
+const HomePage: NextPage<{ seed?: string; metadata?: IAttributeMetadata }> = ({
   seed: seedStr,
   metadata,
 }) => {
   const seed = seedStr && utils.arrayify(BigNumber.from(seedStr));
 
-  const description = `Axolotl Valley - [Seed: ${seedStr.slice(0, 8)}}] ${
-    metadata.attributes
-      ?.map(({ trait_type, value }) => `[${trait_type}]: ${value}]`)
+  const description = `Axolotl Valley - [Seed: ${seedStr?.slice(0, 8) ?? ""}] ${
+    metadata?.attributes
+      ?.map(({ trait_type, value }) => `[${trait_type}: ${value}]`)
       .join(" ") ?? ""
-  }}`;
+  }`;
   return (
     <DefaultProvider i18n={defaultI18nConfig()}>
       <Head>
