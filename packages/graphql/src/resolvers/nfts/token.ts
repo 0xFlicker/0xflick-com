@@ -6,10 +6,13 @@ import { fetchMetadata } from "./common";
 import { IERC721Metadata__factory } from "@0xflick/contracts";
 import { BigNumber } from "ethers";
 import { publicImageResizerUrl } from "../../utils/config";
+import { IChainContext } from "../chain";
 
 const logger = createLogger({
   name: "graphql/resolvers/nfts/token",
 });
+
+export type TTokenContext = IOwnedToken & IChainContext;
 
 function formatSizeParams(params: URLSearchParams) {
   let hasParams = false;
@@ -21,7 +24,7 @@ function formatSizeParams(params: URLSearchParams) {
 }
 
 export const resolveNftTokenImage: IFieldResolver<
-  IOwnedToken,
+  TTokenContext,
   TContext,
   {
     width?: number;
@@ -65,7 +68,7 @@ export const resolveNftTokenImage: IFieldResolver<
 };
 
 export const resolveImage: IFieldResolver<
-  IOwnedToken,
+  TTokenContext,
   TContext,
   {
     contract: string;
@@ -75,7 +78,8 @@ export const resolveImage: IFieldResolver<
   },
   Promise<string | null>
 > = async (nft, { contract, tokenId, width, height }, context) => {
-  const { defaultProvider: provider, urlShortenerDao } = context;
+  const { providerForChain, urlShortenerDao } = context;
+  const provider = providerForChain(nft.chainId);
   const contractMetadata = IERC721Metadata__factory.connect(contract, provider);
   const metadata = await fetchMetadata(
     logger,

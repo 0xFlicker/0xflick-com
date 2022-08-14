@@ -16,3 +16,20 @@ export interface IPaginationCursor {
   page: number;
   count: number;
 }
+
+export interface IDeployConfig {
+  infraIpfsUrl: string;
+  infraIpfsProjectId: string;
+  infraIpfsSecret: string;
+  chains: Record<
+    string,
+    {
+      name: string;
+      rpc: string;
+      nftRootCollection: string;
+      ens?: {
+        registry: string;
+      };
+    }
+  >;
+}

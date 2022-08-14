@@ -57,6 +57,22 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.OwnerPausable__factory>;
     getContractFactory(
+      name: "BaseRegistrarImplementation",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.BaseRegistrarImplementation__factory>;
+    getContractFactory(
+      name: "IBaseRegistrar",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IBaseRegistrar__factory>;
+    getContractFactory(
+      name: "ENS",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ENS__factory>;
+    getContractFactory(
+      name: "ENSRegistry",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ENSRegistry__factory>;
+    getContractFactory(
       name: "AccessControl",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.AccessControl__factory>;
@@ -101,6 +117,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC20__factory>;
     getContractFactory(
+      name: "ERC721",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ERC721__factory>;
+    getContractFactory(
       name: "IERC721Enumerable",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC721Enumerable__factory>;
@@ -129,6 +149,14 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Enumerator__factory>;
     getContractFactory(
+      name: "FlickENS",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.FlickENS__factory>;
+    getContractFactory(
+      name: "ITokenURIGenerator",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ITokenURIGenerator__factory>;
+    getContractFactory(
       name: "IERC721A",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC721A__factory>;
@@ -141,6 +169,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC721Enumerator__factory>;
     getContractFactory(
+      name: "IExtendedResolver",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IExtendedResolver__factory>;
+    getContractFactory(
       name: "ITokenURIGenerator",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ITokenURIGenerator__factory>;
@@ -148,6 +180,14 @@ declare module "hardhat/types/runtime" {
       name: "NFT",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.NFT__factory>;
+    getContractFactory(
+      name: "IResolverService",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IResolverService__factory>;
+    getContractFactory(
+      name: "OffchainResolver",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.OffchainResolver__factory>;
     getContractFactory(
       name: "ERC721A",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -221,6 +261,26 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.OwnerPausable>;
     getContractAt(
+      name: "BaseRegistrarImplementation",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.BaseRegistrarImplementation>;
+    getContractAt(
+      name: "IBaseRegistrar",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IBaseRegistrar>;
+    getContractAt(
+      name: "ENS",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ENS>;
+    getContractAt(
+      name: "ENSRegistry",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ENSRegistry>;
+    getContractAt(
       name: "AccessControl",
       address: string,
       signer?: ethers.Signer
@@ -276,6 +336,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IERC20>;
     getContractAt(
+      name: "ERC721",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ERC721>;
+    getContractAt(
       name: "IERC721Enumerable",
       address: string,
       signer?: ethers.Signer
@@ -311,6 +376,16 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.Enumerator>;
     getContractAt(
+      name: "FlickENS",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.FlickENS>;
+    getContractAt(
+      name: "ITokenURIGenerator",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ITokenURIGenerator>;
+    getContractAt(
       name: "IERC721A",
       address: string,
       signer?: ethers.Signer
@@ -326,6 +401,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IERC721Enumerator>;
     getContractAt(
+      name: "IExtendedResolver",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IExtendedResolver>;
+    getContractAt(
       name: "ITokenURIGenerator",
       address: string,
       signer?: ethers.Signer
@@ -335,6 +415,16 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.NFT>;
+    getContractAt(
+      name: "IResolverService",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IResolverService>;
+    getContractAt(
+      name: "OffchainResolver",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.OffchainResolver>;
     getContractAt(
       name: "ERC721A",
       address: string,

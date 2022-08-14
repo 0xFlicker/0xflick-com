@@ -194,6 +194,9 @@ function useAuthContext() {
               roles: authUser.roleIds,
             })
           );
+        } else {
+          console.warn(`Unable to parse token for ${address}`);
+          dispatch(authActions.userSignInError());
         }
       } catch (err) {
         console.error(err);

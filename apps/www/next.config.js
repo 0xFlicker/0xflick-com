@@ -67,7 +67,6 @@ const nextConfig = withTM({
     WEB3_RPC_URL: WEB3_RPC,
     ENS_RPC_URL,
     NEXT_PUBLIC_JWT_CLAIM_ISSUER: jwtJson.issuer,
-    JWK: jwtJson.JWK,
     NEXT_PUBLIC_APP_NAME: "0xflick.com",
     NEXT_PUBLIC_AXOLOTL_BASE_IMAGES: process.env.NEXT_PUBLIC_AXOLOTL_BASE_IMAGES,
     NEXT_PUBLIC_DEFAULT_CHAIN_ID: process.env.NEXT_PUBLIC_DEFAULT_CHAIN_ID || "1",
@@ -76,7 +75,7 @@ const nextConfig = withTM({
     NEXT_PUBLIC_JWT_PUBLIC_KEY: jwtJson.publicKey,
     NEXT_PUBLIC_IMAGE_RESIZER: "https://image.0xflick.com",
     NEXT_PUBLIC_IPFS: "https://ipfs.0xflick.com",
-    NFT_CONTRACT_ADDRESS: "0x0000000000000000000000000000000000000000",
+    NFT_CONTRACT_ADDRESS: "0x73a5fb8b2faaaa7a058349cbc9563325826776bf",
     NFT_COLLECTIONS_OF_INTEREST: JSON.stringify([{
       address: "0x71eaa691b6e5d5e75a3ebb36d4f87cbfb23c87b0",
       name: "The Odd Dystrict",

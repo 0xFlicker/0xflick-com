@@ -1,10 +1,18 @@
-import { createJwtToken, decryptJweToken } from "@0xflick/backend";
+import {
+  createJwtToken,
+  createLogger,
+  decryptJweToken,
+} from "@0xflick/backend";
 import { authMessage, IUser } from "@0xflick/models";
 import { IFieldResolver } from "@graphql-tools/utils";
 import { utils } from "ethers";
 import { TContext } from "../../context";
 import { AuthError } from "../../errors/auth";
 import { TGraphqlResolver } from "../../types";
+
+const logger = createLogger({
+  name: "graphql/resolvers/auth/signIn",
+});
 
 export interface IGraphqlWeb3LoginUser {
   address: string;
@@ -63,6 +71,7 @@ export const mutations = {
     } else {
       await userDao.create({ address });
     }
+    logger.info(`Logging in user ${address}`);
     setToken(token);
     return {
       address,

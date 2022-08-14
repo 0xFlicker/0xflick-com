@@ -21,9 +21,6 @@ export const typeSchema = gql`
   ${typeSchemaPermissions}
 `;
 
-export const querySchema = `
-`;
-
 export const mutationSchema = `
 ${mutationSchemaNonce}
 ${mutationSchemaSignIn}
@@ -34,8 +31,6 @@ export const resolvers = {
   ...resolversNonce,
   ...resolversWeb3Users,
 };
-
-export const queries = {};
 
 export const mutations = {
   ...mutationNonce,

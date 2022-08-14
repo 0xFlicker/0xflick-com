@@ -1,10 +1,10 @@
 import { IMetadata } from "./metadata";
 
-export interface IOwnedToken {
+export type IOwnedToken = {
   tokenId: number;
   metadata: IMetadata;
   resizedImage: string;
-}
+};
 export interface INfts {
   collectionName: string;
   contractAddress: string;

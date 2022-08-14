@@ -24,20 +24,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const enumerator = await deploy("Enumerator", {
       from: deployer,
       args: [],
-      waitConfirmations: 5
+      waitConfirmations: 5,
     });
     contractAddress = enumerator.address;
   }
-
-  try {
-    await run("verify:verify", {
-      address: contractAddress,
-      constructorArguments: [],
-      contract: "contracts/Enumerator.sol:Enumerator",
-    });
-  } catch (err: any) {
-    console.log(`Failed to verify: ${err.message}`);
-  }
 };
 export default func;
-func.tags = ["Enumerator"];
+func.tags = ["test"];

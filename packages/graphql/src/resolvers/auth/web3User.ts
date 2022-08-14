@@ -1,8 +1,8 @@
 import { IFieldResolver } from "@graphql-tools/utils";
 import { IUser } from "@0xflick/models";
 import { TContext } from "../../context";
-import { IGraphqlPermission, IGraphqlRole } from "./permissions";
 import { TGraphqlResolver } from "../../types";
+import { IGraphqlRole, IGraphqlPermission } from "../admin/roles";
 
 export interface IGraphqlWeb3User {
   address: string;

@@ -214,14 +214,14 @@ contract NFT is
 
   /**
     @notice Returns the length of time, in seconds, that the Token has
-    nested.
+    staked.
     @dev Staking is tied to a specific Token, not to the owner, so it doesn't
     reset upon sale.
     @return staking Whether the Token is currently staking. MAY be true with
     zero current staking if in the same block as staking began.
     @return current Zero if not currently staking, otherwise the length of time
     since the most recent staking began.
-    @return total Total period of time for which the Token has nested across
+    @return total Total period of time for which the Token has staked across
     its life, including the current period.
      */
   function stakingPeriod(uint256 tokenId)
@@ -342,7 +342,7 @@ contract NFT is
   /**
     @notice Admin-only ability to expel a Token from the nest.
     @dev As most sales listings use off-chain signatures it's impossible to
-    detect someone who has nested and then deliberately undercuts the floor
+    detect someone who has staked and then deliberately undercuts the floor
     price in the knowledge that the sale can't proceed. This function allows for
     monitoring of such practices and expulsion if abuse is detected, allowing
     the undercutting token to be sold on the open market. Since OpenSea uses
@@ -351,7 +351,7 @@ contract NFT is
     Tokens.
      */
   function expelFromStaking(uint256 tokenId) external onlyRole(EXPULSION_ROLE) {
-    require(stakingStarted[tokenId] != 0, "SOA: not nested");
+    require(stakingStarted[tokenId] != 0, "SOA: not staked");
     stakingTotal[tokenId] += block.timestamp - stakingStarted[tokenId];
     stakingStarted[tokenId] = 0;
     emit Unstaking(tokenId);

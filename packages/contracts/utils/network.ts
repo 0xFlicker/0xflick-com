@@ -5,6 +5,29 @@ import {
   NetworksUserConfig,
 } from "hardhat/types";
 
+export function ens_signer(networkName: string): string {
+  if (networkName) {
+    const name =
+      process.env[`ENS_RESOLVER_SIGNER_${networkName.toUpperCase()}`];
+    if (name && name !== "") {
+      console.log("Using ens signer from env: ", name);
+      return name;
+    }
+  }
+  return "TEST";
+}
+
+export function ens_gateway(networkName: string): string {
+  if (networkName) {
+    const name = process.env[`ENS_GATEWAY_${networkName.toUpperCase()}`];
+    if (name && name !== "") {
+      console.log("Using gateway from env: ", name);
+      return name;
+    }
+  }
+  return "TEST";
+}
+
 export function nft_name(networkName: string): string {
   if (networkName) {
     const name = process.env[`NFT_NAME_${networkName.toUpperCase()}`];

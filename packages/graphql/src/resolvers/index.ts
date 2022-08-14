@@ -2,16 +2,29 @@ import { gql } from "apollo-server-core";
 import { resolveFlick, resolveImage, resolveNftTokenImage } from "./nfts";
 import {
   typeSchema as typeSchemaAuth,
-  queries as queriesAuth,
-  querySchema as querySchemaAuth,
   resolvers as resolversAuth,
   mutationSchema as mutationSchemaAuth,
   mutations as mutationsAuth,
 } from "./auth";
+import {
+  typeSchema as typeSchemaChain,
+  querySchema as querySchemaChain,
+  resolvers as resolversChain,
+  queryResolvers as queryResolversChain,
+} from "./chain";
+import {
+  typeSchema as typeSchemaAdmin,
+  mutationSchema as mutationSchemaAdmin,
+  mutationResolves as mutationResolvesAdmin,
+  querySchema as querySchemaAdmin,
+  queryResolvers as queryResolversAdmin,
+} from "./admin";
 import { TGraphqlResolver } from "../types";
 
 export const typeDefs = gql`
+  ${typeSchemaChain}
   ${typeSchemaAuth}
+  ${typeSchemaAdmin}
   type MetadataProperties {
     name: String!
     value: String!
@@ -55,27 +68,28 @@ export const typeDefs = gql`
   }
 
   type Query {
-    flick: Flick
-    image(contract: String!, tokenId: Int!, width: Int, height: Int): String
-    ${querySchemaAuth}
+    ${querySchemaChain}
+    ${querySchemaAdmin}
   }
 
   type Mutation {
     ${mutationSchemaAuth}
+    ${mutationSchemaAdmin}
   }
 `;
 
 export const resolvers = {
   Query: {
-    flick: resolveFlick,
-    image: resolveImage,
-    ...queriesAuth,
+    ...queryResolversChain,
+    ...queryResolversAdmin,
   },
   Mutation: {
     ...mutationsAuth,
+    ...mutationResolvesAdmin,
   },
   NftToken: {
     image: resolveNftTokenImage,
   },
   ...resolversAuth,
+  ...resolversChain,
 } as TGraphqlResolver;
