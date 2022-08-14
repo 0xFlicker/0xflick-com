@@ -23,6 +23,7 @@ interface IResolverService {
 contract OffchainResolver is IExtendedResolver, ERC165 {
   string public url;
   mapping(address => bool) public signers;
+  address public parentContract;
 
   event NewSigners(address[] signers);
   error OffchainLookup(
@@ -33,7 +34,12 @@ contract OffchainResolver is IExtendedResolver, ERC165 {
     bytes extraData
   );
 
-  constructor(string memory _url, address[] memory _signers) {
+  constructor(
+    address _parentContract,
+    string memory _url,
+    address[] memory _signers
+  ) {
+    parentContract = _parentContract;
     url = _url;
     for (uint256 i = 0; i < _signers.length; i++) {
       signers[_signers[i]] = true;
@@ -71,7 +77,7 @@ contract OffchainResolver is IExtendedResolver, ERC165 {
     string[] memory urls = new string[](1);
     urls[0] = url;
     revert OffchainLookup(
-      address(this),
+      parentContract,
       urls,
       callData,
       OffchainResolver.resolveWithProof.selector,
@@ -88,6 +94,7 @@ contract OffchainResolver is IExtendedResolver, ERC165 {
     returns (bytes memory)
   {
     (address signer, bytes memory result) = SignatureVerifier.verify(
+      parentContract,
       extraData,
       response
     );

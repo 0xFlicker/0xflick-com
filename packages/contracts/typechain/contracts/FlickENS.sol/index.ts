@@ -2,4 +2,5 @@
 /* tslint:disable */
 /* eslint-disable */
 export type { FlickENS } from "./FlickENS";
+export type { IExtendedResolverWithProof } from "./IExtendedResolverWithProof";
 export type { ITokenURIGenerator } from "./ITokenURIGenerator";

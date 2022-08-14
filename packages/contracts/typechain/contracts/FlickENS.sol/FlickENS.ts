@@ -90,6 +90,9 @@ export interface FlickENSInterface extends utils.Interface {
     "renderingContract()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "renounceRole(bytes32,address)": FunctionFragment;
+    "resolve(bytes,bytes)": FunctionFragment;
+    "resolveWithProof(bytes,bytes)": FunctionFragment;
+    "resolverProxy()": FunctionFragment;
     "revokeRole(bytes32,address)": FunctionFragment;
     "royaltyInfo(uint256,uint256)": FunctionFragment;
     "safeTransferFrom(address,address,uint256)": FunctionFragment;
@@ -102,6 +105,7 @@ export interface FlickENSInterface extends utils.Interface {
     "setMaxMint(uint256)": FunctionFragment;
     "setMaxSupply(uint256)": FunctionFragment;
     "setMintActive(bool)": FunctionFragment;
+    "setOffchainResolver(address)": FunctionFragment;
     "setPreSaleMaxMintPerAccount(uint256)": FunctionFragment;
     "setPresaleActive(bool)": FunctionFragment;
     "setRenderingContract(address)": FunctionFragment;
@@ -176,6 +180,9 @@ export interface FlickENSInterface extends utils.Interface {
       | "renderingContract"
       | "renounceOwnership"
       | "renounceRole"
+      | "resolve"
+      | "resolveWithProof"
+      | "resolverProxy"
       | "revokeRole"
       | "royaltyInfo"
       | "safeTransferFrom(address,address,uint256)"
@@ -188,6 +195,7 @@ export interface FlickENSInterface extends utils.Interface {
       | "setMaxMint"
       | "setMaxSupply"
       | "setMintActive"
+      | "setOffchainResolver"
       | "setPreSaleMaxMintPerAccount"
       | "setPresaleActive"
       | "setRenderingContract"
@@ -383,6 +391,18 @@ export interface FlickENSInterface extends utils.Interface {
     values: [PromiseOrValue<BytesLike>, PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
+    functionFragment: "resolve",
+    values: [PromiseOrValue<BytesLike>, PromiseOrValue<BytesLike>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "resolveWithProof",
+    values: [PromiseOrValue<BytesLike>, PromiseOrValue<BytesLike>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "resolverProxy",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "revokeRole",
     values: [PromiseOrValue<BytesLike>, PromiseOrValue<string>]
   ): string;
@@ -442,6 +462,10 @@ export interface FlickENSInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "setMintActive",
     values: [PromiseOrValue<boolean>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setOffchainResolver",
+    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "setPreSaleMaxMintPerAccount",
@@ -672,6 +696,15 @@ export interface FlickENSInterface extends utils.Interface {
     functionFragment: "renounceRole",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "resolve", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "resolveWithProof",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "resolverProxy",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "revokeRole", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "royaltyInfo",
@@ -709,6 +742,10 @@ export interface FlickENSInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "setMintActive",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setOffchainResolver",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -1237,6 +1274,20 @@ export interface FlickENS extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    resolve(
+      name: PromiseOrValue<BytesLike>,
+      data: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<[string]>;
+
+    resolveWithProof(
+      response: PromiseOrValue<BytesLike>,
+      extraData: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<[string]>;
+
+    resolverProxy(overrides?: CallOverrides): Promise<[string]>;
+
     revokeRole(
       role: PromiseOrValue<BytesLike>,
       account: PromiseOrValue<string>,
@@ -1304,6 +1355,11 @@ export interface FlickENS extends BaseContract {
 
     setMintActive(
       _newMintActive: PromiseOrValue<boolean>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    setOffchainResolver(
+      _resolverProxy: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -1624,6 +1680,20 @@ export interface FlickENS extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  resolve(
+    name: PromiseOrValue<BytesLike>,
+    data: PromiseOrValue<BytesLike>,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
+  resolveWithProof(
+    response: PromiseOrValue<BytesLike>,
+    extraData: PromiseOrValue<BytesLike>,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
+  resolverProxy(overrides?: CallOverrides): Promise<string>;
+
   revokeRole(
     role: PromiseOrValue<BytesLike>,
     account: PromiseOrValue<string>,
@@ -1691,6 +1761,11 @@ export interface FlickENS extends BaseContract {
 
   setMintActive(
     _newMintActive: PromiseOrValue<boolean>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  setOffchainResolver(
+    _resolverProxy: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -2007,6 +2082,20 @@ export interface FlickENS extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    resolve(
+      name: PromiseOrValue<BytesLike>,
+      data: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    resolveWithProof(
+      response: PromiseOrValue<BytesLike>,
+      extraData: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    resolverProxy(overrides?: CallOverrides): Promise<string>;
+
     revokeRole(
       role: PromiseOrValue<BytesLike>,
       account: PromiseOrValue<string>,
@@ -2074,6 +2163,11 @@ export interface FlickENS extends BaseContract {
 
     setMintActive(
       _newMintActive: PromiseOrValue<boolean>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setOffchainResolver(
+      _resolverProxy: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -2528,6 +2622,20 @@ export interface FlickENS extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    resolve(
+      name: PromiseOrValue<BytesLike>,
+      data: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    resolveWithProof(
+      response: PromiseOrValue<BytesLike>,
+      extraData: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    resolverProxy(overrides?: CallOverrides): Promise<BigNumber>;
+
     revokeRole(
       role: PromiseOrValue<BytesLike>,
       account: PromiseOrValue<string>,
@@ -2595,6 +2703,11 @@ export interface FlickENS extends BaseContract {
 
     setMintActive(
       _newMintActive: PromiseOrValue<boolean>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    setOffchainResolver(
+      _resolverProxy: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -2914,6 +3027,20 @@ export interface FlickENS extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
+    resolve(
+      name: PromiseOrValue<BytesLike>,
+      data: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    resolveWithProof(
+      response: PromiseOrValue<BytesLike>,
+      extraData: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    resolverProxy(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     revokeRole(
       role: PromiseOrValue<BytesLike>,
       account: PromiseOrValue<string>,
@@ -2981,6 +3108,11 @@ export interface FlickENS extends BaseContract {
 
     setMintActive(
       _newMintActive: PromiseOrValue<boolean>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setOffchainResolver(
+      _resolverProxy: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

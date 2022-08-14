@@ -13,8 +13,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deploy } = deployments;
 
   const { deployer, signer, beneficiary } = await getNamedAccounts();
-
-  console.log(`Deploying to ${network.name} with ${deployer}`);
+  
   const args = [
     nft_name(network.name),
     nft_symbol(network.name),
@@ -26,17 +25,22 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     beneficiary,
   ];
 
-  console.log(`Deploying NFT with arguments: ${JSON.stringify(args)}`);
-
   const deployed = await deploy("FlickENS", {
     from: deployer,
     args,
+    waitConfirmations: 5,
     log: true,
   });
   const ownerSigner = await ethers.getSigner(deployer);
   const contract = FlickENS__factory.connect(deployed.address, ownerSigner);
   if (!(await contract.isSigner(signer))) {
     await contract.addSigner(signer);
+  }
+  if (deployed.newlyDeployed) {
+    await run("verify:verify", {
+      address: deployed.address,
+      constructorArguments: args,
+    });
   }
 };
 export default func;

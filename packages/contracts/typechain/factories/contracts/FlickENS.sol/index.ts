@@ -2,4 +2,5 @@
 /* tslint:disable */
 /* eslint-disable */
 export { FlickENS__factory } from "./FlickENS__factory";
+export { IExtendedResolverWithProof__factory } from "./IExtendedResolverWithProof__factory";
 export { ITokenURIGenerator__factory } from "./ITokenURIGenerator__factory";

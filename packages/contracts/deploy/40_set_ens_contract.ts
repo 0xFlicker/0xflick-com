@@ -3,7 +3,6 @@ import { DeployFunction } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import {
   ENSRegistry__factory,
-  OffchainResolver__factory,
   BaseRegistrarImplementation__factory,
 } from "../typechain";
 
@@ -22,23 +21,12 @@ const func: DeployFunction = async ({
     baseRegistrarDeployment.address,
     signer
   );
-  console.log(
-    `Reusing existing BaseRegistrar at ${baseRegistrarDeployment.address}`
-  );
   const registryDeployment = await deployments.get("ENSRegistry");
-  console.log(`Reusing existing ENSRegistry at ${registryDeployment.address}`);
   const registry = ENSRegistry__factory.connect(
     registryDeployment.address,
     signer
   );
-  const resolverDeployment = await deployments.get("OffchainResolver");
-  console.log(
-    `Reusing existing OffchainResolver at ${resolverDeployment.address}`
-  );
-  const resolver = OffchainResolver__factory.connect(
-    resolverDeployment.address,
-    signer
-  );
+  const resolverDeployment = await deployments.get("FlickENS");
 
   if (
     (await registry.owner(
@@ -78,12 +66,20 @@ const func: DeployFunction = async ({
     { from: deployer }
   );
   console.log(`Setting the registrar`);
-  await registry.setResolver(utils.namehash("cmdrnft.eth"), resolver.address, {
-    from: deployer,
-  });
-  await registry.setResolver(utils.namehash("0xflick.eth"), resolver.address, {
-    from: deployer,
-  });
+  await registry.setResolver(
+    utils.namehash("cmdrnft.eth"),
+    resolverDeployment.address,
+    {
+      from: deployer,
+    }
+  );
+  await registry.setResolver(
+    utils.namehash("0xflick.eth"),
+    resolverDeployment.address,
+    {
+      from: deployer,
+    }
+  );
 };
 export default func;
 func.tags = ["test"];

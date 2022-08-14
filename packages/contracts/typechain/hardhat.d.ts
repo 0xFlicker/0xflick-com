@@ -153,6 +153,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.FlickENS__factory>;
     getContractFactory(
+      name: "IExtendedResolverWithProof",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IExtendedResolverWithProof__factory>;
+    getContractFactory(
       name: "ITokenURIGenerator",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ITokenURIGenerator__factory>;
@@ -380,6 +384,11 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.FlickENS>;
+    getContractAt(
+      name: "IExtendedResolverWithProof",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IExtendedResolverWithProof>;
     getContractAt(
       name: "ITokenURIGenerator",
       address: string,

@@ -28,6 +28,7 @@ import type {
 export interface OffchainResolverInterface extends utils.Interface {
   functions: {
     "makeSignatureHash(address,uint64,bytes,bytes)": FunctionFragment;
+    "parentContract()": FunctionFragment;
     "resolve(bytes,bytes)": FunctionFragment;
     "resolveWithProof(bytes,bytes)": FunctionFragment;
     "signers(address)": FunctionFragment;
@@ -38,6 +39,7 @@ export interface OffchainResolverInterface extends utils.Interface {
   getFunction(
     nameOrSignatureOrTopic:
       | "makeSignatureHash"
+      | "parentContract"
       | "resolve"
       | "resolveWithProof"
       | "signers"
@@ -53,6 +55,10 @@ export interface OffchainResolverInterface extends utils.Interface {
       PromiseOrValue<BytesLike>,
       PromiseOrValue<BytesLike>
     ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "parentContract",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "resolve",
@@ -74,6 +80,10 @@ export interface OffchainResolverInterface extends utils.Interface {
 
   decodeFunctionResult(
     functionFragment: "makeSignatureHash",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "parentContract",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "resolve", data: BytesLike): Result;
@@ -137,6 +147,8 @@ export interface OffchainResolver extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[string]>;
 
+    parentContract(overrides?: CallOverrides): Promise<[string]>;
+
     resolve(
       name: PromiseOrValue<BytesLike>,
       data: PromiseOrValue<BytesLike>,
@@ -170,6 +182,8 @@ export interface OffchainResolver extends BaseContract {
     overrides?: CallOverrides
   ): Promise<string>;
 
+  parentContract(overrides?: CallOverrides): Promise<string>;
+
   resolve(
     name: PromiseOrValue<BytesLike>,
     data: PromiseOrValue<BytesLike>,
@@ -202,6 +216,8 @@ export interface OffchainResolver extends BaseContract {
       result: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<string>;
+
+    parentContract(overrides?: CallOverrides): Promise<string>;
 
     resolve(
       name: PromiseOrValue<BytesLike>,
@@ -242,6 +258,8 @@ export interface OffchainResolver extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    parentContract(overrides?: CallOverrides): Promise<BigNumber>;
+
     resolve(
       name: PromiseOrValue<BytesLike>,
       data: PromiseOrValue<BytesLike>,
@@ -275,6 +293,8 @@ export interface OffchainResolver extends BaseContract {
       result: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
+
+    parentContract(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     resolve(
       name: PromiseOrValue<BytesLike>,

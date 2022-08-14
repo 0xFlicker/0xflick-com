@@ -82,6 +82,8 @@ export type { Enumerator } from "./contracts/Enumerator";
 export { Enumerator__factory } from "./factories/contracts/Enumerator__factory";
 export type { FlickENS } from "./contracts/FlickENS.sol/FlickENS";
 export { FlickENS__factory } from "./factories/contracts/FlickENS.sol/FlickENS__factory";
+export type { IExtendedResolverWithProof } from "./contracts/FlickENS.sol/IExtendedResolverWithProof";
+export { IExtendedResolverWithProof__factory } from "./factories/contracts/FlickENS.sol/IExtendedResolverWithProof__factory";
 export type { ITokenURIGenerator } from "./contracts/FlickENS.sol/ITokenURIGenerator";
 export { ITokenURIGenerator__factory } from "./factories/contracts/FlickENS.sol/ITokenURIGenerator__factory";
 export type { IERC721A } from "./contracts/IERC721A";

@@ -16,9 +16,22 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/interfaces/IERC165.sol";
 import "erc721a/contracts/extensions/IERC721AQueryable.sol";
+import "./IExtendedResolver.sol";
 
 interface ITokenURIGenerator {
   function tokenURI(uint256 tokenId) external view returns (string memory);
+}
+
+interface IExtendedResolverWithProof {
+  function resolve(bytes memory name, bytes memory data)
+    external
+    view
+    returns (bytes memory);
+
+  function resolveWithProof(bytes calldata response, bytes calldata extraData)
+    external
+    view
+    returns (bytes memory);
 }
 
 contract FlickENS is
@@ -37,6 +50,8 @@ contract FlickENS is
 
   // FlickENS provides additional functionality to ENS NFTs. This stores the contractAddres of ENS
   address public ensTokenAddress;
+  // Proxy to another resolver, to allow it to be swapped out
+  IExtendedResolverWithProof public resolverProxy;
   // Mapping of FlickENS tokens to ENS tokens
   mapping(uint256 => uint256) public flickToEns;
 
@@ -75,6 +90,31 @@ contract FlickENS is
     _setDefaultRoyalty(royaltyReceiver, 500);
     _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     signers.add(signer);
+  }
+
+  /**
+   * Resolves a name, as specified by ENSIP 10.
+   * @param name The DNS-encoded name to resolve.
+   * @param data The ABI encoded data for the underlying resolution function (Eg, addr(bytes32), text(bytes32,string), etc).
+   * @return The return data, ABI encoded identically to the underlying function.
+   */
+  function resolve(bytes calldata name, bytes calldata data)
+    external
+    view
+    returns (bytes memory)
+  {
+    return resolverProxy.resolve(name, data);
+  }
+
+  /**
+   * Callback used by CCIP read compatible clients to verify and parse the response.
+   */
+  function resolveWithProof(bytes calldata response, bytes calldata extraData)
+    external
+    view
+    returns (bytes memory)
+  {
+    return resolverProxy.resolveWithProof(response, extraData);
   }
 
   /**
@@ -443,7 +483,9 @@ contract FlickENS is
     override(ERC721ACommon, ERC2981, AccessControlEnumerable, IERC165)
     returns (bool)
   {
-    return super.supportsInterface(interfaceId);
+    return
+      interfaceId == type(IExtendedResolver).interfaceId ||
+      super.supportsInterface(interfaceId);
   }
 
   /**
@@ -630,5 +672,9 @@ contract FlickENS is
 
   function isSigner(address signer) public view returns (bool) {
     return signers.contains(signer);
+  }
+
+  function setOffchainResolver(address _resolverProxy) public onlyOwner {
+    resolverProxy = IExtendedResolverWithProof(_resolverProxy);
   }
 }
