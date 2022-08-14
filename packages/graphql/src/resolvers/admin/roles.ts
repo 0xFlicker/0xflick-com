@@ -1,18 +1,17 @@
 import { gql } from "apollo-server-core";
-import { v4 as createUuid } from "uuid";
 import {
   defaultAdminStrategyAll,
   EActions,
   EResource,
-  IRolePermission,
   isActionOnResource,
+  IUser,
   verifyJwtToken,
 } from "@0xflick/models";
 import { IFieldResolver } from "@graphql-tools/utils";
 import { TContext } from "../../context";
-import { AuthError } from "../../errors/auth";
-import { defaultChainId } from "@0xflick/backend";
 import { RoleError } from "../../errors/roles";
+import { bindUserToRole, createRole } from "../../controllers/admin/roles";
+import { OperationTypeNode } from "graphql";
 
 export interface IGraphqlPermission {
   action: EActions;
@@ -61,6 +60,7 @@ export const typeSchema = gql`
     id: ID!
     name: String!
     permissions: [Permission!]!
+    bindToUser(userAddress: String!): Web3User!
   }
 `;
 
@@ -69,9 +69,28 @@ export const querySchema = `
 `;
 
 export const mutationSchema = `
+  role(id: ID!): Role!
   createRole(name: String!, permissions: [PermissionInput!]!): Role!
-  bindRoleToUser(roleId: ID!, address: ID!): Boolean!
+  bindRoleToUser(roleId: ID!, userAddress: ID!): Boolean!
 `;
+
+const roleBindToUserResolver: IFieldResolver<
+  IGraphqlRole,
+  TContext,
+  { userAddress: string },
+  Promise<IUser>
+> = async ({ id: roleId }, { userAddress }, context, info) => {
+  return await bindUserToRole(context, info, {
+    userAddress,
+    roleId,
+  });
+};
+
+export const resolvers = {
+  Role: {
+    bindToUser: roleBindToUserResolver,
+  },
+};
 
 const roleResolver: IFieldResolver<
   void,
@@ -95,116 +114,32 @@ export const queryResolvers = {
   role: roleResolver,
 };
 
-const canPerformCreateRoleAction = defaultAdminStrategyAll(
-  EResource.PERMISSION,
-  isActionOnResource({
-    action: EActions.CREATE,
-    resource: EResource.ROLE,
-  })
-);
-
 const createRoleResolver: IFieldResolver<
   void,
   TContext,
   { name: string; permissions: IGraphqlPermission[] },
   Promise<IGraphqlRole>
-> = async (
-  _,
-  { name, permissions },
-  { config, rolesDao, rolePermissionsDao, getToken, ownerForChain }
-) => {
-  const token = getToken();
-  if (!token) {
-    throw new AuthError("Not authenticated", "NOT_AUTHENTICATED");
-  }
-  const user = await verifyJwtToken(token);
-  if (!user) {
-    throw new AuthError("Invalid token", "NOT_AUTHENTICATED");
-  }
-
-  const permissionsFromDb = await rolePermissionsDao.allowedActionsForRoleIds(
-    user.roleIds
-  );
-
-  let isAuthorized = canPerformCreateRoleAction(permissionsFromDb);
-  const contractOwner = await ownerForChain(Number(defaultChainId()));
-  if (!isAuthorized && contractOwner === user.address) {
-    isAuthorized = true;
-  }
-  if (!isAuthorized) {
-    throw new AuthError("Forbidden", "NOT_AUTHORIZED");
-  }
-  const id = createUuid();
-  await rolesDao.create({
-    id,
-    name,
-  });
-  await Promise.all(
-    permissions.map(async (permission) => {
-      await rolePermissionsDao.bind({
-        roleId: id,
-        ...permission,
-      });
-    })
-  );
-  return {
-    id,
+> = async (_, { name, permissions }, context, info) => {
+  return await createRole(context, info, {
     name,
     permissions,
-  };
+  });
 };
 
-const canPerformBindRoleToUserAction = defaultAdminStrategyAll(
-  EResource.PERMISSION,
-  isActionOnResource({
-    action: EActions.UPDATE,
-    resource: EResource.ROLE,
-  })
-);
 const bindRoleToUserResolver: IFieldResolver<
   void,
   TContext,
-  { roleId: string; address: string },
-  Promise<boolean>
-> = async (
-  _,
-  { roleId, address },
-  { config, userRolesDao, userDao, rolePermissionsDao, getToken, ownerForChain }
-) => {
-  const token = getToken();
-  if (!token) {
-    throw new AuthError("Not authenticated", "NOT_AUTHENTICATED");
-  }
-  const user = await verifyJwtToken(token);
-  if (!user) {
-    throw new AuthError("Invalid token", "NOT_AUTHENTICATED");
-  }
-
-  const permissionsFromDb = await rolePermissionsDao.allowedActionsForRoleIds(
-    user.roleIds
-  );
-
-  let isAuthorized = canPerformBindRoleToUserAction(permissionsFromDb);
-  const contractOwner = await ownerForChain(Number(defaultChainId()));
-  if (!isAuthorized && contractOwner === user.address) {
-    isAuthorized = true;
-  }
-  if (!isAuthorized) {
-    throw new AuthError("Forbidden", "NOT_AUTHORIZED");
-  }
-  const userFromDb = await userDao.getUser(address);
-  const userModel =
-    userFromDb ??
-    (await userDao.create({
-      address,
-    }));
-
-  await userRolesDao.bind(userModel.address, roleId);
-
-  return true;
+  { roleId: string; userAddress: string },
+  Promise<IUser>
+> = async (_, { roleId, userAddress }, context, info) => {
+  return await bindUserToRole(context, info, {
+    userAddress,
+    roleId,
+  });
 };
 
 export const mutationResolvers = {
+  role: roleResolver,
   createRole: createRoleResolver,
   bindRoleToUser: bindRoleToUserResolver,
 };

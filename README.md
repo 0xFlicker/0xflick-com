@@ -16,8 +16,16 @@ Work in progress
 
 ## Installation
 
+**NOTE**: This code cannot be run as-is because it requires access to secrets and additional setup that is `.gitignore`. If you interested in running this locally please reach out to me for options.
+
 ```
 yarn
+```
+
+You'll need to build the contracts:
+
+```
+yarn workspace @0xflick/contracts compile
 ```
 
 ## WWW

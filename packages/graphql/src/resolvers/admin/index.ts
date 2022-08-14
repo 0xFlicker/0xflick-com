@@ -5,6 +5,7 @@ import {
   queryResolvers as queryResolversRoles,
   querySchema as querySchemaRoles,
   typeSchema as typeSchemaRoles,
+  resolvers as resolversRoles,
 } from "./roles";
 
 export const typeSchema = gql`
@@ -26,3 +27,7 @@ export const mutationResolves = {
 export const queryResolvers = {
   ...queryResolversRoles,
 };
+
+export const resolvers  = {
+  ...resolversRoles,
+}

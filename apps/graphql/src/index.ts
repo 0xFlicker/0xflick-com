@@ -33,6 +33,7 @@ createContext(config)
         origin: ["http://localhost:3000"],
         credentials: true,
       },
+      rootValue() {},
       context({ req, res }) {
         return {
           ...context,

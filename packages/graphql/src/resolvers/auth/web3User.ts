@@ -1,8 +1,11 @@
+import { gql } from "apollo-server-core";
 import { IFieldResolver } from "@graphql-tools/utils";
 import { IUser } from "@0xflick/models";
+
 import { TContext } from "../../context";
 import { TGraphqlResolver } from "../../types";
 import { IGraphqlRole, IGraphqlPermission } from "../admin/roles";
+import { bindUserToRole } from "../../controllers/admin/roles";
 
 export interface IGraphqlWeb3User {
   address: string;
@@ -11,8 +14,37 @@ export interface IGraphqlWeb3User {
   allowedActions: IGraphqlPermission[];
 }
 
+export const typeSchema = gql`
+  type Web3User {
+    address: ID!
+    nonce: Int!
+    roles: [Role!]!
+    allowedActions: [Permission!]!
+    bindToRole(roleId: String!): Web3User!
+  }
+
+  type Web3LoginUser {
+    address: ID!
+    user: Web3User!
+    token: String!
+  }
+`;
+
+const roleBindToUserResolver: IFieldResolver<
+  IUser,
+  TContext,
+  { roleId: string },
+  Promise<IUser>
+> = async ({ address: userAddress }, { roleId }, context, info) => {
+  return await bindUserToRole(context, info, {
+    userAddress,
+    roleId,
+  });
+};
+
 export const resolvers = {
   Web3User: {
+    bindToRole: roleBindToUserResolver,
     allowedActions: (async (
       user,
       _,

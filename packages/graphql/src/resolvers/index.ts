@@ -18,6 +18,7 @@ import {
   mutationResolves as mutationResolvesAdmin,
   querySchema as querySchemaAdmin,
   queryResolvers as queryResolversAdmin,
+  resolvers as resolversAdmin,
 } from "./admin";
 import { TGraphqlResolver } from "../types";
 
@@ -92,4 +93,5 @@ export const resolvers = {
   },
   ...resolversAuth,
   ...resolversChain,
+  ...resolversAdmin,
 } as TGraphqlResolver;

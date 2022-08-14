@@ -5,12 +5,14 @@ import {
   resolvers as resolversNonce,
   typeSchema as typeSchemaNonce,
 } from "./nonce";
-import { typeSchema as typeSchemaPermissions } from "./permissions";
 import {
   mutationSchema as mutationSchemaSignIn,
   mutations as mutationsSignIn,
 } from "./signIn";
-import { resolvers as resolversWeb3Users } from "./web3User";
+import {
+  resolvers as resolversWeb3Users,
+  typeSchema as typeSchemaWeb3Users,
+} from "./web3User";
 import {
   mutationSchema as mutationSchemaSignOut,
   mutations as mutationSignOut,
@@ -18,7 +20,7 @@ import {
 
 export const typeSchema = gql`
   ${typeSchemaNonce}
-  ${typeSchemaPermissions}
+  ${typeSchemaWeb3Users}
 `;
 
 export const mutationSchema = `

@@ -3,9 +3,9 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { reducer as web3Reducer } from "features/web3/redux";
 import { reducer as configReducer } from "features/config/redux";
-// import { reducer as mintReducer } from "features/mint/redux";
-// import { reducer as mintApiReducer } from "features/mint/api";
-// import { reducer as recaptchaReducer } from "features/faucet/recaptcha";
+import { reducer as mintReducer } from "features/mint/redux";
+import { reducer as mintApiReducer } from "features/mint/api";
+import { reducer as recaptchaReducer } from "features/faucet/recaptcha";
 import { reducer as authReducer } from "features/auth/redux";
 import { reducer as authApiReducer } from "features/auth/api";
 // import { reducer as adminApiReducer } from "features/admin/api";
@@ -16,9 +16,9 @@ export const store = configureStore({
   reducer: {
     config: configReducer,
     web3: web3Reducer,
-    // mint: mintReducer,
-    // mintApi: mintApiReducer,
-    // recaptcha: recaptchaReducer,
+    mint: mintReducer,
+    mintApi: mintApiReducer,
+    recaptcha: recaptchaReducer,
     auth: authReducer,
     authApi: authApiReducer,
     // adminApi: adminApiReducer,
