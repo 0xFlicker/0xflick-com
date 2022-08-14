@@ -52,6 +52,11 @@ export const typeSchema = gql`
     resource: PermissionResource!
   }
 
+  input PermissionInput {
+    action: PermissionAction!
+    resource: PermissionResource!
+  }
+
   type Role {
     id: ID!
     name: String!
@@ -64,7 +69,7 @@ export const querySchema = `
 `;
 
 export const mutationSchema = `
-  createRole(name: String!, permissions: [Permission!]!): Role!
+  createRole(name: String!, permissions: [PermissionInput!]!): Role!
   bindRoleToUser(roleId: ID!, address: ID!): Boolean!
 `;
 

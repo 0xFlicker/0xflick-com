@@ -7,6 +7,7 @@ export function serializeSessionCookie(value: string, path: string) {
   return serialize(cookieName, value, {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
+    httpOnly: true,
     expires: new Date(Date.now() + 1000 * sessionExpiration),
     path,
   });
@@ -16,6 +17,7 @@ export function expireSessionCookie(path: string) {
   return serialize(cookieName, "", {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
+    httpOnly: true,
     expires: new Date(0),
     path,
   });
