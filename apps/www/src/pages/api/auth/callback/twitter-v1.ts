@@ -1,17 +1,16 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { getDb } from "../../db/dynamodb";
-import { AuthOrchestrationDao } from "../../db/auth/orchestration";
 import {
+  getDb,
+  AuthOrchestrationDao,
   fetchTableNames,
+  getAppTwitterClient,
   getAuthorizationToken,
-  getTwitterClient,
-} from "../../helpers";
+} from "@0xflick/backend";
 import { verifyJwtToken, EProviderTypes } from "@0xflick/models";
 
 const db = getDb();
 const authOrchestrationDao = new AuthOrchestrationDao(db);
 const promiseTableNames = fetchTableNames();
-const twitterApi = getTwitterClient();
 
 if (!process.env.TWITTER_FOLLOW_USER_ID) {
   throw new Error("TWITTER_FOLLOW_USER_ID is not set");
@@ -39,13 +38,13 @@ export default async function handler(
         console.error("unable to verify token");
         return res.status(401).json({ error: "Unauthorized" });
       }
-      const codeParam = req.query.code;
+      const codeParam = req.query.oauth_verifier;
       if (!codeParam) {
         return res.status(400).json({ error: "Code is required" });
       }
       const code = Array.isArray(codeParam) ? codeParam[0] : codeParam;
 
-      const stateParam = req.query.state;
+      const stateParam = req.query.oauth_token;
       if (!stateParam) {
         return res.status(400).json({ error: "State is required" });
       }
@@ -53,18 +52,20 @@ export default async function handler(
       console.log(`Checking state: ${state}`);
       const verified = await authOrchestrationDao.verifyState(
         state,
-        EProviderTypes.TWITTER
+        EProviderTypes["TWITTER-V1"]
       );
       if (!verified) {
         return res.status(400).json({ error: "State is invalid" });
       }
+      // Save the token to the database
+
       // Exchange the code for an access token
       console.log("Exchanging code for token");
-      const twitterResult = await twitterApi.loginWithOAuth2({
-        code,
-        codeVerifier: verified.codeVerifier,
-        redirectUri: `https://${req.headers.host}/api/auth/callback/twitter`,
+      const twitterApi = getAppTwitterClient({
+        accessToken: state,
+        accessSecret: verified.codeVerifier,
       });
+      const twitterResult = await twitterApi.login(code);
       if (!twitterResult) {
         return res
           .status(400)
@@ -82,7 +83,7 @@ export default async function handler(
       const existingAccount =
         await authOrchestrationDao.doesAccountForAddressExist(
           user.address,
-          EProviderTypes.TWITTER,
+          EProviderTypes["TWITTER-V1"],
           profile.data.id
         );
       if (existingAccount.alreadyConnectedWithDifferentAddress) {
@@ -93,16 +94,28 @@ export default async function handler(
       console.log("Creating account");
       let follower = profile.data.id === followTwitterUserId;
       if (!follower) {
-        const isFollowerResponse = await loggedInClient.v2.following(
-          followTwitterUserId
+        console.log(
+          `Checking if ${profile.data.username} is following ${followTwitterUserId}`
+        );
+        const isFollowerResponse = await loggedInClient.v1.friendship({
+          source_id: profile.data.id,
+          target_id: followTwitterUserId,
+        });
+        follower = isFollowerResponse.relationship.source.following;
+        console.log(
+          `${profile.data.username} is ${
+            follower ? "" : "not"
+          } following ${followTwitterUserId}`
         );
       }
       await authOrchestrationDao.createAccountForAddress(
         {
           address: user.address,
-          provider: EProviderTypes.TWITTER,
+          provider: EProviderTypes["TWITTER-V1"],
           providerAccountId: profile.data.id,
-          accessToken,
+          oauthV1AccessToken: accessToken,
+          oauthV1Secret: verified.codeVerifier,
+          oauthV1Code: code,
         },
         follower
       );

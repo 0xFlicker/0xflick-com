@@ -1,14 +1,13 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { AccountUserDao } from "../db/auth/accountUser";
-import { getDb } from "../db/dynamodb";
 import {
+  AccountUserDao,
+  getDb,
   fetchTableNames,
   getAppTwitterClient,
   getAuthorizationToken,
-} from "../helpers";
-import { verifyJwtToken } from "@0xflick/models/user";
-import { AccountProviderDao } from "../db/auth/accountProvider";
-import { EProviderTypes } from "@0xflick/models/auth/accountProvider";
+  AccountProviderDao,
+} from "@0xflick/backend";
+import { EProviderTypes, verifyJwtToken } from "@0xflick/models";
 
 const db = getDb();
 const accountUserDao = new AccountUserDao(db);
