@@ -2,20 +2,14 @@ import { TAllowedAction, verifyJwtToken } from "@0xflick/models";
 import { defaultChainId } from "@0xflick/backend";
 import { TContext } from "../../context";
 import { AuthError } from "../../errors/auth";
+import { authorizedUser } from "./user";
 
 export async function verifyAuthorizedUser(
-  { getToken, rolePermissionsDao, ownerForChain }: TContext,
+  context: TContext,
   authorizer: (item: TAllowedAction[]) => boolean
 ) {
-  const token = getToken();
-  if (!token) {
-    throw new AuthError("Not authenticated", "NOT_AUTHENTICATED");
-  }
-  const user = await verifyJwtToken(token);
-  if (!user) {
-    throw new AuthError("Invalid token", "NOT_AUTHENTICATED");
-  }
-
+  const user = await authorizedUser(context);
+  const { getToken, rolePermissionsDao, ownerForChain } = context;
   const permissionsFromDb = await rolePermissionsDao.allowedActionsForRoleIds(
     user.roleIds
   );

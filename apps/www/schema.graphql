@@ -1,5 +1,27 @@
+type ChainQuery {
+  chainId: String!
+  chainName: String!
+  ensRegistry: String
+  flick: Flick
+  image(contract: String!, tokenId: Int!, width: Int, height: Int): String
+}
+
 type Nonce {
   nonce: Int!
+}
+
+type Web3User {
+  address: ID!
+  nonce: Int!
+  roles: [Role!]!
+  allowedActions: [Permission!]!
+  bindToRole(roleId: String!): Web3User!
+}
+
+type Web3LoginUser {
+  address: ID!
+  user: Web3User!
+  token: String!
 }
 
 enum PermissionAction {
@@ -28,23 +50,16 @@ type Permission {
   resource: PermissionResource!
 }
 
+input PermissionInput {
+  action: PermissionAction!
+  resource: PermissionResource!
+}
+
 type Role {
   id: ID!
   name: String!
   permissions: [Permission!]!
-}
-
-type Web3User {
-  address: ID!
-  nonce: Int!
-  roles: [Role!]!
-  allowedActions: [Permission!]!
-}
-
-type Web3LoginUser {
-  address: ID!
-  user: Web3User!
-  token: String!
+  bindToUser(userAddress: String!): Web3User!
 }
 
 type MetadataProperties {
@@ -96,12 +111,17 @@ type Flick {
 }
 
 type Query {
-  flick: Flick
-  image(contract: String!, tokenId: Int!, width: Int, height: Int): String
-  nonceForAddress(address: String!): Nonce
+  chain(id: ID!): ChainQuery!
+  self: Web3User
+  role(id: ID!): Role!
 }
 
 type Mutation {
+  nonceForAddress(address: String!): Nonce
   signIn(address: String!, jwe: String!): Web3LoginUser
   signOut: Boolean!
+  self: Web3User
+  role(id: ID!): Role!
+  createRole(name: String!, permissions: [PermissionInput!]!): Role!
+  bindRoleToUser(roleId: ID!, userAddress: ID!): Boolean!
 }

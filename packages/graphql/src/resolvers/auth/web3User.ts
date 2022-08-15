@@ -6,6 +6,7 @@ import { TContext } from "../../context";
 import { TGraphqlResolver } from "../../types";
 import { IGraphqlRole, IGraphqlPermission } from "../admin/roles";
 import { bindUserToRole } from "../../controllers/admin/roles";
+import { authorizedUser } from "../../controllers/auth/user";
 
 export interface IGraphqlWeb3User {
   address: string;
@@ -29,6 +30,31 @@ export const typeSchema = gql`
     token: String!
   }
 `;
+
+export const querySchema = `
+  self: Web3User
+`;
+
+const selfResolver: IFieldResolver<
+  void,
+  TContext,
+  void,
+  Promise<IUser>
+> = async (_, __, context) => {
+  return await authorizedUser(context);
+};
+
+export const queryResolvers = {
+  self: selfResolver,
+};
+
+export const mutationSchema = `
+  self: Web3User
+`;
+
+export const mutationResolvers = {
+  self: selfResolver,
+};
 
 const roleBindToUserResolver: IFieldResolver<
   IUser,

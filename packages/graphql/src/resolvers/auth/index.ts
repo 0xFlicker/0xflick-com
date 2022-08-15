@@ -12,6 +12,10 @@ import {
 import {
   resolvers as resolversWeb3Users,
   typeSchema as typeSchemaWeb3Users,
+  mutationResolvers as mutationResolversWeb3Users,
+  mutationSchema as mutationSchemaWeb3Users,
+  queryResolvers as queryResolversWeb3Users,
+  querySchema as querySchemaWeb3Users,
 } from "./web3User";
 import {
   mutationSchema as mutationSchemaSignOut,
@@ -23,10 +27,15 @@ export const typeSchema = gql`
   ${typeSchemaWeb3Users}
 `;
 
+export const querySchema = `
+${querySchemaWeb3Users}
+`;
+
 export const mutationSchema = `
 ${mutationSchemaNonce}
 ${mutationSchemaSignIn}
 ${mutationSchemaSignOut}
+${mutationSchemaWeb3Users}
 `;
 
 export const resolvers = {
@@ -34,8 +43,13 @@ export const resolvers = {
   ...resolversWeb3Users,
 };
 
-export const mutations = {
+export const mutationResolvers = {
   ...mutationNonce,
   ...mutationsSignIn,
   ...mutationSignOut,
+  ...mutationResolversWeb3Users,
+};
+
+export const queryResolvers = {
+  ...queryResolversWeb3Users,
 };

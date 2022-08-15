@@ -4,7 +4,9 @@ import {
   typeSchema as typeSchemaAuth,
   resolvers as resolversAuth,
   mutationSchema as mutationSchemaAuth,
-  mutations as mutationsAuth,
+  mutationResolvers as mutationResolversAuth,
+  queryResolvers as queryResolversAuth,
+  querySchema as querySchemaAuth,
 } from "./auth";
 import {
   typeSchema as typeSchemaChain,
@@ -70,6 +72,7 @@ export const typeDefs = gql`
 
   type Query {
     ${querySchemaChain}
+    ${querySchemaAuth}
     ${querySchemaAdmin}
   }
 
@@ -82,16 +85,17 @@ export const typeDefs = gql`
 export const resolvers = {
   Query: {
     ...queryResolversChain,
+    ...queryResolversAuth,
     ...queryResolversAdmin,
   },
   Mutation: {
-    ...mutationsAuth,
+    ...mutationResolversAuth,
     ...mutationResolvesAdmin,
   },
   NftToken: {
     image: resolveNftTokenImage,
   },
-  ...resolversAuth,
   ...resolversChain,
+  ...resolversAuth,
   ...resolversAdmin,
 } as TGraphqlResolver;

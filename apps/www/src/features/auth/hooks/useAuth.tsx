@@ -5,7 +5,6 @@ import {
   useCallback,
   useEffect,
   useContext,
-  useState,
   useMemo,
 } from "react";
 import { selectors as authSelectors, actions as authActions } from "../redux";
@@ -22,7 +21,7 @@ import {
 } from "@0xflick/models";
 import { useSignIn } from "./useSignIn";
 import { useSignOut } from "./useSignOut";
-// import { useListRolePermissionsQuery } from "features/admin/api";
+import { useAllowedActions } from "./useAllowedActions";
 
 export function useSavedToken(token?: string) {
   const [savedToken, setSavedToken] = useLocalStorage("token", "", {
@@ -205,15 +204,9 @@ function useAuthContext() {
     }
   }, [address, dispatch, nonceData, nonceIsSuccess, tokenData, tokenIsSuccess]);
 
-  // const { data: rolePermissionsData } = useListRolePermissionsQuery(
-  //   {
-  //     token: savedToken,
-  //     roleIds: user?.roleIds ?? [],
-  //   },
-  //   {
-  //     skip: !savedToken || !user?.roleIds || user.roleIds.length === 0,
-  //   }
-  // );
+  const { allowedActions } = useAllowedActions({
+    skip: !savedToken || !user?.roleIds || user.roleIds.length === 0,
+  });
 
   return {
     isAuthenticated,
@@ -224,7 +217,7 @@ function useAuthContext() {
     isUserSigningOut,
     token: tokenData?.signIn.token ?? savedToken,
     user,
-    // permissions: rolePermissionsData,
+    allowedActions,
     signIn,
     signOut,
     savedToken,
@@ -251,15 +244,14 @@ export function useAuth() {
   return ctx;
 }
 
-// TODO: re-enable once graphql login works
-const permissions = [] as TAllowedAction[];
-export function useHasPermission(permissionMatcher: Matcher<TAllowedAction[]>) {
-  // const auth = useAuth();
-  // const permissions = [] as TAllowedAction[];
+export function useHasAllowedAction(
+  permissionMatcher: Matcher<TAllowedAction[]>
+) {
+  const { allowedActions } = useAuth();
   return useMemo(() => {
-    if (permissions) {
-      return permissionMatcher(permissions);
+    if (allowedActions) {
+      return permissionMatcher(allowedActions);
     }
     return false;
-  }, [permissionMatcher]);
+  }, [permissionMatcher, allowedActions]);
 }
