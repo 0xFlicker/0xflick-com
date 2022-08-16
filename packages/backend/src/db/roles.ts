@@ -12,6 +12,11 @@ import { IRole, RoleModel } from "@0xflick/models";
 import { UserRolesDAO } from "./userRoles";
 import { IPaginatedResult, IPaginationOptions } from "../types";
 import { decodeCursor, encodeCursor, paginate } from "../helpers";
+import { createLogger } from "../utils";
+
+const logger = createLogger({
+  name: "db/roles",
+});
 
 export class RolesDAO {
   public static TABLE_NAME = process.env.TABLE_NAME_ROLES || "Roles";
@@ -21,16 +26,30 @@ export class RolesDAO {
     this.db = db;
   }
 
-  public async create(role: IRole): Promise<RolesDAO> {
-    await this.db.send(
-      new PutCommand({
-        TableName: RolesDAO.TABLE_NAME,
-        Item: {
-          ID: role.id,
-          RoleName: role.name,
-        },
-      })
-    );
+  public async create(role: Omit<IRole, "userCount">): Promise<RolesDAO> {
+    try {
+      await this.db.send(
+        new PutCommand({
+          TableName: RolesDAO.TABLE_NAME,
+          Item: {
+            ID: role.id,
+            RoleName: role.name,
+            UserCount: 0,
+          },
+          ConditionExpression: "attribute_not_exists(ID)",
+        })
+      );
+    } catch (e) {
+      // Check if this error is a known DynamoDB error
+      if (e instanceof Error && e.name === "ConditionalCheckFailedException") {
+        logger.warn("RolesDao: Duplicate entry on create", role);
+        // Duplicate entry, whatever. continue but don't update any counters
+      } else {
+        // Something else went wrong, rethrow
+        throw e;
+      }
+    }
+
     return this;
   }
 
@@ -49,7 +68,42 @@ export class RolesDAO {
     return {
       id: role.Item.ID,
       name: role.Item.RoleName,
+      userCount: role.Item.UserCount || 0,
     };
+  }
+
+  public async usersBound(roleId: string, count: number = 1) {
+    // Increment UserCount
+    await this.db.send(
+      new UpdateCommand({
+        TableName: RolesDAO.TABLE_NAME,
+        Key: {
+          ID: roleId,
+        },
+        UpdateExpression: "set UserCount = UserCount + :inc",
+        ExpressionAttributeValues: {
+          ":inc": count,
+        },
+      })
+    );
+    return this;
+  }
+
+  public async usersRemoved(roleId: string, count: number = 1) {
+    // Decrement UserCount
+    await this.db.send(
+      new UpdateCommand({
+        TableName: RolesDAO.TABLE_NAME,
+        Key: {
+          ID: roleId,
+        },
+        UpdateExpression: "set UserCount = UserCount - :inc",
+        ExpressionAttributeValues: {
+          ":inc": count,
+        },
+      })
+    );
+    return this;
   }
 
   public async addPermissions(
@@ -107,6 +161,7 @@ export class RolesDAO {
       roles.Responses?.[RolesDAO.TABLE_NAME].map((role) => ({
         id: role.ID,
         name: role.RoleName,
+        userCount: role.UserCount ?? 0,
       })) ?? []
     );
   }
@@ -126,6 +181,7 @@ export class RolesDAO {
       result.Items?.map((item) => ({
         id: item.ID,
         name: item.RoleName,
+        userCount: item.UserCount ?? 0,
       })) ?? []
     );
   }
@@ -161,8 +217,9 @@ export class RolesDAO {
     const cursor = encodeCursor({ lastEvaluatedKey, page, count });
     return {
       items:
-        result.Items?.map((item) => new RoleModel(item.ID, item.RoleName)) ??
-        [],
+        result.Items?.map(
+          (item) => new RoleModel(item.ID, item.RoleName, item.UserCount ?? 0)
+        ) ?? [],
       cursor,
       page,
       count,

@@ -2,21 +2,20 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "module": "NodeNext",
-    "composite": true /* Enable the use of the ES2015 module loader. */,
-    "rootDir": "./src" /* Specify the root folder within your source files. */,
-    "outDir": "dist" /* Specify an output folder for all emitted files. */,
+    "composite": true,
+    "rootDir": "./src",
+    "outDir": "dist",
     "paths": {
       "@0xflick/models": ["../models/src/index"],
       "@0xflick/models/*": ["../models/src/*"]
     },
     "noErrorTruncation": true,
-    "noImplicitAny": true,
+    "noImplicitAny": false,
     "noImplicitThis": true,
     "alwaysStrict": true,
     "strictBindCallApply": true,
     "strictFunctionTypes": true,
     "strictNullChecks": false
-    // "strictPropertyInitialization": false
   },
   "include": ["**/*.ts", "../models/src/message.ts"],
   "exclude": ["**/node_modules", "**/.*/", "dist", "build"],

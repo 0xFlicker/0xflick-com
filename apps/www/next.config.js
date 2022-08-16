@@ -19,6 +19,7 @@ function jsonFromSecret(file) {
 
 const secretsJson = jsonFromSecret("deploy-secrets.json");
 const jwtJson = jsonFromSecret("jwt-secret.json");
+const twitter = jsonFromSecret("twitter-secrets.json");
 
 const INFURA_IPFS_AUTH = `Basic ${Buffer.from(
   `${secretsJson.infraIpfsProjectId}:${secretsJson.infraIpfsSecret}`
@@ -60,6 +61,14 @@ const nextConfig = withTM({
   },
   env: {
     LOG_LEVEL: "debug",
+    TWITTER_OAUTH_CLIENT_SECRET: twitter.TWITTER_OAUTH_CLIENT_SECRET,
+    NEXT_PUBLIC_TWITTER_OAUTH_CLIENT_ID: twitter.NEXT_PUBLIC_TWITTER_OAUTH_CLIENT_ID,
+    TWITTER_APP_KEY: twitter.TWITTER_APP_KEY,
+    TWITTER_APP_SECRET: twitter.TWITTER_APP_SECRET,
+    TWITTER_FOLLOW_USER_ID: twitter.follow.userId,
+    NEXT_PUBLIC_TWITTER_FOLLOW_NAME: twitter.follow.name,
+    SSM_TABLE_NAMES: process.env.SSM_TABLE_NAMES,
+    SSM_TABLE_NAMES_REGION: process.env.SSM_TABLE_NAMES_REGION,
     IPFS_API_URL,
     IPFS_API_PROJECT,
     IPFS_API_SECRET,

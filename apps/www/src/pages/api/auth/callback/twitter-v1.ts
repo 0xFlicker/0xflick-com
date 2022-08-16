@@ -38,6 +38,19 @@ export default async function handler(
         console.error("unable to verify token");
         return res.status(401).json({ error: "Unauthorized" });
       }
+
+      if (req.query.denied) {
+        const denied = req.query.denied as string;
+        const verified = await authOrchestrationDao.verifyState(
+          denied,
+          EProviderTypes["TWITTER-V1"]
+        );
+        if (!verified) {
+          return res.status(400).json({ error: "State is invalid" });
+        }
+        res.status(302).setHeader("Location", verified.redirectUri);
+        return res.send("Redirecting...");
+      }
       const codeParam = req.query.oauth_verifier;
       if (!codeParam) {
         return res.status(400).json({ error: "Code is required" });

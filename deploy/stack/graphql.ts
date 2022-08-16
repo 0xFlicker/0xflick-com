@@ -11,6 +11,7 @@ import {
   HttpApi,
   HttpMethod,
 } from "@aws-cdk/aws-apigatewayv2-alpha";
+import { getTable, getTableNameParam } from "./utils/tables.js";
 
 export interface ApiProps extends cdk.StackProps {
   readonly ensRpcUrl: string;
@@ -47,80 +48,22 @@ export class GraphqlStack extends cdk.Stack {
     } = props;
     super(scope, id, rest);
 
-    const getTable = (
-      tableName: string,
-      {
-        globalIndexes,
-        localIndexes,
-      }: { globalIndexes?: string[]; localIndexes?: string[] } = {}
-    ) => {
-      const tableArnParam = new cr.AwsCustomResource(
-        this,
-        `${tableName}ArnParam`,
-        {
-          onUpdate: {
-            // will also be called for a CREATE event
-            service: "SSM",
-            action: "getParameter",
-            parameters: {
-              Name: `${tableName}_TableArn`,
-              WithDecryption: true,
-            },
-            region: "us-east-2",
-            physicalResourceId: cr.PhysicalResourceId.of(Date.now().toString()), // Update physical id to always fetch the latest version
-          },
-          policy: cr.AwsCustomResourcePolicy.fromSdkCalls({
-            resources: cr.AwsCustomResourcePolicy.ANY_RESOURCE,
-          }),
-        }
-      );
-
-      const tableArn = tableArnParam.getResponseField("Parameter.Value");
-      const table = dynamodb.Table.fromTableAttributes(this, tableName, {
-        tableArn,
-        globalIndexes,
-        localIndexes,
-      });
-
-      return table;
-    };
     // Fetch table names from SSM Parameter Store
-    const urlShortenerTable = getTable("UrlShortener");
-    const userNonceTable = getTable("UserNonce");
-    const rolePermissionsTable = getTable("RolePermissions");
-    const rolesTable = getTable("Roles", {
+    const urlShortenerTable = getTable(this, "UrlShortener");
+    const userNonceTable = getTable(this, "UserNonce");
+    const rolePermissionsTable = getTable(this, "RolePermissions");
+    const rolesTable = getTable(this, "Roles", {
       globalIndexes: ["RolesByNameIndex"],
     });
-    const userRolesTable = getTable("UserRoles", {
+    const userRolesTable = getTable(this, "UserRoles", {
       globalIndexes: ["RoleIDIndex", "AddressIndex"],
     });
 
     // Fetch table names from SSM Parameter Store
-    const tableNamesParamResource = new cr.AwsCustomResource(
+    const tableNamesParam = getTableNameParam(
       this,
-      "TableNamesParamResource",
-      {
-        onUpdate: {
-          // will also be called for a CREATE event
-          service: "SSM",
-          action: "getParameter",
-          parameters: {
-            Name: "DynamoDB_TableNames",
-          },
-          region: "us-east-2",
-          physicalResourceId: cr.PhysicalResourceId.of(Date.now().toString()), // Update physical id to always fetch the latest version
-        },
-        policy: cr.AwsCustomResourcePolicy.fromSdkCalls({
-          resources: cr.AwsCustomResourcePolicy.ANY_RESOURCE,
-        }),
-      }
+      "Graphql_DynamoDB_TableNames"
     );
-    const tableNamesParamValue =
-      tableNamesParamResource.getResponseField("Parameter.Value");
-    const tableNamesParam = new ssm.StringParameter(this, "TableNamesParam", {
-      parameterName: "Graphql_DynamoDB_TableNames",
-      stringValue: tableNamesParamValue,
-    });
     const graphqlHandler = new lambda.Function(this, "Graphql", {
       runtime: lambda.Runtime.NODEJS_16_X,
       code: lambda.Code.fromAsset(path.join(__dirname, "../.layers/graphql")),

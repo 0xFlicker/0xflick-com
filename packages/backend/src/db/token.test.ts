@@ -73,7 +73,11 @@ describe("#Token DAO", () => {
       address: userId,
     });
     const userRolesDao = new UserRolesDAO(db);
-    await userRolesDao.bind(userId, roleId);
+    await userRolesDao.bind({
+      address: userId,
+      roleId: roleId,
+      rolesDao,
+    });
 
     const token = await createJwtToken({
       address: userId,

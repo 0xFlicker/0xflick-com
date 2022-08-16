@@ -4,17 +4,16 @@
     "module": "NodeNext",
     "composite": true /* Enable the use of the ES2015 module loader. */,
     "outDir": "dist" /* Specify an output folder for all emitted files. */,
-
     "incremental": true,
     "noErrorTruncation": true,
-    "noImplicitAny": false,
+    "noImplicitAny": true,
     "noImplicitThis": true,
     "alwaysStrict": true,
     "strictBindCallApply": true,
     "strictFunctionTypes": true,
     "strictNullChecks": false,
-    "skipLibCheck": true
-    // "strictPropertyInitialization": false
+    "skipLibCheck": true,
+    "strictPropertyInitialization": false
   },
   "include": [
     "./hardhat.config.ts",

@@ -23,7 +23,8 @@ const handler: NextApiHandler = async (req, res) => {
       : redirectUriParam;
 
     const host = req.headers.host;
-    const callbackUrl = `https://${host}/api/auth/callback/twitter-v1`;
+    const protocol = process.env.WWW_PROTOCOL || "https";
+    const callbackUrl = `${protocol}://${host}/api/auth/callback/twitter-v1`;
     console.log(`callbackUrl: ${callbackUrl}`);
     const { oauth_token, oauth_token_secret, url } =
       await twitterApi.generateAuthLink(callbackUrl, {

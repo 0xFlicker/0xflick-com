@@ -122,7 +122,11 @@ export default async function handler(
       rolePermissions[0]
     );
     console.log(`Apply role ${narrowestRole.role.id} to user ${user.address}`);
-    await userRolesDao.bind(user.address, narrowestRole.role.id);
+    await userRolesDao.bind({
+      address: user.address,
+      roleId: narrowestRole.role.id,
+      rolesDao,
+    });
 
     // Update the user's token
     const newToken = await createJwtToken({

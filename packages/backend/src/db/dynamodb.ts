@@ -6,15 +6,13 @@ let instance: DynamoDBDocumentClient;
 export function createDb(opts?: DynamoDBClientConfig) {
   const isTest = process.env.NODE_ENV === "test";
   const config = {
-    ...(isTest
-      ? {
-          endpoint: "http://localhost:8000",
-          region: "local-env",
-        }
-      : {
-          endpoint: process.env.DYNAMODB_ENDPOINT,
-          region: process.env.DYNAMODB_REGION || "us-east-1",
-        }),
+    endpoint: process.env.DYNAMODB_ENDPOINT,
+    region: process.env.DYNAMODB_REGION || "us-east-1",
+    ...(process.env.MOCK_DYNAMODB_ENDPOINT && {
+      endpoint: process.env.MOCK_DYNAMODB_ENDPOINT,
+      sslEnabled: false,
+      region: "local",
+    }),
     ...opts,
   };
   const ddb = new DynamoDBClient(config);

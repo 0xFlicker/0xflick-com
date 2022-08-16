@@ -17,6 +17,7 @@ import { fileURLToPath } from "url";
 import { Duration } from "aws-cdk-lib";
 import { readAssetsDirectory } from "./utils/readAssetsDir.js";
 import pathToPosix from "./utils/pathToPosix.js";
+import { getTable, getTableNameParam } from "./utils/tables.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -30,6 +31,11 @@ export class WwwStack extends cdk.Stack {
   constructor(scope: cdk.Stage, id: string, props: IProps) {
     const { domain, graphqlApiUrl: graphqlApi, ...rest } = props;
     super(scope, id, rest);
+
+    const externalAuthTable = getTable(this, "ExternalAuth", {
+      globalIndexes: ["GSI1"],
+    });
+    const tableNamesParam = getTableNameParam(this, "WWW_DynamoDB_TableNames");
 
     const staticAssets = new s3.Bucket(this, "StaticAssets", {
       transferAcceleration: true,
@@ -145,6 +151,8 @@ export class WwwStack extends cdk.Stack {
       memorySize: 512,
       timeout: cdk.Duration.seconds(10),
     });
+    externalAuthTable.grantReadWriteData(apiHandler);
+    tableNamesParam.grantRead(apiHandler);
 
     const defaultHandler = new lambda.Function(this, "defaultHandler", {
       runtime: lambda.Runtime.NODEJS_16_X,
@@ -364,6 +372,10 @@ export class WwwStack extends cdk.Stack {
       target: route53.RecordTarget.fromAlias(
         new targets.CloudFrontTarget(distribution)
       ),
+    });
+
+    new cdk.CfnOutput(this, "tableParamName", {
+      value: tableNamesParam.parameterName,
     });
   }
 }

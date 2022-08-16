@@ -7,41 +7,26 @@ import {
 } from "@mui/material";
 import { DarkModeSwitch } from "features/appbar/components/DarkModeSwitch";
 import { FancyModeSwitch } from "features/appbar/components/FancyModeSwitch";
-import { randomUint8ArrayOfLength } from "features/axolotlValley/hooks/useOffscreenCanvas";
-import { PleaseAxolotl } from "features/home/components/PleaseAxolotl";
 import { useLocale } from "locales/hooks";
 import { FC, useCallback, useState } from "react";
 import { Main } from "./Main";
-import { Preview } from "features/axolotlValley/components/Preview";
-import { utils } from "ethers";
-import { Share } from "@mui/icons-material";
-import { CopyToClipboardMenuItem } from "components/CopyToClipboardMenuItem";
-import { useFancyMode, useSavedTheme } from "features/appbar/hooks";
+import { useSavedTheme } from "features/appbar/hooks";
+import { useMint } from "features/mint/hooks";
+import { useHasAllowedAction } from "features/auth/hooks";
+import { canPreSaleMint } from "features/auth/matchers";
+import { ApprovalCard } from "features/mint/components/ApprovalCard";
+import { MintInfo } from "features/mint";
 
 export const PreSaleMint: FC = () => {
-  const { t } = useLocale("common");
-  const [seed, setSeed] = useState<Uint8Array>(randomUint8ArrayOfLength(32));
-  const onFlick = useCallback(() => {
-    const newSeed = randomUint8ArrayOfLength(32);
-    setSeed(newSeed);
-  }, []);
+  const { t } = useLocale(["mint"]);
+  const canPreSale = useHasAllowedAction(canPreSaleMint);
+  useMint();
   const { handleChange: handleThemeChange } = useSavedTheme();
-  const { isFancyMode, handleChange: handleFancyChange } = useFancyMode();
   return (
     <Main
-      onFlick={onFlick}
       menu={
         <>
           <MenuList dense disablePadding>
-            <CopyToClipboardMenuItem
-              icon={<Share />}
-              text={`https://0xflick.com/seed/${utils.hexlify(seed)}`}
-            >
-              <Typography textAlign="right" flexGrow={1}>
-                {t("menu_share")}
-              </Typography>
-            </CopyToClipboardMenuItem>
-            <Divider />
             <MenuItem onClick={handleThemeChange}>
               <DarkModeSwitch />
               <ListItemText
@@ -52,21 +37,11 @@ export const PreSaleMint: FC = () => {
                 }
               />
             </MenuItem>
-            <MenuItem onClick={handleFancyChange}>
-              <FancyModeSwitch />
-              <ListItemText
-                primary={
-                  <Typography textAlign="right" flexGrow={1}>
-                    {t("menu_fancy")}
-                  </Typography>
-                }
-              />
-            </MenuItem>
           </MenuList>
         </>
       }
     >
-      {isFancyMode ? <PleaseAxolotl seed={seed} /> : <Preview seed={seed} />}
+      {canPreSale ? <MintInfo /> : <ApprovalCard />}
     </Main>
   );
 };

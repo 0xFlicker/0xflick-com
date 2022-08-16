@@ -13,7 +13,7 @@ import {
 } from "@react-three/drei";
 import * as THREE from "three";
 import { useRelativeOrientationSensor } from "hooks/useDeviceMotion";
-import { FrameLimiter } from "threeFiber/FrameLimiter";
+import { FrameLimiter } from "components/threeFiber/FrameLimiter";
 import { useOffscreenCanvas } from "features/axolotlValley/hooks/useOffscreenCanvas";
 extend({
   ThreeCanvas,

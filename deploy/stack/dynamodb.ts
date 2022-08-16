@@ -181,6 +181,11 @@ export class DynamoDB extends cdk.Stack {
       parameterName: `UserNonce_TableArn`,
       stringValue: userNonceTable.tableArn,
     });
+    new ssm.StringParameter(this, "ExternalAuth_TableArn", {
+      description: "The ExternalAuth table ARN",
+      parameterName: `ExternalAuth_TableArn`,
+      stringValue: userNonceTable.tableArn,
+    });
 
     // // Create a new SSM Parameter holding the table name, because we can
     // // not pass env vars into edge lambdas

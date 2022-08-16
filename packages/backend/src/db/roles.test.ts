@@ -50,10 +50,12 @@ describe("#Roles DAO", () => {
     expect(roles).toContainEqual({
       id: roleId1,
       name: "test",
+      userCount: 0,
     });
     expect(roles).toContainEqual({
       id: roleId2,
       name: "test2",
+      userCount: 0,
     });
   });
 });

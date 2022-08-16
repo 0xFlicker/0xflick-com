@@ -36,7 +36,7 @@ export async function bindUserToRole(
 ) {
   context.requireMutation(info);
   await verifyAuthorizedUser(context, canPerformBindRoleToUserAction);
-  const { userDao, userRolesDao } = context;
+  const { userDao, userRolesDao, rolesDao } = context;
   const userFromDb = await userDao.getUser(userAddress);
   const userModel =
     userFromDb ??
@@ -44,7 +44,11 @@ export async function bindUserToRole(
       address: userAddress,
     }));
 
-  await userRolesDao.bind(userAddress, roleId);
+  await userRolesDao.bind({
+    address: userAddress,
+    roleId: roleId,
+    rolesDao,
+  });
   return userModel;
 }
 

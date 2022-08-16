@@ -15,7 +15,7 @@
     "jsx": "preserve",
     "incremental": true,
     "baseUrl": "src/.",
-    "noImplicitAny": true,
+    "noImplicitAny": false,
     "noImplicitThis": true,
     "alwaysStrict": true,
     "strictBindCallApply": true,
@@ -26,6 +26,7 @@
       "@0xflick/models": ["../../packages/models/src/index"],
       "@0xflick/backend": ["../../packages/backend/src/index"],
       "@0xflick/graphql": ["../../packages/backend/src/index"],
+      "@0xflick/contracts": ["../../packages/contracts/index"],
       "@0xflick/assets": ["../../packages/assets/src/index"]
     },
     "plugins": [
@@ -50,6 +51,9 @@
     },
     {
       "path": "../../packages/assets"
+    },
+    {
+      "path": "../../packages/contracts"
     }
   ]
 }

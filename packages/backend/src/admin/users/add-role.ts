@@ -105,7 +105,11 @@ export default async function handler(
           address: body.address,
         }));
 
-      await userRolesDao.bind(userModel.address, role.id);
+      await userRolesDao.bind({
+        address: userModel.address,
+        roleId: role.id,
+        rolesDao,
+      });
 
       return res.status(200).send("OK");
     } catch (err: any) {

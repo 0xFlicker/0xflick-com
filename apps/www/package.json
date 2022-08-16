@@ -10,7 +10,10 @@
     "typegen": "tsgql typegen",
     "start": "next start",
     "lint": "next lint",
-    "generate": "graphql-codegen --config codegen.yml"
+    "generate": "yarn generate:schema && yarn generate:introspection && yarn generate:types",
+    "generate:schema": "yarn --cwd ../../packages/graphql schema:build",
+    "generate:introspection": "node scripts/possibleTypes.cjs",
+    "generate:types": "graphql-codegen --config codegen.yml"
   },
   "dependencies": {
     "@apollo/client": "^3.6.9",
