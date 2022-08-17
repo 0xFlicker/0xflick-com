@@ -87,3 +87,27 @@ export async function createRole(
     permissions,
   };
 }
+
+const canPerformUnlinkRoleToUserAction = defaultAdminStrategyAll(
+  EResource.PERMISSION,
+  isActionOnResource({
+    action: EActions.DELETE,
+    resource: EResource.USER_ROLE,
+  })
+);
+
+export async function unlinkUserFromRole(
+  context: TContext,
+  info: GraphQLResolveInfo,
+  { userAddress, roleId }: { userAddress: string; roleId: string }
+) {
+  context.requireMutation(info);
+  await verifyAuthorizedUser(context, canPerformUnlinkRoleToUserAction);
+  const { userRolesDao, rolesDao } = context;
+  await userRolesDao.unlink({
+    address: userAddress,
+    roleId,
+    rolesDao,
+  });
+  return true;
+}

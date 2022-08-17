@@ -1,5 +1,5 @@
 import axios from "axios";
-import { cidPath as isCidPath } from "is-ipfs";
+import { cidPath as isCidPath, cid as isCid } from "is-ipfs";
 import type {
   CloudFrontResponseCallback,
   CloudFrontResponseEvent,
@@ -132,25 +132,44 @@ export const handler = async (
 
       // parse the prefix, width, height and image name
       // Ex: key=images/200x200/webp/image.jpg
-      const match = key.match(
+      let match = key.match(
         /(ipfs|web)\/(.*)\/(\d+|auto)x(\d+|auto)\/(.*)\/(.*)/
       );
+      let type: string,
+        prefix: string | undefined,
+        width: string,
+        height: string,
+        imageName: string | undefined,
+        originalKey: string,
+        pathKey: string,
+        requiredFormat: string;
       if (!match) {
-        console.log(`Invalid key: ${key}`);
-        return callback(null, response);
+        console.log(`Let's try again: ${key}`);
+        match = key.match(/(ipfs|web)\/(.*)\/(\d+|auto)x(\d+|auto)\/(.*)/);
+        if (!match) {
+          console.log("nope");
+          return callback(null, response);
+        }
+        type = match[1];
+        pathKey = match[2];
+        width = match[3];
+        height = match[4];
+        requiredFormat = match[5] == "jpg" ? "jpeg" : match[5];
+        originalKey = `${type}/${pathKey}`;
+        prefix = undefined;
+        imageName = undefined;
+      } else {
+        type = match[1];
+        prefix = match[2];
+        width = match[3];
+        height = match[4];
+
+        // correction for jpg required for 'Sharp'
+        requiredFormat = match[5] == "jpg" ? "jpeg" : match[5];
+        imageName = match[6];
+        originalKey = `${type}/${prefix}${imageName ? `/${imageName}` : ""}`;
+        pathKey = `${prefix}${imageName ? `/${imageName}` : ""}`;
       }
-
-      const type = match[1];
-      const prefix = match[2];
-      const width = match[3];
-      const height = match[4];
-
-      // correction for jpg required for 'Sharp'
-      const requiredFormat = match[5] == "jpg" ? "jpeg" : match[5];
-      const imageName = match[6];
-      const originalKey = `${type}/${prefix}/${imageName}`;
-      const pathKey = `${prefix}/${imageName}`;
-
       console.log(
         `type: ${type} prefix: ${prefix} width: ${width} height: ${height} pathKey: ${pathKey} imageName: ${imageName} originalKey: ${originalKey} requiredFormat ${requiredFormat}`
       );
@@ -159,7 +178,7 @@ export const handler = async (
       let buffer: Buffer;
       if (!(await s3Exists(originalKey))) {
         // Check if the key is a CID
-        if (type === "web") {
+        if (type === "web" && prefix && imageName) {
           const urlShortenerDao = await getUrlShortenerDao();
           const model = await urlShortenerDao.get(prefix);
           if (!model) {
@@ -172,7 +191,7 @@ export const handler = async (
           });
           buffer = Buffer.from(imageResponse.data, "binary");
         } else if (type === "ipfs") {
-          if (!isCidPath(pathKey)) {
+          if (!isCidPath(pathKey) && !isCid(pathKey)) {
             console.log(`Invalid key: ${pathKey}`);
             response.status = "404";
             return callback(null, response);
@@ -180,6 +199,10 @@ export const handler = async (
 
           console.log("IPFS request: ", pathKey);
           buffer = await loadIpfsContent(ipfsClient, pathKey);
+        } else {
+          console.log(`Invalid type: ${type}`);
+          response.status = "404";
+          return callback(null, response);
         }
 
         // Cache the image in S3

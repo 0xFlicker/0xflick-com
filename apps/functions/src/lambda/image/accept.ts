@@ -42,8 +42,37 @@ export const handler = async (
   // parse the prefix, image name and extension from the uri.
   // In our case /images/image.jpg
 
-  const match = fwdUri.match(/(.*)\/(.*)\/(.*)\.(.*)/);
+  let match = fwdUri.match(/(.*)\/(.*)\/(.*)\.(.*)/);
   if (!match) {
+    console.log("Try a smaller match");
+    match = fwdUri.match(/(.*)\/(.*)/);
+    if (!match) {
+      return request;
+    }
+    const type = match[1];
+    const path = match[2];
+
+    console.log(`Fetching image ${path} at ${width}x${height} of type ${type}`);
+    // read the accept header to determine if webP is supported.
+    const accept = headers["accept"] ? headers["accept"][0].value : "";
+
+    const url = [type];
+    // build the new uri to be forwarded upstream
+    url.push(path);
+    url.push(width + "x" + height);
+
+    // check support for webp
+    if (accept.includes(variables.webpExtension)) {
+      url.push(variables.webpExtension);
+    } else {
+      url.push("jpeg");
+    }
+
+    fwdUri = url.join("/");
+
+    // final modified url is of format /images/200x200/webp
+    console.log(`Forwarding ${fwdUri}`);
+    request.uri = fwdUri;
     return request;
   }
   const type = match[1];
@@ -73,6 +102,7 @@ export const handler = async (
   fwdUri = url.join("/");
 
   // final modified url is of format /images/200x200/webp/image.jpg
+  console.log(`Forwarding ${fwdUri}`);
   request.uri = fwdUri;
   return request;
 };

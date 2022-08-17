@@ -168,12 +168,12 @@ export class ImageStack extends cdk.Stack {
       }
     );
     const imageOrigin = new cloudfront.experimental.EdgeFunction(this, "io", {
-      runtime: lambda.Runtime.NODEJS_16_X,
+      runtime: lambda.Runtime.NODEJS_14_X,
       code: lambda.Code.fromAsset(
         path.join(__dirname, "../.layers/sharp-layer.zip")
       ),
       handler: "index.handler",
-      timeout: cdk.Duration.seconds(15),
+      timeout: cdk.Duration.seconds(30),
       memorySize: 1536,
     });
     urlShortenerTable.grantReadData(imageOrigin);

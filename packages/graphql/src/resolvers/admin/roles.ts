@@ -10,7 +10,11 @@ import {
 import { IFieldResolver } from "@graphql-tools/utils";
 import { TContext } from "../../context";
 import { RoleError } from "../../errors/roles";
-import { bindUserToRole, createRole } from "../../controllers/admin/roles";
+import {
+  bindUserToRole,
+  createRole,
+  unlinkUserFromRole,
+} from "../../controllers/admin/roles";
 import { OperationTypeNode } from "graphql";
 
 export interface IGraphqlPermission {
@@ -59,8 +63,10 @@ export const typeSchema = gql`
   type Role {
     id: ID!
     name: String!
+    userCount: Int!
     permissions: [Permission!]!
     bindToUser(userAddress: String!): Web3User!
+    unbindFromUser(userAddress: String!): Web3User!
   }
 `;
 
@@ -71,16 +77,28 @@ export const querySchema = `
 export const mutationSchema = `
   role(id: ID!): Role!
   createRole(name: String!, permissions: [PermissionInput!]!): Role!
-  bindRoleToUser(roleId: ID!, userAddress: ID!): Boolean!
 `;
 
 const roleBindToUserResolver: IFieldResolver<
   IGraphqlRole,
   TContext,
   { userAddress: string },
-  Promise<IUser>
+  Promise<boolean>
 > = async ({ id: roleId }, { userAddress }, context, info) => {
-  return await bindUserToRole(context, info, {
+  await bindUserToRole(context, info, {
+    userAddress,
+    roleId,
+  });
+  return true;
+};
+
+const roleUnlinkFromUserResolver: IFieldResolver<
+  IGraphqlRole,
+  TContext,
+  { userAddress: string },
+  Promise<boolean>
+> = async ({ id: roleId }, { userAddress }, context, info) => {
+  return await unlinkUserFromRole(context, info, {
     userAddress,
     roleId,
   });
@@ -89,6 +107,7 @@ const roleBindToUserResolver: IFieldResolver<
 export const resolvers = {
   Role: {
     bindToUser: roleBindToUserResolver,
+    unbindFromUser: roleUnlinkFromUserResolver,
   },
 };
 
@@ -126,20 +145,7 @@ const createRoleResolver: IFieldResolver<
   });
 };
 
-const bindRoleToUserResolver: IFieldResolver<
-  void,
-  TContext,
-  { roleId: string; userAddress: string },
-  Promise<IUser>
-> = async (_, { roleId, userAddress }, context, info) => {
-  return await bindUserToRole(context, info, {
-    userAddress,
-    roleId,
-  });
-};
-
 export const mutationResolvers = {
   role: roleResolver,
   createRole: createRoleResolver,
-  bindRoleToUser: bindRoleToUserResolver,
 };
