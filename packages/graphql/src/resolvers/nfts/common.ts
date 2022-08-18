@@ -52,7 +52,6 @@ export const fetchMetadata = (
       const result = await response.json();
       return result as IMetadata;
     })
-
     .catch((err) => {
       logger.error(err);
       throw new MetadataError(err.message, "METADATA_FETCH_ERROR", err.code);

@@ -5,7 +5,6 @@ import { join } from "path";
 
 /**
  * @param {string} file
- * @param {Buffer} buffer
  */
 function saveBufferToSecret(file) {
   const s = spawn("sops", ['--encrypt', file], {
