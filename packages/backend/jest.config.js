@@ -9,5 +9,8 @@ module.exports = {
   moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, { prefix: '<rootDir>/' }),
   setupFiles: ['<rootDir>/jest.setup.js'],
   roots: ["<rootDir>/src/"],
+  "transformIgnorePatterns": [
+    "node_modules/?!(uuid)/"
+  ],
   ...require("jest-dynalite/jest-preset")
 }

@@ -146,6 +146,26 @@ module.exports = {
         AttributeName: "key", AttributeType: "S"
       }],
       BillingMode: "PAY_PER_REQUEST",
+    }, {
+      TableName: 'NameFlick',
+      KeySchema: [{ AttributeName: "pk", KeyType: "HASH" }],
+      AttributeDefinitions: [{
+        AttributeName: "pk", AttributeType: "S"
+      }, {
+        AttributeName: "GSI1PK", AttributeType: "S"
+      }, {
+        AttributeName: "GSI2PK", AttributeType: "S"
+      }],
+      BillingMode: "PAY_PER_REQUEST",
+      GlobalSecondaryIndexes: [{
+        IndexName: 'GSI1',
+        KeySchema: [{ AttributeName: "GSI1PK", KeyType: "HASH" }],
+        Projection: { ProjectionType: "ALL" },
+      }, {
+        IndexName: 'GSI2',
+        KeySchema: [{ AttributeName: "GSI2PK", KeyType: "HASH" }],
+        Projection: { ProjectionType: "ALL" },
+      }]
     }],
   port: 8000,
 };
