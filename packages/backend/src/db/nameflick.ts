@@ -4,6 +4,7 @@ import {
   GetCommand,
   PutCommand,
   QueryCommand,
+  UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { INameFlick } from "@0xflick/models";
 
@@ -28,22 +29,22 @@ export interface INameFlickDB {
   GSI1PK: GSI1PK;
   GSI2PK?: GSI2PK;
   ttl?: number;
-  ["address!btc"]?: string;
-  ["address!eth"]?: string;
-  ["address!ltc"]?: string;
-  ["address!doge"]?: string;
+  ["address_btc"]?: string;
+  ["address_eth"]?: string;
+  ["address_ltc"]?: string;
+  ["address_doge"]?: string;
   content?: string;
-  ["text!email"]?: string;
-  ["text!avatar"]?: string;
-  ["text!description"]?: string;
-  ["text!com.discord"]?: string;
-  ["text!com.github"]?: string;
-  ["text!url"]?: string;
-  ["text!notice"]?: string;
-  ["text!keywords"]?: string;
-  ["text!com.reddit"]?: string;
-  ["text!com.twitter"]?: string;
-  ["text!org.telegram"]?: string;
+  ["text_email"]?: string;
+  ["text_avatar"]?: string;
+  ["text_description"]?: string;
+  ["text_com_discord"]?: string;
+  ["text_com_github"]?: string;
+  ["text_url"]?: string;
+  ["text_notice"]?: string;
+  ["text_keywords"]?: string;
+  ["text_com_reddit"]?: string;
+  ["text_com_twitter"]?: string;
+  ["text_org_telegram"]?: string;
 }
 
 export function nameflickToDb(nameflick: INameFlick): INameFlickDB {
@@ -54,50 +55,50 @@ export function nameflickToDb(nameflick: INameFlick): INameFlickDB {
     ...(nameflick.ensHash ? { GSI2PK: asGsi2Pk(nameflick.ensHash) } : {}),
     ...(nameflick.ttl ? { ttl: nameflick.ttl } : {}),
     ...(nameflick.addresses?.BTC
-      ? { ["address!btc"]: nameflick.addresses?.BTC }
+      ? { ["address_btc"]: nameflick.addresses?.BTC }
       : {}),
     ...(nameflick.addresses?.ETH
-      ? { ["address!eth"]: nameflick.addresses?.ETH }
+      ? { ["address_eth"]: nameflick.addresses?.ETH }
       : {}),
     ...(nameflick.addresses?.LTC
-      ? { ["address!ltc"]: nameflick.addresses?.LTC }
+      ? { ["address_ltc"]: nameflick.addresses?.LTC }
       : {}),
     ...(nameflick.addresses?.DOGE
-      ? { ["address!doge"]: nameflick.addresses?.DOGE }
+      ? { ["address_doge"]: nameflick.addresses?.DOGE }
       : {}),
     ...(nameflick.content ? { content: nameflick.content } : {}),
     ...(nameflick.textRecord?.email
-      ? { ["text!email"]: nameflick.textRecord?.email }
+      ? { ["text_email"]: nameflick.textRecord?.email }
       : {}),
     ...(nameflick.textRecord?.avatar
-      ? { ["text!avatar"]: nameflick.textRecord?.avatar }
+      ? { ["text_avatar"]: nameflick.textRecord?.avatar }
       : {}),
     ...(nameflick.textRecord?.description
-      ? { ["text!description"]: nameflick.textRecord?.description }
+      ? { ["text_description"]: nameflick.textRecord?.description }
       : {}),
-    ...(nameflick.textRecord?.["com.discord"]
-      ? { ["text!com.discord"]: nameflick.textRecord?.["com.discord"] }
+    ...(nameflick.textRecord?.["com_discord"]
+      ? { ["text_com_discord"]: nameflick.textRecord?.["com_discord"] }
       : {}),
-    ...(nameflick.textRecord?.["com.github"]
-      ? { ["text!com.github"]: nameflick.textRecord?.["com.github"] }
+    ...(nameflick.textRecord?.["com_github"]
+      ? { ["text_com_github"]: nameflick.textRecord?.["com_github"] }
       : {}),
     ...(nameflick.textRecord?.url
-      ? { ["text!url"]: nameflick.textRecord?.url }
+      ? { ["text_url"]: nameflick.textRecord?.url }
       : {}),
     ...(nameflick.textRecord?.notice
-      ? { ["text!notice"]: nameflick.textRecord?.notice }
+      ? { ["text_notice"]: nameflick.textRecord?.notice }
       : {}),
     ...(nameflick.textRecord?.keywords
-      ? { ["text!keywords"]: nameflick.textRecord?.keywords }
+      ? { ["text_keywords"]: nameflick.textRecord?.keywords }
       : {}),
-    ...(nameflick.textRecord?.["com.reddit"]
-      ? { ["text!com.reddit"]: nameflick.textRecord?.["com.reddit"] }
+    ...(nameflick.textRecord?.["com_reddit"]
+      ? { ["text_com_reddit"]: nameflick.textRecord?.["com_reddit"] }
       : {}),
-    ...(nameflick.textRecord?.["com.twitter"]
-      ? { ["text!com.twitter"]: nameflick.textRecord?.["com.twitter"] }
+    ...(nameflick.textRecord?.["com_twitter"]
+      ? { ["text_com_twitter"]: nameflick.textRecord?.["com_twitter"] }
       : {}),
-    ...(nameflick.textRecord?.["org.telegram"]
-      ? { ["text!org.telegram"]: nameflick.textRecord?.["org.telegram"] }
+    ...(nameflick.textRecord?.["org_telegram"]
+      ? { ["text_org_telegram"]: nameflick.textRecord?.["org_telegram"] }
       : {}),
   };
 }
@@ -108,37 +109,37 @@ function dbToNameflick(nameflick: Record<string, any>): INameFlick {
     ensHash: nameflick.GSI2PK,
     ttl: nameflick.ttl,
     addresses: {
-      ...(nameflick["address!btc"] ? { BTC: nameflick["address!btc"] } : {}),
-      ...(nameflick["address!eth"] ? { ETH: nameflick["address!eth"] } : {}),
-      ...(nameflick["address!ltc"] ? { LTC: nameflick["address!ltc"] } : {}),
-      ...(nameflick["address!doge"] ? { DOGE: nameflick["address!doge"] } : {}),
+      ...(nameflick["address_btc"] ? { BTC: nameflick["address_btc"] } : {}),
+      ...(nameflick["address_eth"] ? { ETH: nameflick["address_eth"] } : {}),
+      ...(nameflick["address_ltc"] ? { LTC: nameflick["address_ltc"] } : {}),
+      ...(nameflick["address_doge"] ? { DOGE: nameflick["address_doge"] } : {}),
     },
     content: nameflick.content,
     textRecord: {
-      ...(nameflick["text!email"] ? { email: nameflick["text!email"] } : {}),
-      ...(nameflick["text!avatar"] ? { avatar: nameflick["text!avatar"] } : {}),
-      ...(nameflick["text!description"]
-        ? { description: nameflick["text!description"] }
+      ...(nameflick["text_email"] ? { email: nameflick["text_email"] } : {}),
+      ...(nameflick["text_avatar"] ? { avatar: nameflick["text_avatar"] } : {}),
+      ...(nameflick["text_description"]
+        ? { description: nameflick["text_description"] }
         : {}),
-      ...(nameflick["text!com.discord"]
-        ? { "com.discord": nameflick["text!com.discord"] }
+      ...(nameflick["text_com_discord"]
+        ? { com_discord: nameflick["text_com_discord"] }
         : {}),
-      ...(nameflick["text!com.github"]
-        ? { "com.github": nameflick["text!com.github"] }
+      ...(nameflick["text_com_github"]
+        ? { com_github: nameflick["text_com_github"] }
         : {}),
-      ...(nameflick["text!url"] ? { url: nameflick["text!url"] } : {}),
-      ...(nameflick["text!notice"] ? { notice: nameflick["text!notice"] } : {}),
-      ...(nameflick["text!keywords"]
-        ? { keywords: nameflick["text!keywords"] }
+      ...(nameflick["text_url"] ? { url: nameflick["text_url"] } : {}),
+      ...(nameflick["text_notice"] ? { notice: nameflick["text_notice"] } : {}),
+      ...(nameflick["text_keywords"]
+        ? { keywords: nameflick["text_keywords"] }
         : {}),
-      ...(nameflick["text!com.reddit"]
-        ? { "com.reddit": nameflick["text!com.reddit"] }
+      ...(nameflick["text_com_reddit"]
+        ? { com_reddit: nameflick["text_com_reddit"] }
         : {}),
-      ...(nameflick["text!com.twitter"]
-        ? { "com.twitter": nameflick["text!com.twitter"] }
+      ...(nameflick["text_com_twitter"]
+        ? { com_twitter: nameflick["text_com_twitter"] }
         : {}),
-      ...(nameflick["text!org.telegram"]
-        ? { "org.telegram": nameflick["text!org.telegram"] }
+      ...(nameflick["text_org_telegram"]
+        ? { org_telegram: nameflick["text_org_telegram"] }
         : {}),
     },
   };
@@ -171,10 +172,25 @@ export class NameFlickDAO {
   }
 
   public async createOrUpdate(nameflick: INameFlick): Promise<void> {
+    const dbObj = nameflickToDb(nameflick);
     await this.db.send(
-      new PutCommand({
+      new UpdateCommand({
         TableName: NameFlickDAO.TABLE_NAME,
-        Item: nameflickToDb(nameflick),
+        Key: { pk: nameflick.normalized },
+        UpdateExpression: `set ${Object.keys(dbObj)
+          .filter((k) => k !== "pk")
+          .map((k) => `#${k} = :${k}`)
+          .join(", ")}`,
+        ExpressionAttributeValues: Object.fromEntries(
+          Object.entries(dbObj)
+            .filter(([k]) => k !== "pk")
+            .map(([k, v]) => [`:${k}`, v])
+        ),
+        ExpressionAttributeNames: Object.fromEntries(
+          Object.keys(dbObj)
+            .filter((k) => k !== "pk")
+            .map((k) => [`#${k}`, k])
+        ),
       })
     );
   }

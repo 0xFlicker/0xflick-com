@@ -10,7 +10,7 @@ module.exports = {
   setupFiles: ['<rootDir>/jest.setup.js'],
   roots: ["<rootDir>/src/"],
   "transformIgnorePatterns": [
-    "node_modules/?!(uuid)/"
+    ".*node_modules/?!(uuid)/"
   ],
   ...require("jest-dynalite/jest-preset")
 }
