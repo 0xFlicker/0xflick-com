@@ -58,6 +58,9 @@ export class GraphqlStack extends cdk.Stack {
     const userRolesTable = getTable(this, "UserRoles", {
       globalIndexes: ["RoleIDIndex", "AddressIndex"],
     });
+    const nameflickTable = getTable(this, "Nameflick", {
+      globalIndexes: ["GSI1", "GSI2", "GSI3"],
+    });
 
     // Fetch table names from SSM Parameter Store
     const tableNamesParam = getTableNameParam(
@@ -77,7 +80,7 @@ export class GraphqlStack extends cdk.Stack {
         NFT_CONTRACT_ADDRESS: nftRootCollection,
         WEB3_RPC_URL: web3RpcUrl,
         CHAIN_ID: chainId,
-        NEXT_PUBLIC_APP_NAME: "0xflick.com",
+        NEXT_PUBLIC_APP_NAME: "https://0xflick.com",
         FLICK_ENS_DOMAIN: "0xflick.eth",
         IPFS_API_URL: ipfsApiUrl,
         IPFS_API_PROJECT: ipfsApiProject,
@@ -89,6 +92,7 @@ export class GraphqlStack extends cdk.Stack {
         NEXT_PUBLIC_JWT_PUBLIC_KEY: jwtPublicKey,
         JWK: jwk,
         NEXT_PUBLIC_JWT_CLAIM_ISSUER: jwtClaimIssuer,
+        SIWE_EXPIRATION_TIME_SECONDS: "604800",
       },
     });
     urlShortenerTable.grantReadWriteData(graphqlHandler);
@@ -96,6 +100,7 @@ export class GraphqlStack extends cdk.Stack {
     rolePermissionsTable.grantReadWriteData(graphqlHandler);
     rolesTable.grantReadWriteData(graphqlHandler);
     userRolesTable.grantReadWriteData(graphqlHandler);
+    nameflickTable.grantReadWriteData(graphqlHandler);
 
     tableNamesParam.grantRead(graphqlHandler);
 

@@ -1,9 +1,4 @@
-export interface INameFlickAddresses {
-  ETH?: string;
-  BTC?: string;
-  LTC?: string;
-  DOGE?: string;
-}
+export type TNameFlickAddresses = Record<string, string | undefined>;
 
 export interface INameFlickTextRecord {
   email?: string;
@@ -23,7 +18,7 @@ export interface INameFlick {
   normalized?: string;
   ttl?: number;
   ensHash: string;
-  addresses: INameFlickAddresses;
+  addresses: TNameFlickAddresses;
   content?: string;
   textRecord: INameFlickTextRecord;
 }

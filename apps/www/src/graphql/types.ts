@@ -71,19 +71,12 @@ export type MetadataProperties = {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  bindRoleToUser: Scalars['Boolean'];
   createRole: Role;
   nonceForAddress?: Maybe<Nonce>;
   role: Role;
   self?: Maybe<Web3User>;
   signIn?: Maybe<Web3LoginUser>;
   signOut: Scalars['Boolean'];
-};
-
-
-export type MutationBindRoleToUserArgs = {
-  roleId: Scalars['ID'];
-  userAddress: Scalars['ID'];
 };
 
 
@@ -105,6 +98,8 @@ export type MutationRoleArgs = {
 
 export type MutationSignInArgs = {
   address: Scalars['String'];
+  chainId: Scalars['Int'];
+  issuedAt: Scalars['String'];
   jwe: Scalars['String'];
 };
 
@@ -189,10 +184,17 @@ export type Role = {
   id: Scalars['ID'];
   name: Scalars['String'];
   permissions: Array<Permission>;
+  unbindFromUser: Web3User;
+  userCount: Scalars['Int'];
 };
 
 
 export type RoleBindToUserArgs = {
+  userAddress: Scalars['String'];
+};
+
+
+export type RoleUnbindFromUserArgs = {
   userAddress: Scalars['String'];
 };
 

@@ -2,7 +2,7 @@ import { serialize, parse } from "cookie";
 
 const cookieName = process.env.SESSION_COOKIE || "session";
 export const sessionExpiration =
-  Number(process.env.SESSION_EXPIRATION_SECONDS) || 60 * 60 * 24 * 7;
+  Number(process.env.SIWE_EXPIRATION_TIME_SECONDS) || 60 * 60 * 24 * 7;
 export function serializeSessionCookie(value: string, path: string) {
   return serialize(cookieName, value, {
     secure: process.env.NODE_ENV === "production",

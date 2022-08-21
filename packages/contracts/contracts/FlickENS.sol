@@ -1,5 +1,20 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.9 <0.9.0;
+/*
+
+  _  _                               __     _       _              _     
+ | \| |   __ _    _ __     ___      / _|   | |     (_)     __     | |__  
+ | .` |  / _` |  | '  \   / -_)    |  _|   | |     | |    / _|    | / /  
+ |_|\_|  \__,_|  |_|_|_|  \___|   _|_|_   _|_|_   _|_|_   \__|_   |_\_\  
+_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""| 
+"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-' 
+                       ___    _  _     ___                                                   
+                      | __|  | \| |   / __|                                                  
+                      | _|   | .` |   \__ \                                                  
+                      |___|  |_|\_|   |___/                                                  
+                    _|"""""|_|"""""|_|"""""|                                                 
+                    "`-0-0-'"`-0-0-'"`-0-0-'                                                 
+*/
 
 import "@divergencetech/ethier/contracts/crypto/SignatureChecker.sol";
 import "@divergencetech/ethier/contracts/crypto/SignerManager.sol";
@@ -16,11 +31,8 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/interfaces/IERC165.sol";
 import "erc721a/contracts/extensions/IERC721AQueryable.sol";
+import "./ITokenURIGenerator.sol";
 import "./IExtendedResolver.sol";
-
-interface ITokenURIGenerator {
-  function tokenURI(uint256 tokenId) external view returns (string memory);
-}
 
 interface IExtendedResolverWithProof {
   function resolve(bytes memory name, bytes memory data)
@@ -658,6 +670,9 @@ contract FlickENS is
     }
   }
 
+  /**
+   * @dev withdraws all ETH from the contract
+   */
   function withdrawSplit() public onlyOwner {
     uint256 shares = totalShares();
     for (uint256 i = 0; i < shares; i++) {
@@ -666,10 +681,16 @@ contract FlickENS is
     }
   }
 
+  /**
+   * @dev sets the ENS resolver that this contract will proxy
+   */
   function setEnsContract(address ensContract) public onlyOwner {
     ensTokenAddress = ensContract;
   }
 
+  /**
+   * @dev used by the deployment scripts to check if an address is already a signer to avoid setting it again
+   */
   function isSigner(address signer) public view returns (bool) {
     return signers.contains(signer);
   }

@@ -1,6 +1,7 @@
 import {
   AuthOrchestrationDao,
   DrinkerDAO,
+  NameFlickDAO,
   RolePermissionsDAO,
   RolesDAO,
   UrlShortenerDAO,
@@ -38,6 +39,7 @@ export interface IDbContext {
   urlShortenerDao: UrlShortenerDAO;
   userDao: UserDAO;
   userRolesDao: UserRolesDAO;
+  nameFlickDao: NameFlickDAO;
 }
 
 export async function createDbContext({
@@ -56,5 +58,6 @@ export async function createDbContext({
     urlShortenerDao: new UrlShortenerDAO(db),
     userDao: new UserDAO(db),
     userRolesDao: new UserRolesDAO(db),
+    nameFlickDao: new NameFlickDAO(db),
   };
 }

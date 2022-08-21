@@ -13,7 +13,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deploy } = deployments;
 
   const { deployer, signer, beneficiary } = await getNamedAccounts();
-  
+
   const args = [
     nft_name(network.name),
     nft_symbol(network.name),
@@ -44,4 +44,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 };
 export default func;
-func.tags = ["test"];
+func.tags = ["test", "production"];

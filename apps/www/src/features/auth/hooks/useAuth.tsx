@@ -138,7 +138,18 @@ function useAuthContext() {
       provider &&
       address
     ) {
-      const message = authMessage(nonceData.nonceForAddress.nonce.toString());
+      const now = Date.now();
+      const message = authMessage({
+        address,
+        nonce: nonceData.nonceForAddress.nonce.toString(),
+        chainId: provider.network.chainId,
+        domain: process.env.NEXT_PUBLIC_APP_NAME,
+        expirationTime:
+          now + Number(process.env.SIWE_EXPIRATION_TIME_SECONDS) * 1000,
+        issuedAt: now,
+        uri: process.env.NEXT_PUBLIC_JWT_CLAIM_ISSUER ?? "",
+        version: "1",
+      });
       const signer = provider.getSigner();
       signer.signMessage(message).then(
         (signature) => {
@@ -149,6 +160,8 @@ function useAuthContext() {
                 variables: {
                   address,
                   jwe,
+                  chainId: provider.network.chainId,
+                  issuedAt: now.toString(),
                 },
               });
             })

@@ -23,7 +23,7 @@ function asGsi2Pk(pk: string): GSI2PK {
   return pk as GSI2PK;
 }
 
-export interface IDB {
+export interface INameFlickDB {
   pk: TPK;
   GSI1PK: GSI1PK;
   GSI2PK?: GSI2PK;
@@ -46,7 +46,7 @@ export interface IDB {
   ["text!org.telegram"]?: string;
 }
 
-export function nameflickToDb(nameflick: INameFlick): IDB {
+export function nameflickToDb(nameflick: INameFlick): INameFlickDB {
   const rootDomain = nameflick.normalized.split(".").slice(-2).join(".");
   return {
     pk: asPk(nameflick.normalized),
@@ -154,15 +154,15 @@ function dbToNameflick(nameflick: Record<string, any>): INameFlick {
  *  fields... (see INameFlick)
  *
  * @example
- *  pk                   | GSI1PK           | GSI2PK      | fields...
- * +---------------------+------------------+-------------+
- * | example.eth         | example.eth      | 0xbadbeef01 |
- * | *.example.eth       | example.eth      |             |
- * | foo.example.eth     | example.eth      | 0xbadbeef03 |
- * | foo.bar.example.eth | example.eth      | 0xbadbeef04 |
- * +---------------------+------------------+-------------+
+ *  pk                   | GSI1PK           | GSI2PK      | GSI2PK   fields...
+ * +---------------------+------------------+-------------+---------
+ * | example.eth         | example.eth      | 0xbadbeef01 | 0xabcd...
+ * | *.example.eth       | example.eth      |             | 0xabce...
+ * | foo.example.eth     | example.eth      | 0xbadbeef03 | 0xabcf...
+ * | foo.bar.example.eth | example.eth      | 0xbadbeef04 | 0xabcg...
+ * +---------------------+------------------+-------------+---------
  */
-export class NameFlickDao {
+export class NameFlickDAO {
   public static TABLE_NAME = process.env.TABLE_NAME_NAMEFLICK || "NameFlick";
   private db: DynamoDBDocumentClient;
 
@@ -173,7 +173,7 @@ export class NameFlickDao {
   public async createOrUpdate(nameflick: INameFlick): Promise<void> {
     await this.db.send(
       new PutCommand({
-        TableName: NameFlickDao.TABLE_NAME,
+        TableName: NameFlickDAO.TABLE_NAME,
         Item: nameflickToDb(nameflick),
       })
     );
@@ -182,7 +182,7 @@ export class NameFlickDao {
   public async getByNormalizedName(pk: string): Promise<INameFlick | null> {
     const result = await this.db.send(
       new GetCommand({
-        TableName: NameFlickDao.TABLE_NAME,
+        TableName: NameFlickDAO.TABLE_NAME,
         Key: { pk },
       })
     );
@@ -195,7 +195,7 @@ export class NameFlickDao {
   public async getByEnsHash(ensHash: string): Promise<INameFlick | null> {
     const result = await this.db.send(
       new QueryCommand({
-        TableName: NameFlickDao.TABLE_NAME,
+        TableName: NameFlickDAO.TABLE_NAME,
         IndexName: "GSI2",
         KeyConditionExpression: "GSI2PK = :ensHash",
         ExpressionAttributeValues: {
@@ -212,7 +212,7 @@ export class NameFlickDao {
   public async getByRootDomainName(rootDomain: string): Promise<INameFlick[]> {
     const result = await this.db.send(
       new QueryCommand({
-        TableName: NameFlickDao.TABLE_NAME,
+        TableName: NameFlickDAO.TABLE_NAME,
         IndexName: "GSI1",
         KeyConditionExpression: "GSI1PK = :rootDomain",
         ExpressionAttributeValues: {
@@ -226,10 +226,30 @@ export class NameFlickDao {
     return result.Items.map(dbToNameflick);
   }
 
-  public async delete(pk: TPK): Promise<void> {
+  public async reverseLookup(address: string): Promise<INameFlick[]> {
+    const result = await this.db.send(
+      new QueryCommand({
+        TableName: NameFlickDAO.TABLE_NAME,
+        IndexName: "GSI3",
+        KeyConditionExpression: "#eth = :address",
+        ExpressionAttributeValues: {
+          ":address": address,
+        },
+        ExpressionAttributeNames: {
+          "#eth": `address!eth`,
+        },
+      })
+    );
+    if (!result.Items || result.Items.length === 0) {
+      return [];
+    }
+    return result.Items.map(dbToNameflick);
+  }
+
+  public async deleteByFqdn(pk: string): Promise<void> {
     await this.db.send(
       new DeleteCommand({
-        TableName: NameFlickDao.TABLE_NAME,
+        TableName: NameFlickDAO.TABLE_NAME,
         Key: { pk },
       })
     );

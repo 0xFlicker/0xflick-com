@@ -36,7 +36,7 @@ const func: DeployFunction = async ({
     console.log(`Setting the root tld`);
     await registry.setSubnodeOwner(
       "0x0000000000000000000000000000000000000000000000000000000000000000",
-      utils.namehash("eth"),
+      utils.id("eth"),
       deployer,
       { from: deployer }
     );
@@ -65,6 +65,13 @@ const func: DeployFunction = async ({
     deployer,
     { from: deployer }
   );
+  console.log(`Registering flick's ENS domain`);
+  await registry.setSubnodeOwner(
+    ethers.utils.namehash("eth"),
+    ethers.utils.id("nameflick"),
+    deployer,
+    { from: deployer }
+  );
   console.log(`Setting the registrar`);
   await registry.setResolver(
     utils.namehash("cmdrnft.eth"),
@@ -75,6 +82,13 @@ const func: DeployFunction = async ({
   );
   await registry.setResolver(
     utils.namehash("0xflick.eth"),
+    resolverDeployment.address,
+    {
+      from: deployer,
+    }
+  );
+  await registry.setResolver(
+    utils.namehash("nameflick.eth"),
     resolverDeployment.address,
     {
       from: deployer,

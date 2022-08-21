@@ -146,6 +146,31 @@ export class DynamoDB extends cdk.Stack {
       value: drinkerTable.tableName,
     });
 
+    const nameflickTable = new dynamodb.Table(this, "Nameflick", {
+      partitionKey: { name: "pk", type: dynamodb.AttributeType.STRING },
+      tableClass: dynamodb.TableClass.STANDARD,
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+    });
+
+    nameflickTable.addGlobalSecondaryIndex({
+      indexName: "GSI1",
+      partitionKey: { name: "GSI1PK", type: dynamodb.AttributeType.STRING },
+    });
+    nameflickTable.addGlobalSecondaryIndex({
+      indexName: "GSI2",
+      partitionKey: { name: "GSI2PK", type: dynamodb.AttributeType.STRING },
+    });
+    nameflickTable.addGlobalSecondaryIndex({
+      indexName: "GSI3",
+      partitionKey: {
+        name: "address!eth",
+        type: dynamodb.AttributeType.STRING,
+      },
+    });
+    new cdk.CfnOutput(this, "NameflickTable", {
+      value: nameflickTable.tableName,
+    });
+
     const urlShortenerTable = new dynamodb.Table(this, "UrlShortener", {
       partitionKey: { name: "pk", type: dynamodb.AttributeType.STRING },
       timeToLiveAttribute: "expires",
@@ -186,6 +211,11 @@ export class DynamoDB extends cdk.Stack {
       parameterName: `ExternalAuth_TableArn`,
       stringValue: userNonceTable.tableArn,
     });
+    new ssm.StringParameter(this, "Nameflick_TableArn", {
+      description: "The Nameflick table ARN",
+      parameterName: `Nameflick_TableArn`,
+      stringValue: nameflickTable.tableArn,
+    });
 
     // // Create a new SSM Parameter holding the table name, because we can
     // // not pass env vars into edge lambdas
@@ -194,6 +224,7 @@ export class DynamoDB extends cdk.Stack {
       parameterName: `${id}_TableNames`,
       stringValue: JSON.stringify({
         userNonceTable: userNonceTable.tableName,
+        nameflickTable: nameflickTable.tableName,
         rolesTable: rolesTable.tableName,
         rolesPermissionsTable: rolesPermissionsTable.tableName,
         userRolesTable: userRolesTable.tableName,

@@ -51,4 +51,4 @@ const func: DeployFunction = async ({
   }
 };
 export default func;
-func.tags = ["test"];
+func.tags = ["test", "production"];

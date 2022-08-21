@@ -2,6 +2,7 @@
 pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "./IExtendedResolver.sol";
 import "./SignatureVerifier.sol";
 
@@ -20,7 +21,7 @@ interface IResolverService {
  * Implements an ENS resolver that directs all queries to a CCIP read gateway.
  * Callers must implement EIP 3668 and ENSIP 10.
  */
-contract OffchainResolver is IExtendedResolver, ERC165 {
+contract OffchainResolver is IExtendedResolver, ERC165, Ownable {
   string public url;
   mapping(address => bool) public signers;
   address public parentContract;
@@ -45,6 +46,10 @@ contract OffchainResolver is IExtendedResolver, ERC165 {
       signers[_signers[i]] = true;
     }
     emit NewSigners(_signers);
+  }
+
+  function setOffchainResolver(string memory _url) external onlyOwner {
+    url = _url;
   }
 
   function makeSignatureHash(

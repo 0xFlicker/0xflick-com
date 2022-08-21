@@ -1,5 +1,14 @@
 {
-  "cSpell.words": ["appbar", "ipfs", "multiformats", "nameflick", "Prefetch"],
+  "cSpell.words": [
+    "appbar",
+    "ipfs",
+    "multiformats",
+    "nameflick",
+    "Offchain",
+    "Prefetch",
+    "SIWE",
+    "swie"
+  ],
   "sops.keys.aws.profile": "0xflick-portfolio-admin",
   "sops.defaults.awsProfile": "0xflick-portfolio-admin"
 }

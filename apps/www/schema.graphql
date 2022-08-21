@@ -58,8 +58,10 @@ input PermissionInput {
 type Role {
   id: ID!
   name: String!
+  userCount: Int!
   permissions: [Permission!]!
   bindToUser(userAddress: String!): Web3User!
+  unbindFromUser(userAddress: String!): Web3User!
 }
 
 type MetadataProperties {
@@ -118,10 +120,9 @@ type Query {
 
 type Mutation {
   nonceForAddress(address: String!): Nonce
-  signIn(address: String!, jwe: String!): Web3LoginUser
+  signIn(address: String!, jwe: String!, issuedAt: String!, chainId: Int!): Web3LoginUser
   signOut: Boolean!
   self: Web3User
   role(id: ID!): Role!
   createRole(name: String!, permissions: [PermissionInput!]!): Role!
-  bindRoleToUser(roleId: ID!, userAddress: ID!): Boolean!
 }

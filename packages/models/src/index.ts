@@ -13,3 +13,4 @@ export * from "./token";
 export * from "./urlShortener";
 export * from "./user";
 export * from "./userRoles";
+export { coinTypeToName } from "./coinTypes";

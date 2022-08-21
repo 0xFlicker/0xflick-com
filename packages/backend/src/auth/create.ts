@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { utils } from "ethers";
 import { getDb } from "../db/dynamodb";
 import { UserDAO } from "../db/user";
-import { authMessage } from "@0xflick/models";
+import { authMessage, TokenModel } from "@0xflick/models";
 import { createJwtToken, decryptJweToken } from "../db/token";
 import { UserRolesDAO } from "../db/userRoles";
 import { fetchTableNames, getOwner } from "../helpers";
@@ -20,6 +20,16 @@ const userDao = new UserDAO(db);
 const userRolesDao = new UserRolesDAO(db);
 
 const promiseTableNames = fetchTableNames();
+
+if (!process.env.SIWE_EXPIRATION_TIME_SECONDS) {
+  throw new Error("SIWE_EXPIRATION_TIME_SECONDS is not set");
+}
+const siweExpirationTime =
+  parseInt(process.env.SIWE_EXPIRATION_TIME_SECONDS, 10) * 1000;
+if (!process.env.NEXT_PUBLIC_APP_NAME) {
+  throw new Error("NEXT_PUBLIC_APP_NAME is not set");
+}
+const appName = process.env.NEXT_PUBLIC_APP_NAME;
 
 export default async function handler(
   req: NextApiRequest,
@@ -43,7 +53,11 @@ export default async function handler(
 
     // The body of the request contains the signature of the message
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
-    const { jwe } = body as { jwe: string };
+    const { jwe, issuedAt, chainId } = body as {
+      jwe: string;
+      issuedAt: number;
+      chainId: number;
+    };
     if (!jwe) {
       return res.status(400).json({ error: "JWE is required" });
     }
@@ -55,12 +69,22 @@ export default async function handler(
     const { protectedHeader, plaintext } = await decryptJweToken(jwe);
     const signature = Buffer.from(plaintext).toString("utf8");
     const nonce: number = Number(protectedHeader.kid);
+
     const nonceFromDb = userFromDb ? userFromDb.nonce : 0;
 
     if (nonceFromDb !== nonce) {
       return res.status(400).json({ error: "Nonce is invalid" });
     }
-    const userAuthMessage = authMessage(nonce.toString());
+    const userAuthMessage = authMessage({
+      address,
+      chainId,
+      domain: appName,
+      expirationTime: issuedAt + siweExpirationTime,
+      issuedAt,
+      nonce: nonce.toString(),
+      uri: TokenModel.JWT_CLAIM_ISSUER,
+      version: "1",
+    });
     const verifiedAddress = utils.verifyMessage(userAuthMessage, signature);
     if (verifiedAddress.toLowerCase() !== address.toLowerCase()) {
       return res.status(400).json({ error: "Signature is invalid" });

@@ -115,6 +115,7 @@ const config: HardhatUserConfig = {
     mainnet: {
       url: node_url("mainnet"),
       accounts: accounts("mainnet"),
+      gasPrice: utils.parseUnits("4", "gwei").toNumber(),
     },
     kovan: {
       url: node_url("kovan"),
@@ -140,7 +141,7 @@ const config: HardhatUserConfig = {
   }),
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,
-    gasPrice: 30,
+    gasPrice: 4,
     currency: "USD",
     coinmarketcap: process.env.COINMARKETCAP_API_KEY,
   },

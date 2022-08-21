@@ -13,6 +13,7 @@ import { IpfsStack } from "./ipfs.js";
 import { AssetStack } from "./assets.js";
 import { GraphqlStack } from "./graphql.js";
 import { DynamoDB } from "./dynamodb.js";
+import { NameflickStack } from "./nameflick.js";
 
 const secretsJson = jsonFromSecret("deploy-secrets.json");
 const jwtJson = jsonFromSecret("jwt-secret.json");
@@ -76,7 +77,15 @@ new Redirects(app, "Redirects", {
   },
 });
 new OrganizationStack(app, "Bootstrap");
-
+new NameflickStack(app, "NameflickBeta", {
+  domain: ["nameflick-beta", "0xflick.com"],
+  privateKey: secretsJson.privateKey,
+  web3RpcUrl: secretsJson.chains["1"].rpc,
+  env: {
+    account: process.env.CDK_DEFAULT_ACCOUNT,
+    region: process.env.CDK_DEFAULT_REGION,
+  },
+});
 new WwwStack(app, "www", {
   domain: "0xflick.com",
   graphqlApiUrl: "6kjnzpunu3.execute-api.us-east-2.amazonaws.com",

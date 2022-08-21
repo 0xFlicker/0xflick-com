@@ -4,7 +4,6 @@ import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 let instance: DynamoDBDocumentClient;
 
 export function createDb(opts?: DynamoDBClientConfig) {
-  const isTest = process.env.NODE_ENV === "test";
   const config = {
     endpoint: process.env.DYNAMODB_ENDPOINT,
     region: process.env.DYNAMODB_REGION || "us-east-1",

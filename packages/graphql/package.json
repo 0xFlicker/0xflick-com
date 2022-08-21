@@ -5,9 +5,12 @@
   "main": "src/index.ts",
   "license": "MIT",
   "scripts": {
-    "schema:build": "ts-node ./src/schema.ts"
+    "schema:types": "yarn graphql-codegen --config codegen.yml",
+    "schema:build": "SIWE_EXPIRATION_TIME_SECONDS=604800 NEXT_PUBLIC_APP_NAME=example ts-node ./src/schema.ts"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "^2.11.6",
+    "@graphql-codegen/typescript": "^2.7.3",
     "@types/node": "^18.0.6",
     "typescript": "^4.7.4"
   },

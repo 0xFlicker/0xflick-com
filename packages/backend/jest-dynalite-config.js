@@ -155,6 +155,8 @@ module.exports = {
         AttributeName: "GSI1PK", AttributeType: "S"
       }, {
         AttributeName: "GSI2PK", AttributeType: "S"
+      }, {
+        AttributeName: "address!eth", AttributeType: "S"
       }],
       BillingMode: "PAY_PER_REQUEST",
       GlobalSecondaryIndexes: [{
@@ -164,6 +166,10 @@ module.exports = {
       }, {
         IndexName: 'GSI2',
         KeySchema: [{ AttributeName: "GSI2PK", KeyType: "HASH" }],
+        Projection: { ProjectionType: "ALL" },
+      }, {
+        IndexName: 'GSI3',
+        KeySchema: [{ AttributeName: "address!eth", KeyType: "HASH" }],
         Projection: { ProjectionType: "ALL" },
       }]
     }],

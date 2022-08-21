@@ -22,9 +22,18 @@ import {
   queryResolvers as queryResolversAdmin,
   resolvers as resolversAdmin,
 } from "./admin";
+import {
+  typeSchema as typeSchemaNameflick,
+  querySchema as querySchemaNameflick,
+  mutationResolvers as mutationResolversNameflick,
+  mutationSchema as mutationSchemaNameflick,
+  queryResolvers as queryResolversNameflick,
+  resolvers as resolversNameflick,
+} from "./nameflick";
 import { TGraphqlResolver } from "../types";
 
 export const typeDefs = gql`
+  ${typeSchemaNameflick}
   ${typeSchemaChain}
   ${typeSchemaAuth}
   ${typeSchemaAdmin}
@@ -71,12 +80,14 @@ export const typeDefs = gql`
   }
 
   type Query {
+    ${querySchemaNameflick}
     ${querySchemaChain}
     ${querySchemaAuth}
     ${querySchemaAdmin}
   }
 
   type Mutation {
+    ${mutationSchemaNameflick}
     ${mutationSchemaAuth}
     ${mutationSchemaAdmin}
   }
@@ -84,11 +95,13 @@ export const typeDefs = gql`
 
 export const resolvers = {
   Query: {
+    ...queryResolversNameflick,
     ...queryResolversChain,
     ...queryResolversAuth,
     ...queryResolversAdmin,
   },
   Mutation: {
+    ...mutationResolversNameflick,
     ...mutationResolversAuth,
     ...mutationResolvesAdmin,
   },
@@ -98,4 +111,5 @@ export const resolvers = {
   ...resolversChain,
   ...resolversAuth,
   ...resolversAdmin,
+  ...resolversNameflick,
 } as TGraphqlResolver;

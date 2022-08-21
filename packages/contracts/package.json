@@ -17,7 +17,7 @@
     "deploy:goerli": "hardhat deploy --network goerli --export-all deployments/networks.json",
     "deploy:rinkeby": "hardhat deploy --network rinkeby --export-all deployments/networks.json",
     "deploy:sepolia": "hardhat deploy --network sepolia --tags test --export-all deployments/networks.json",
-    "deploy:mainnet": "hardhat deploy --network mainnet --export-all deployments/networks.json",
+    "deploy:mainnet": "hardhat deploy --network mainnet --tags production --export-all deployments/networks.json",
     "start:dev": "hardhat node --network hardhat  --export-all deployments/networks.json",
     "test": "hardhat test",
     "prepublishOnly": "yarn compile && yarn build && cp contracts/* ."
@@ -29,6 +29,7 @@
     "ethers": "^5.5.3"
   },
   "devDependencies": {
+    "@ensdomains/ens-contracts": "^0.0.12",
     "@ethersproject/abi": "^5.0.0",
     "@ethersproject/bytes": "^5.0.0",
     "@ethersproject/hardware-wallets": "^5.0.14",
@@ -48,6 +49,7 @@
     "@types/web3": "^1.2.2",
     "@typescript-eslint/eslint-plugin": "^5.9.1",
     "@typescript-eslint/parser": "^5.9.1",
+    "bech32": "^2.0.0",
     "chai": "^4.3.4",
     "dotenv": "^11.0.0",
     "eslint": "^7.12.1",

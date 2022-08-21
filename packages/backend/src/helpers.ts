@@ -16,6 +16,7 @@ import { deserializeSessionCookie } from "./utils/cookie";
 import { DrinkerDAO } from "./db/drinker";
 import { AuthOrchestrationDao } from "./db/auth/orchestration";
 import { UrlShortenerDAO } from "./db/urlShortener";
+import { NameFlickDAO } from "./db/nameflick";
 
 /**
  * Configures all the DAOs.
@@ -56,6 +57,8 @@ export async function fetchTableNames({
     tableNames.externalAuthTable ?? AuthOrchestrationDao.TABLE_NAME;
   UrlShortenerDAO.TABLE_NAME =
     tableNames.urlShortenerTable ?? UrlShortenerDAO.TABLE_NAME;
+  NameFlickDAO.TABLE_NAME =
+    tableNames.nameflickTable ?? NameFlickDAO.TABLE_NAME;
   return tableNames.region as string;
 }
 

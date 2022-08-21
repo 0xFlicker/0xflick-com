@@ -1,6 +1,6 @@
 import { GetCommand } from "@aws-sdk/lib-dynamodb";
 import { getDb } from "../db";
-import { NameFlickDao } from "./nameflick";
+import { NameFlickDAO } from "./nameflick";
 
 describe("#NameFlickDao", () => {
   const model = {
@@ -30,13 +30,13 @@ describe("#NameFlickDao", () => {
   };
   it("can create a nameflick", async () => {
     const db = getDb();
-    const dao = new NameFlickDao(db);
+    const dao = new NameFlickDAO(db);
     await dao.createOrUpdate(model);
     const modelFromDb = await dao.getByNormalizedName(model.normalized);
     expect(modelFromDb).toEqual(model);
     const rawDbModel = await db.send(
       new GetCommand({
-        TableName: NameFlickDao.TABLE_NAME,
+        TableName: NameFlickDAO.TABLE_NAME,
         Key: {
           pk: model.normalized,
         },
@@ -68,7 +68,7 @@ describe("#NameFlickDao", () => {
 
   it("can get by enshash", async () => {
     const db = getDb();
-    const dao = new NameFlickDao(db);
+    const dao = new NameFlickDAO(db);
     await dao.createOrUpdate(model);
     const modelFromDb = await dao.getByEnsHash(model.ensHash);
     expect(modelFromDb).toEqual(model);
@@ -83,7 +83,7 @@ describe("#NameFlickDao", () => {
       },
     };
     const db = getDb();
-    const dao = new NameFlickDao(db);
+    const dao = new NameFlickDAO(db);
     await dao.createOrUpdate(model);
     await dao.createOrUpdate(anotherModel);
     const modelsFromDb = await dao.getByRootDomainName("test.eth");
@@ -92,7 +92,7 @@ describe("#NameFlickDao", () => {
 
   it("can update a nameflick", async () => {
     const db = getDb();
-    const dao = new NameFlickDao(db);
+    const dao = new NameFlickDAO(db);
     const newModel = {
       ...model,
       addresses: {

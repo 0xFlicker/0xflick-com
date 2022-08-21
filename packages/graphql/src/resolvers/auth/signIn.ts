@@ -21,14 +21,14 @@ export interface IGraphqlWeb3LoginUser {
 }
 
 export const mutationSchema = `
-  signIn(address: String!, jwe: String!): Web3LoginUser
+  signIn(address: String!, jwe: String!, issuedAt: String!, chainId: Int!): Web3LoginUser
 `;
 
 export const mutations = {
   signIn: (async (
     _,
-    { address, jwe },
-    { userDao, userRolesDao, setToken, clearToken }
+    { address, jwe, issuedAt: issuedAtStr, chainId },
+    { userDao, userRolesDao, setToken, clearToken, config }
   ) => {
     // Check if the user is already registered
     const userFromDb = await userDao.getUserWithRoles(userRolesDao, address);
@@ -43,7 +43,17 @@ export const mutations = {
       clearToken();
       throw new AuthError("Invalid nonce", "INVALID_NONCE");
     }
-    const userAuthMessage = authMessage(nonce.toString());
+    const issuedAt = Number(issuedAtStr);
+    const userAuthMessage = authMessage({
+      address,
+      chainId,
+      domain: config.swie.domain,
+      expirationTime: issuedAt + config.swie.expirationTime,
+      issuedAt,
+      nonce: nonce.toString(),
+      uri: config.swie.uri,
+      version: config.swie.version,
+    });
     const verifiedAddress = utils.verifyMessage(userAuthMessage, signature);
     if (verifiedAddress.toLowerCase() !== address.toLowerCase()) {
       clearToken();
@@ -84,7 +94,7 @@ export const mutations = {
   }) as IFieldResolver<
     any,
     TContext,
-    { address: string; jwe: string },
+    { address: string; jwe: string; issuedAt: string; chainId: number },
     Promise<IGraphqlWeb3LoginUser>
   >,
 } as TGraphqlResolver;

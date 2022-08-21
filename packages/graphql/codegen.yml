@@ -1,0 +1,5 @@
+overwrite: true
+schema: "src/resolvers/**/*.ts"
+generates:
+  src/types.generated.ts:
+    - typescript
