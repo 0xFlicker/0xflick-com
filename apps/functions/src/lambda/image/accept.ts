@@ -24,6 +24,21 @@ export const handler = async (
   // fetch the uri of original image
   let fwdUri = request.uri;
 
+  // Special case for NFTW Genesis avatars
+  console.log("request.uri", request.uri);
+  if (fwdUri.startsWith("/nftwgas/")) {
+    const imageName = fwdUri.replace("/nftwgas/", "");
+
+    const url = ["/ipfs", "nftwgas", "64x64", "png", `${imageName}.png`];
+
+    fwdUri = url.join("/");
+
+    // final modified url is of format /images/200x200/webp/image.jpg
+    console.log(`Forwarding ${fwdUri}`);
+    request.uri = fwdUri;
+    return request;
+  }
+
   // if there is no dimension attribute, just pass the request
   if (!params.get("w") && !params.get("h")) {
     return request;
@@ -35,10 +50,11 @@ export const handler = async (
   const h = params.get("h");
   const heightAuto = h === null || h === "auto";
 
+  const f = params.get("f");
+
   // set the width and height parameters
   const width = widthAuto ? "auto" : w;
   const height = heightAuto ? "auto" : h;
-
   // parse the prefix, image name and extension from the uri.
   // In our case /images/image.jpg
 
@@ -92,7 +108,9 @@ export const handler = async (
   url.push(width + "x" + height);
 
   // check support for webp
-  if (accept.includes(variables.webpExtension)) {
+  if (f !== null) {
+    url.push(f);
+  } else if (accept.includes(variables.webpExtension)) {
     url.push(variables.webpExtension);
   } else {
     url.push(extension);

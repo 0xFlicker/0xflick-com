@@ -22,8 +22,8 @@ extend({
   Html,
 });
 
-const rsqw = (t, delta = 0.1, a = 1, f = 1 / (2 * Math.PI)) =>
-  (a / Math.atan(1 / delta)) * Math.atan(Math.sin(2 * Math.PI * t * f) / delta);
+// Can't seem to find where this comes from in drei
+type HtmlProps = any;
 
 export const HeroBackground: FC<{}> = ({}) => {
   return (

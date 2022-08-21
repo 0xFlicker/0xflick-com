@@ -71,7 +71,9 @@ export type MetadataProperties = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  createOrUpdateNameflick: Nameflick;
   createRole: Role;
+  deleteNameflick: Scalars['Boolean'];
   nonceForAddress?: Maybe<Nonce>;
   role: Role;
   self?: Maybe<Web3User>;
@@ -80,9 +82,21 @@ export type Mutation = {
 };
 
 
+export type MutationCreateOrUpdateNameflickArgs = {
+  domain: Scalars['ID'];
+  fields: NameflickFieldsInput;
+  ttl?: InputMaybe<Scalars['Int']>;
+};
+
+
 export type MutationCreateRoleArgs = {
   name: Scalars['String'];
   permissions: Array<PermissionInput>;
+};
+
+
+export type MutationDeleteNameflickArgs = {
+  domain: Scalars['ID'];
 };
 
 
@@ -101,6 +115,68 @@ export type MutationSignInArgs = {
   chainId: Scalars['Int'];
   issuedAt: Scalars['String'];
   jwe: Scalars['String'];
+};
+
+export type Nameflick = {
+  __typename?: 'Nameflick';
+  addresses: NameflickAddress;
+  content?: Maybe<Scalars['String']>;
+  domain: Scalars['ID'];
+  ensHash?: Maybe<Scalars['String']>;
+  etherscan: Scalars['String'];
+  rootDomain: Scalars['String'];
+  textRecord: NameflickTextRecord;
+  ttl?: Maybe<Scalars['Int']>;
+};
+
+export type NameflickAddress = {
+  __typename?: 'NameflickAddress';
+  btc?: Maybe<Scalars['String']>;
+  doge?: Maybe<Scalars['String']>;
+  eth?: Maybe<Scalars['String']>;
+  ltc?: Maybe<Scalars['String']>;
+};
+
+export type NameflickAddressInput = {
+  btc?: InputMaybe<Scalars['String']>;
+  doge?: InputMaybe<Scalars['String']>;
+  eth?: InputMaybe<Scalars['String']>;
+  ltc?: InputMaybe<Scalars['String']>;
+};
+
+export type NameflickFieldsInput = {
+  addresses?: InputMaybe<NameflickAddressInput>;
+  content?: InputMaybe<Scalars['String']>;
+  textRecord?: InputMaybe<NameflickTextRecordInput>;
+};
+
+export type NameflickTextRecord = {
+  __typename?: 'NameflickTextRecord';
+  avatar?: Maybe<Scalars['String']>;
+  comDiscord?: Maybe<Scalars['String']>;
+  comGithub?: Maybe<Scalars['String']>;
+  comReddit?: Maybe<Scalars['String']>;
+  comTwitter?: Maybe<Scalars['String']>;
+  description?: Maybe<Scalars['String']>;
+  email?: Maybe<Scalars['String']>;
+  keywords?: Maybe<Scalars['String']>;
+  notice?: Maybe<Scalars['String']>;
+  orgTelegram?: Maybe<Scalars['String']>;
+  url?: Maybe<Scalars['String']>;
+};
+
+export type NameflickTextRecordInput = {
+  avatar?: InputMaybe<Scalars['String']>;
+  comDiscord?: InputMaybe<Scalars['String']>;
+  comGithub?: InputMaybe<Scalars['String']>;
+  comReddit?: InputMaybe<Scalars['String']>;
+  comTwitter?: InputMaybe<Scalars['String']>;
+  description?: InputMaybe<Scalars['String']>;
+  email?: InputMaybe<Scalars['String']>;
+  keywords?: InputMaybe<Scalars['String']>;
+  notice?: InputMaybe<Scalars['String']>;
+  orgTelegram?: InputMaybe<Scalars['String']>;
+  url?: InputMaybe<Scalars['String']>;
 };
 
 export type Nft = {
@@ -164,6 +240,9 @@ export enum PermissionResource {
 export type Query = {
   __typename?: 'Query';
   chain: ChainQuery;
+  nameflickByEnsHash?: Maybe<Nameflick>;
+  nameflickByFqdn?: Maybe<Nameflick>;
+  nameflicksByRootDomain: Array<Nameflick>;
   role: Role;
   self?: Maybe<Web3User>;
 };
@@ -171,6 +250,21 @@ export type Query = {
 
 export type QueryChainArgs = {
   id: Scalars['ID'];
+};
+
+
+export type QueryNameflickByEnsHashArgs = {
+  ensHash: Scalars['String'];
+};
+
+
+export type QueryNameflickByFqdnArgs = {
+  fqdn: Scalars['ID'];
+};
+
+
+export type QueryNameflicksByRootDomainArgs = {
+  rootDomain: Scalars['String'];
 };
 
 

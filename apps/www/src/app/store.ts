@@ -12,6 +12,7 @@ import { reducer as authApiReducer } from "features/auth/api";
 import { reducer as appbarReducer } from "features/appbar/redux";
 import { reducer as nftCollectionApiReducer } from "features/nft-collection/api";
 import { reducer as twitterApiReducer } from "features/twitter/api";
+import { reducer as resolverReducer } from "features/resolver/redux";
 
 export const store = configureStore({
   reducer: {
@@ -26,6 +27,7 @@ export const store = configureStore({
     appbar: appbarReducer,
     apiNftCollection: nftCollectionApiReducer,
     twitterApi: twitterApiReducer,
+    resolver: resolverReducer,
   },
   devTools: process.env.NODE_ENV !== "production",
 });

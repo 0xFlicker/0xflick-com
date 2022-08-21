@@ -1,3 +1,62 @@
+type NameflickAddress {
+  eth: String
+  btc: String
+  ltc: String
+  doge: String
+}
+
+type NameflickTextRecord {
+  email: String
+  avatar: String
+  description: String
+  comDiscord: String
+  comGithub: String
+  url: String
+  notice: String
+  keywords: String
+  comReddit: String
+  comTwitter: String
+  orgTelegram: String
+}
+
+type Nameflick {
+  domain: ID!
+  ensHash: String
+  rootDomain: String!
+  ttl: Int
+  addresses: NameflickAddress!
+  content: String
+  textRecord: NameflickTextRecord!
+  etherscan: String!
+}
+
+input NameflickAddressInput {
+  eth: String
+  btc: String
+  ltc: String
+  doge: String
+}
+
+input NameflickTextRecordInput {
+  email: String
+  avatar: String
+  description: String
+  comDiscord: String
+  comGithub: String
+  url: String
+  notice: String
+  keywords: String
+  comReddit: String
+  comTwitter: String
+  orgTelegram: String
+}
+
+input NameflickFieldsInput {
+  addresses: NameflickAddressInput
+  content: String
+  textRecord: NameflickTextRecordInput
+}
+
 type ChainQuery {
   chainId: String!
   chainName: String!
@@ -113,12 +172,17 @@ type Flick {
 }
 
 type Query {
+  nameflickByFqdn(fqdn: ID!): Nameflick
+  nameflickByEnsHash(ensHash: String!): Nameflick
+  nameflicksByRootDomain(rootDomain: String!): [Nameflick!]!
   chain(id: ID!): ChainQuery!
   self: Web3User
   role(id: ID!): Role!
 }
 
 type Mutation {
+  createOrUpdateNameflick(domain: ID!, ttl: Int, fields: NameflickFieldsInput!): Nameflick!
+  deleteNameflick(domain: ID!): Boolean!
   nonceForAddress(address: String!): Nonce
   signIn(address: String!, jwe: String!, issuedAt: String!, chainId: Int!): Web3LoginUser
   signOut: Boolean!

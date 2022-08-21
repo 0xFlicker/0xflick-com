@@ -1,0 +1,15 @@
+mutation submitPublicResolver(
+  $domain: ID!
+  $addressEth: String!
+  $textRecordEmail: String
+) {
+  createOrUpdateNameflick(
+    domain: $domain
+    fields: {
+      addresses: { eth: $addressEth }
+      textRecord: { email: $textRecordEmail }
+    }
+  ) {
+    etherscan
+  }
+}

@@ -18,8 +18,10 @@ import {
   Container,
   Typography,
 } from "@mui/material";
+import { ResolverFormDemo } from "features/resolver/components/ResolverFormDemo";
 import { HeroBackground } from "./HeroBackground";
 import { useSpring, animated, config } from "react-spring";
+import { FAQ } from "./FAQ";
 
 const SlideFromSide: FC<
   PropsWithChildren<{
@@ -54,51 +56,6 @@ const SlideFromSide: FC<
   );
 };
 
-const FAQ: FC = () => {
-  return (
-    <>
-      <Card>
-        <Accordion>
-          <AccordionSummary>
-            <Typography variant="h6">
-              What is the purpose of this website?
-            </Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Typography>
-              This website is a tool to help you find the best place to stay
-              during your stay in the Netherlands.
-            </Typography>
-          </AccordionDetails>
-        </Accordion>
-        <Accordion>
-          <AccordionSummary>
-            <Typography variant="h6">How do I use this website?</Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Typography>
-              You can use the search bar to find the best place to stay.
-            </Typography>
-          </AccordionDetails>
-        </Accordion>
-        <Accordion>
-          <AccordionSummary>
-            <Typography variant="h6">
-              How do I add a place to the website?
-            </Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Typography>
-              You can add a place to the website by filling out the form on the
-              right.
-            </Typography>
-          </AccordionDetails>
-        </Accordion>
-      </Card>
-    </>
-  );
-};
-
 export const Hero: FC = () => {
   // const ignoreScroll: UIEventHandler<HTMLDivElement> = useCallback((event) => {
   //   event.preventDefault();
@@ -116,7 +73,7 @@ export const Hero: FC = () => {
     <>
       {/* <HeroBackground /> */}
 
-      <Parallax pages={7}>
+      <Parallax pages={8}>
         <ParallaxLayer
           offset={0}
           speed={0}
@@ -266,6 +223,11 @@ export const Hero: FC = () => {
           </Card>
         </ParallaxLayer>
         <ParallaxLayer offset={6}>
+          <Container sx={{ mt: 8 }}>
+            <ResolverFormDemo />
+          </Container>
+        </ParallaxLayer>
+        <ParallaxLayer offset={7}>
           <Container sx={{ mt: 8 }}>
             <FAQ />
           </Container>
