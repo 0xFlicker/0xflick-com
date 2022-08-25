@@ -4,11 +4,11 @@ export interface INameFlickTextRecord {
   email?: string;
   avatar?: string;
   description?: string;
-  ["com.discord"]?: string;
-  ["com.github"]?: string;
   url?: string;
   notice?: string;
   keywords?: string;
+  ["com.discord"]?: string;
+  ["com.github"]?: string;
   ["com.reddit"]?: string;
   ["com.twitter"]?: string;
   ["org.telegram"]?: string;
@@ -21,4 +21,5 @@ export interface INameFlick {
   addresses: TNameFlickAddresses;
   content?: string;
   textRecord: INameFlickTextRecord;
+  erc721?: string;
 }

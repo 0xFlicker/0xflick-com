@@ -29,6 +29,7 @@ export interface INameFlickDB {
   GSI1PK: GSI1PK;
   GSI2PK?: GSI2PK;
   ttl?: number;
+  erc721?: string;
   ["address_btc"]?: string;
   ["address_eth"]?: string;
   ["address_ltc"]?: string;
@@ -66,6 +67,7 @@ export function nameflickToDb(nameflick: INameFlick): INameFlickDB {
     ...(nameflick.addresses?.DOGE
       ? { ["address_doge"]: nameflick.addresses?.DOGE }
       : {}),
+    ...(nameflick.erc721 ? { erc721: nameflick.erc721 } : {}),
     ...(nameflick.content ? { content: nameflick.content } : {}),
     ...(nameflick.textRecord?.email
       ? { ["text_email"]: nameflick.textRecord?.email }
@@ -115,6 +117,7 @@ function dbToNameflick(nameflick: Record<string, any>): INameFlick {
       ...(nameflick["address_doge"] ? { DOGE: nameflick["address_doge"] } : {}),
     },
     content: nameflick.content,
+    erc721: nameflick.erc721,
     textRecord: {
       ...(nameflick["text_email"] ? { email: nameflick["text_email"] } : {}),
       ...(nameflick["text_avatar"] ? { avatar: nameflick["text_avatar"] } : {}),
