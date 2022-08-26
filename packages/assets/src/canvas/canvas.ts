@@ -6,5 +6,5 @@ export default async function createCanvas(width: number, height: number) {
     return canvas;
   }
   const Canvas = await import("canvas");
-  return Canvas.createCanvas(width, height);
+  return new Canvas.Canvas(width, height);
 }

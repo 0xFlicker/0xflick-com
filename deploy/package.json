@@ -10,7 +10,8 @@
     "deploy": "node --experimental-json-modules ./node_modules/.bin/cdk deploy",
     "build:layer:sharp": "bash ./scripts/build-layer-sharp.sh",
     "build:layer:ipfs": "bash ./scripts/build-layer-ipfs.sh",
-    "build:layer:axolotl": "bash ./scripts/build-layer-axolotl.sh"
+    "build:layer:axolotl": "bash ./scripts/build-layer-axolotl.sh",
+    "build:layer:nameflick-image": "bash ./scripts/build-layer-nameflick-image.sh"
   },
   "devDependencies": {
     "@serverless-stack/resources": "^1.1.2",

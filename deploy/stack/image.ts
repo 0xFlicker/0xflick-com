@@ -232,6 +232,56 @@ export class ImageStack extends cdk.Stack {
       "GET",
       new apigateway.LambdaIntegration(axolotlOrigin)
     );
+
+    const nameflickImageBucket = new s3.Bucket(this, "nameflick-image-bucket", {
+      publicReadAccess: true,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
+
+    const nameflickImage = new lambda.DockerImageFunction(
+      this,
+      "Image-Nameflick",
+      {
+        timeout: cdk.Duration.seconds(15),
+        code: lambda.DockerImageCode.fromImageAsset(
+          path.join(__dirname, "../.layers/nameflick-image"),
+          {
+            file: "../../docker/nameflick-image/Dockerfile",
+            cmd: ["index.handler"],
+            extraHash: "6",
+          }
+        ),
+        memorySize: 512,
+        environment: {
+          BUCKET_NAME: nameflickImageBucket.bucketName,
+        },
+      }
+    );
+    nameflickImageBucket.grantReadWrite(nameflickImage);
+    nameflickImageBucket.grantPutAcl(nameflickImage);
+    const nameflickImageHttpApi = new apigateway.RestApi(
+      this,
+      "nameflickImageApi",
+      {}
+    );
+    const nameflickImageResource = nameflickImageHttpApi.root
+      .addResource("nameflick-image")
+      .addResource("{wrapped}")
+      .addResource("{tokenId}");
+    nameflickImageResource.addCorsPreflight({
+      allowOrigins: [
+        "http://localhost:3000",
+        "https://localhost:9000",
+        "https://0xflick.com",
+        "https://nameflick.com",
+      ],
+      allowMethods: ["GET", "OPTION"],
+    });
+    nameflickImageResource.addMethod(
+      "GET",
+      new apigateway.LambdaIntegration(nameflickImage)
+    );
+
     const cf = new cloudfront.Distribution(this, "image-distribution", {
       additionalBehaviors: {
         "axolotl/*": {
@@ -253,6 +303,32 @@ export class ImageStack extends cdk.Stack {
             "axolotl-origin-cache-policy",
             {
               minTtl: cdk.Duration.hours(72),
+              queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
+              cookieBehavior: cloudfront.CacheCookieBehavior.none(),
+              headerBehavior:
+                cloudfront.CacheHeaderBehavior.allowList("origin"),
+            }
+          ),
+        },
+        "nameflick/*": {
+          origin: new origins.S3Origin(nameflickImageBucket),
+          cachePolicy: new cloudfront.CachePolicy(
+            this,
+            "nameflick-image-cache-policy",
+            {
+              defaultTtl: cdk.Duration.days(60),
+              minTtl: cdk.Duration.seconds(0),
+              maxTtl: cdk.Duration.days(30),
+            }
+          ),
+        },
+        "nameflick-image/*": {
+          origin: new origins.RestApiOrigin(nameflickImageHttpApi),
+          cachePolicy: new cloudfront.CachePolicy(
+            this,
+            "nameflick-image-origin-cache-policy",
+            {
+              minTtl: cdk.Duration.hours(24),
               queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
               cookieBehavior: cloudfront.CacheCookieBehavior.none(),
               headerBehavior:

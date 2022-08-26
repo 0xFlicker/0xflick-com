@@ -7,6 +7,7 @@ import operations from "./canvas/axolotlValley/generate";
 import createCanvas from "./canvas/canvas";
 import { renderCanvas } from "./canvas/core";
 import { resolve } from "path";
+import { generateNameflick } from "./generate-nameflick";
 
 const program = new Command();
 
@@ -61,8 +62,13 @@ function parseIntArg(value: string) {
   return parsedValue;
 }
 
+program.command("nameflick <name> <out>").action(async (name, out) => {
+  const buffer = await generateNameflick(name, 1);
+  await fs.promises.writeFile(out, buffer);
+});
+
 program
-  .command("generate")
+  .command("generate-all")
   .option("-n, --name <name>", "Name of collection", "Test")
   .option("-c, --count <number>", "Number of NFTs to generate", parseIntArg, 5)
   .option(

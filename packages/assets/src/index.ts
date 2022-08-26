@@ -5,3 +5,4 @@ export {
 } from "./canvas/axolotlValley/generate";
 export type { IAttributeMetadata } from "./canvas/axolotlValley/generate";
 export type { Image, Canvas } from "canvas";
+export * from "./generate-nameflick";

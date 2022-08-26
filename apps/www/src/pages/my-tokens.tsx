@@ -4,11 +4,11 @@ import { getStaticProps } from "locales";
 import { DefaultProvider } from "context/default";
 import { InitOptions } from "i18next";
 import { NextPage } from "next";
-import { Demo } from "layouts/Demo";
+import { MyTokens } from "layouts/MyTokens";
 
 export { getStaticProps };
 
-const HomePage: NextPage<{ i18n: InitOptions }> = ({ i18n }) => {
+const MyTokensPage: NextPage<{ i18n: InitOptions }> = ({ i18n }) => {
   return (
     <DefaultProvider i18n={i18n}>
       <Head>
@@ -19,4 +19,4 @@ const HomePage: NextPage<{ i18n: InitOptions }> = ({ i18n }) => {
     </DefaultProvider>
   );
 };
-export default HomePage;
+export default MyTokensPage;

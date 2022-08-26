@@ -13,6 +13,7 @@ import { reducer as appbarReducer } from "features/appbar/redux";
 import { reducer as nftCollectionApiReducer } from "features/nft-collection/api";
 import { reducer as twitterApiReducer } from "features/twitter/api";
 import { reducer as resolverReducer } from "features/resolver/redux";
+import { reducer as nameflickManageReducer } from "features/nameflick-manage/redux";
 
 export const store = configureStore({
   reducer: {
@@ -28,6 +29,7 @@ export const store = configureStore({
     apiNftCollection: nftCollectionApiReducer,
     twitterApi: twitterApiReducer,
     resolver: resolverReducer,
+    nameflickManage: nameflickManageReducer,
   },
   devTools: process.env.NODE_ENV !== "production",
 });
