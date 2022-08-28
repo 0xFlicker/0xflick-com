@@ -1,7 +1,7 @@
-import { INameFlick } from "@0xflick/models";
+import { INameflick } from "@0xflick/models";
 import { Nameflick } from "../../types.generated";
 
-export function nameflickModelToGraphql(nameflickModel: INameFlick): Nameflick {
+export function nameflickModelToGraphql(nameflickModel: INameflick): Nameflick {
   const rootDomain = nameflickModel.normalized.split(".").slice(-2).join(".");
   return {
     domain: nameflickModel.normalized,

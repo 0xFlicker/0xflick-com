@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { Box, Container } from "@mui/material";
-import { ResolverFormDemo } from "features/resolver/components/ResolverFormDemo";
+import { ListNameflickManage } from "features/nameflick-manage/components/List";
 
 export const MyTokens: FC = () => {
   return (
@@ -11,8 +11,8 @@ export const MyTokens: FC = () => {
       alignContent="center"
       height="100vh"
     >
-      <Container maxWidth="sm">
-        <ResolverFormDemo />
+      <Container maxWidth="lg">
+        <ListNameflickManage />
       </Container>
     </Box>
   );

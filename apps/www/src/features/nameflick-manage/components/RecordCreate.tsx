@@ -1,43 +1,41 @@
-import { FC } from "react";
-import { Box, Button, LinearProgress, Typography } from "@mui/material";
+import { FC, useMemo } from "react";
+import { Box, Button, LinearProgress } from "@mui/material";
 import { Formik, Form, Field } from "formik";
 import { utils } from "ethers";
-import { useSubmitPublicResolver } from "../graphql/useSubmitPublicResolver";
-import { useAppDispatch } from "app/store";
-import { actions as resolverActions } from "../redux";
 import { EmailInputForm } from "components/forms/EmailInputForm";
 import { SubdomainInputForm } from "components/forms/SubdomainInputForm";
 import { EthereumAddressInput } from "components/forms/EthereumAddressInput";
+import {
+  INameflick,
+  subdomainFromEnsName,
+  rootFromEnsName,
+} from "@0xflick/models";
 
-interface IValues {
+export type TValues = {
   subdomain: string;
   addressEth: string;
   textRecordEmail: string;
-}
-const SubDomainComponent = SubdomainInputForm("public.nameflick.eth");
-export const ResolverFormDemo: FC = () => {
-  const { submit, etherscan } = useSubmitPublicResolver();
-  const dispatch = useAppDispatch();
+};
 
+export const RecordCreate: FC<{
+  domain: string;
+  onCreate: (values: TValues) => void;
+  onCancel: () => void;
+}> = ({ domain, onCreate, onCancel }) => {
+  const SubDomainComponent = useMemo(
+    () => SubdomainInputForm(domain),
+    [domain]
+  );
   return (
     <>
-      <Typography variant="h4" component="h4" gutterBottom>
-        Nameflick public resolver
-      </Typography>
-      <Typography variant="h6" component="h6">
-        Set any subdomain on *.public.nameflick.eth
-      </Typography>
-      <Typography variant="h6" component="h6" gutterBottom>
-        instantly, gassless and free
-      </Typography>
       <Formik
         initialValues={{
           subdomain: "",
           addressEth: "",
           textRecordEmail: "",
         }}
-        validate={(values: IValues) => {
-          const errors: Partial<IValues> = {};
+        validate={(values: TValues) => {
+          const errors: Partial<TValues> = {};
           if (!values.subdomain) {
             errors.subdomain = "Required";
           }
@@ -49,16 +47,10 @@ export const ResolverFormDemo: FC = () => {
           return errors;
         }}
         onSubmit={(values, { setSubmitting }) => {
-          submit({
-            variables: {
-              addressEth: values.addressEth,
-              domain: `${values.subdomain}.public.nameflick.eth`,
-              textRecordEmail: values.textRecordEmail,
-            },
-          }).then(() => {
+          setTimeout(() => {
+            onCreate(values);
             setSubmitting(false);
-            dispatch(resolverActions.close());
-          });
+          }, 500);
         }}
       >
         {({ submitForm, isSubmitting }) => (
@@ -90,29 +82,28 @@ export const ResolverFormDemo: FC = () => {
               }}
             />
             <br />
-            <Button
-              variant="contained"
-              color="primary"
-              sx={{
-                mt: 2,
-              }}
-              disabled={isSubmitting}
-              onClick={submitForm}
-            >
-              Submit
-            </Button>
+            <Box display="flex" mt={2}>
+              <Button
+                variant="contained"
+                color="primary"
+                disabled={isSubmitting}
+                onClick={submitForm}
+              >
+                Create
+              </Button>
+              <Button
+                variant="contained"
+                color="secondary"
+                disabled={isSubmitting}
+                sx={{ ml: 2 }}
+                onClick={onCancel}
+              >
+                Cancel
+              </Button>
+            </Box>
           </Form>
         )}
       </Formik>
-      {etherscan ? (
-        <Box textAlign="center">
-          <a href={etherscan} target="_blank" rel="noopener noreferrer">
-            See it on etherscan
-          </a>
-        </Box>
-      ) : (
-        <br />
-      )}
     </>
   );
 };

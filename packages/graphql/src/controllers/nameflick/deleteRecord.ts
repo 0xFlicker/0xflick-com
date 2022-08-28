@@ -1,5 +1,5 @@
 import { GraphQLResolveInfo } from "graphql";
-import { INameFlick } from "@0xflick/models";
+import { INameflick } from "@0xflick/models";
 import { TContext } from "../../context";
 import { NameflickError } from "../../errors/nameflick";
 

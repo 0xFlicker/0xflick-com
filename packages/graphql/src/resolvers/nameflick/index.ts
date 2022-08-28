@@ -1,6 +1,6 @@
 import { IFieldResolver } from "@graphql-tools/utils";
 import { gql } from "apollo-server-core";
-import { INameFlick } from "@0xflick/models";
+import { INameflick } from "@0xflick/models";
 import { TContext } from "../../context";
 import { NameflickFieldsInput, Nameflick } from "../../types.generated";
 import { createOrUpdateNameFlickRecord } from "../../controllers/nameflick/createOrUpdateRecord";

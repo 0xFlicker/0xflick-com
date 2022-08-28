@@ -15,7 +15,7 @@ const MyTokensPage: NextPage<{ i18n: InitOptions }> = ({ i18n }) => {
         <title>Nameflick Demo</title>
         <meta name="viewport" content="initial-scale=1.0, width=device-width" />
       </Head>
-      <Demo />
+      <MyTokens />
     </DefaultProvider>
   );
 };

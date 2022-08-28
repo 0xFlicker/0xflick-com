@@ -1,6 +1,6 @@
 import { IMetadata } from "./metadata";
 
-export type TNameFlickAddresses = Record<string, string | undefined>;
+export type TNameflickAddresses = Record<string, string | undefined>;
 
 export interface INameFlickTextRecord {
   email?: string;
@@ -16,11 +16,11 @@ export interface INameFlickTextRecord {
   ["org.telegram"]?: string;
 }
 
-export interface INameFlick {
+export interface INameflick {
   normalized?: string;
   ttl?: number;
   ensHash: string;
-  addresses: TNameFlickAddresses;
+  addresses: TNameflickAddresses;
   content?: string;
   textRecord: INameFlickTextRecord;
   erc721?: string;
@@ -32,14 +32,22 @@ export enum ENameflickTokenStatus {
   COMMUNITY_USE = "COMMUNITY_USE",
   PREMIUM_USE = "PREMIUM_USE",
 }
-export type NameFlickTokenStatus = keyof typeof ENameflickTokenStatus;
+export type NameflickTokenStatus = keyof typeof ENameflickTokenStatus;
 
 export interface INameflickMetadata extends IMetadata {
-  status: NameFlickTokenStatus;
+  status: NameflickTokenStatus;
   wrappedEns?: string;
-  records: Record<string, INameFlick>;
+  records: Record<string, INameflick>;
 }
 export interface INameflickToken {
   tokenId: number;
   metadata?: INameflickMetadata;
+}
+
+export function subdomainFromEnsName(ensName: string): string {
+  return ensName.split(".").slice(0, -2).join(".");
+}
+
+export function rootFromEnsName(ensName: string): string {
+  return ensName.split(".").slice(-2).join(".");
 }

@@ -6,7 +6,7 @@ import {
   QueryCommand,
   UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
-import { INameFlick } from "@0xflick/models";
+import { INameflick, rootFromEnsName } from "@0xflick/models";
 
 export type TPK = string & { __pk: true };
 export type GSI1PK = string & { __gsi1pk: true };
@@ -48,8 +48,8 @@ export interface INameFlickDB {
   ["text_org_telegram"]?: string;
 }
 
-export function nameflickToDb(nameflick: INameFlick): INameFlickDB {
-  const rootDomain = nameflick.normalized.split(".").slice(-2).join(".");
+export function nameflickToDb(nameflick: INameflick): INameFlickDB {
+  const rootDomain = rootFromEnsName(nameflick.normalized);
   return {
     pk: asPk(nameflick.normalized),
     GSI1PK: asGsi1Pk(rootDomain),
@@ -105,7 +105,7 @@ export function nameflickToDb(nameflick: INameFlick): INameFlickDB {
   };
 }
 
-function dbToNameflick(nameflick: Record<string, any>): INameFlick {
+function dbToNameflick(nameflick: Record<string, any>): INameflick {
   return {
     normalized: nameflick.pk,
     ensHash: nameflick.GSI2PK,
@@ -174,7 +174,7 @@ export class NameFlickDAO {
     this.db = db;
   }
 
-  public async createOrUpdate(nameflick: INameFlick): Promise<void> {
+  public async createOrUpdate(nameflick: INameflick): Promise<void> {
     const dbObj = nameflickToDb(nameflick);
     await this.db.send(
       new UpdateCommand({
@@ -198,7 +198,7 @@ export class NameFlickDAO {
     );
   }
 
-  public async getByNormalizedName(pk: string): Promise<INameFlick | null> {
+  public async getByNormalizedName(pk: string): Promise<INameflick | null> {
     const result = await this.db.send(
       new GetCommand({
         TableName: NameFlickDAO.TABLE_NAME,
@@ -211,7 +211,7 @@ export class NameFlickDAO {
     return dbToNameflick(result.Item);
   }
 
-  public async getByEnsHash(ensHash: string): Promise<INameFlick | null> {
+  public async getByEnsHash(ensHash: string): Promise<INameflick | null> {
     const result = await this.db.send(
       new QueryCommand({
         TableName: NameFlickDAO.TABLE_NAME,
@@ -228,7 +228,7 @@ export class NameFlickDAO {
     return dbToNameflick(result.Items[0]);
   }
 
-  public async getByRootDomainName(rootDomain: string): Promise<INameFlick[]> {
+  public async getByRootDomainName(rootDomain: string): Promise<INameflick[]> {
     const result = await this.db.send(
       new QueryCommand({
         TableName: NameFlickDAO.TABLE_NAME,
@@ -245,7 +245,7 @@ export class NameFlickDAO {
     return result.Items.map(dbToNameflick);
   }
 
-  public async reverseLookup(address: string): Promise<INameFlick[]> {
+  public async reverseLookup(address: string): Promise<INameflick[]> {
     const result = await this.db.send(
       new QueryCommand({
         TableName: NameFlickDAO.TABLE_NAME,

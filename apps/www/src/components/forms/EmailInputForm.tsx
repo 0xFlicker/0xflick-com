@@ -2,22 +2,20 @@ import { FC } from "react";
 import TextField from "@mui/material/TextField";
 import { fieldToTextField, TextFieldProps } from "formik-mui";
 import { InputAdornment } from "@mui/material";
-import { NetworkPing } from "@mui/icons-material";
+import { Email } from "@mui/icons-material";
 
-export const SubdomainInputForm: FC<TextFieldProps> = (props) => {
+export const EmailInputForm: FC<TextFieldProps> = (props) => {
   return (
     <TextField
       {...fieldToTextField(props)}
       margin="normal"
       fullWidth
+      helperText="Optional"
       InputProps={{
         startAdornment: (
           <InputAdornment position="start">
-            <NetworkPing />
+            <Email />
           </InputAdornment>
-        ),
-        endAdornment: (
-          <InputAdornment position="end">.public.nameflick.eth</InputAdornment>
         ),
       }}
     />
