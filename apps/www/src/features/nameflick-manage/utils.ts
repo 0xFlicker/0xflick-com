@@ -1,4 +1,8 @@
-import { INameflickToken, subdomainFromEnsName } from "@0xflick/models";
+import {
+  INameflickMetadata,
+  INameflickToken,
+  subdomainFromEnsName,
+} from "@0xflick/models";
 import { publicImageResizerUrl } from "utils/config";
 
 export function tokenToUrl(token: INameflickToken) {
@@ -9,8 +13,8 @@ export function tokenToUrl(token: INameflickToken) {
   )}/${token.tokenId}`;
 }
 
-export function tokenToStatusDescription(token: INameflickToken) {
-  switch (token.metadata?.status) {
+export function tokenToStatusDescription(status: INameflickMetadata["status"]) {
+  switch (status) {
     case "FREE_USE":
       return "Free to use. Allows you to claim and use one sub-domain on nameflick.eth";
     case "PERSONAL_USE":

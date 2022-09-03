@@ -25,3 +25,7 @@ export function jsonFromSecret(file: string) {
   }
   return JSON.parse(stdout);
 }
+
+export function readJSONSync(file: string) {
+  return JSON.parse(fs.readFileSync(file, "utf8"));
+}

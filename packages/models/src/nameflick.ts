@@ -34,9 +34,19 @@ export enum ENameflickTokenStatus {
 }
 export type NameflickTokenStatus = keyof typeof ENameflickTokenStatus;
 
+export interface INameflickTokenSettings {
+  enableNft?: boolean;
+  contractAddress?: string;
+  tokenSubDomains?: boolean;
+  tokenSubDomainsContractEditable?: boolean;
+  tokenSubDomainsOwnerEditable?: boolean;
+  claimableSubDomains?: boolean;
+}
+
 export interface INameflickMetadata extends IMetadata {
   status: NameflickTokenStatus;
   wrappedEns?: string;
+  settings?: INameflickTokenSettings;
   records: Record<string, INameflick>;
 }
 export interface INameflickToken {

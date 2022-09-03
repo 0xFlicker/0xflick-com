@@ -1,6 +1,6 @@
 import { createSelector, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { INameflickMetadata, INameflickToken } from "@0xflick/models";
-import { token1 } from "./fixture";
+import { tokens } from "./fixture";
 
 export interface IState {
   ownedTokens: INameflickToken[];
@@ -9,7 +9,7 @@ export interface IState {
 const slice = createSlice({
   name: "nameflick-manage",
   initialState: {
-    ownedTokens: [token1],
+    ownedTokens: tokens,
   } as IState,
   reducers: {
     setOwnedTokens: (state, action: PayloadAction<INameflickToken[]>) => {

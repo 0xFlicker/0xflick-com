@@ -23,9 +23,13 @@ export const ListNameflickManage: FC = () => {
         <Grid item xs={12} sm={12} md={6} lg={4} key={token.tokenId}>
           <Card variant="elevation" sx={{ maxWidth: 345 }}>
             <CardMedia component="img" image={tokenToUrl(token)} />
-            <CardContent>
+            <CardContent
+              sx={{
+                minHeight: 100,
+              }}
+            >
               <Typography variant="body2" color="text.secondary">
-                {tokenToStatusDescription(token)}
+                {tokenToStatusDescription(token?.metadata?.status)}
               </Typography>
             </CardContent>
             <CardActions>

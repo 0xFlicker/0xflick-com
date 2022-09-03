@@ -14,6 +14,10 @@ import { AssetStack } from "./assets.js";
 import { GraphqlStack } from "./graphql.js";
 import { DynamoDB } from "./dynamodb.js";
 import { NameflickStack } from "./nameflick.js";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const secretsJson = jsonFromSecret("deploy-secrets.json");
 const jwtJson = jsonFromSecret("jwt-secret.json");
@@ -89,6 +93,9 @@ new NameflickStack(app, "NameflickBeta", {
 new WwwStack(app, "www", {
   domain: "0xflick.com",
   graphqlApiUrl: "6kjnzpunu3.execute-api.us-east-2.amazonaws.com",
+  serverlessBuildOutDir: path.resolve(__dirname, "../.layers"),
+  withLogging: true,
+  whiteListedHeaders: ["Authorization", "Host", "Content-Type", "Accept"],
   env: {
     region: "us-east-1",
     account: process.env.CDK_DEFAULT_ACCOUNT,

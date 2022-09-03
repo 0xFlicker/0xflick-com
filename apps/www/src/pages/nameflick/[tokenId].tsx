@@ -3,7 +3,7 @@ import { defaultI18nConfig } from "locales";
 import { DefaultProvider } from "context/default";
 import type { GetStaticPaths, NextPage, GetStaticProps } from "next";
 import { INameflickToken } from "@0xflick/models";
-import { token1, token2 } from "features/nameflick-manage/fixture";
+import { tokens } from "features/nameflick-manage/fixture";
 import { TokenDetails } from "layouts/TokenDetails";
 
 export const getStaticProps: GetStaticProps<{
@@ -13,8 +13,7 @@ export const getStaticProps: GetStaticProps<{
   const { tokenId: maybeToken } = params;
   const tokenId = Array.isArray(maybeToken) ? maybeToken[0] : maybeToken;
   const token: INameflickToken = {
-    ...(tokenId === "1" ? token1 : token2),
-    tokenId: Number(tokenId),
+    ...tokens[Number(tokenId) - 1],
   };
   return {
     props: {
@@ -25,7 +24,7 @@ export const getStaticProps: GetStaticProps<{
 
 export const getStaticPaths: GetStaticPaths = async () => {
   return {
-    paths: ["/nameflick/1", "/nameflick/2"],
+    paths: ["/nameflick/1", "/nameflick/2", "/nameflick/3"],
     fallback: true,
   };
 };

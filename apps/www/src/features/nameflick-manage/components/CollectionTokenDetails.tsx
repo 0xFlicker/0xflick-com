@@ -3,7 +3,9 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  Container,
   IconButton,
+  Paper,
   Typography,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
@@ -16,6 +18,7 @@ import {
 import { RecordUpdate } from "./RecordUpdate";
 import { RecordCreate, TValues } from "./RecordCreate";
 import { utils } from "ethers";
+import { CollectionDetails } from "./CollectionSettings";
 
 const Record: FC<{
   summary: ReactNode;
@@ -38,7 +41,7 @@ const Record: FC<{
   );
 };
 
-export const FreemiumTokenDetails: FC<{
+export const CollectionTokenDetails: FC<{
   token?: INameflickToken;
 }> = ({ token }) => {
   const domain = token?.metadata?.wrappedEns ?? "unknown";
@@ -88,6 +91,7 @@ export const FreemiumTokenDetails: FC<{
       <Typography variant="h4" component="h4" gutterBottom>
         {domain}
       </Typography>
+      <CollectionDetails settings={token?.metadata?.settings} ens={domain} />
       {mockedRecords.map(([key, value]) => (
         <Record
           key={key}
@@ -112,7 +116,7 @@ export const FreemiumTokenDetails: FC<{
           onCreate={onNewRecord}
           onCancel={onCreateCancel}
         />
-      ) : mockedRecords.length === 0 ? (
+      ) : (
         <IconButton
           aria-label="add subdomain"
           color="primary"
@@ -120,7 +124,7 @@ export const FreemiumTokenDetails: FC<{
         >
           <AddIcon />
         </IconButton>
-      ) : undefined}
+      )}
     </>
   );
 };

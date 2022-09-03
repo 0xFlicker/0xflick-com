@@ -38,7 +38,7 @@ const Record: FC<{
   );
 };
 
-export const FreemiumTokenDetails: FC<{
+export const PersonalTokenDetails: FC<{
   token?: INameflickToken;
 }> = ({ token }) => {
   const domain = token?.metadata?.wrappedEns ?? "unknown";
@@ -112,7 +112,7 @@ export const FreemiumTokenDetails: FC<{
           onCreate={onNewRecord}
           onCancel={onCreateCancel}
         />
-      ) : mockedRecords.length === 0 ? (
+      ) : (
         <IconButton
           aria-label="add subdomain"
           color="primary"
@@ -120,7 +120,7 @@ export const FreemiumTokenDetails: FC<{
         >
           <AddIcon />
         </IconButton>
-      ) : undefined}
+      )}
     </>
   );
 };
