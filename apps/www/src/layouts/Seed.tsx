@@ -38,7 +38,9 @@ export const Seed: FC<{ seed?: Uint8Array }> = ({ seed }) => {
           <MenuList dense disablePadding>
             <CopyToClipboardMenuItem
               icon={<Share />}
-              text={`https://0xflick.com/seed/${seed && utils.hexlify(seed)}`}
+              text={`${process.env.NEXT_PUBLIC_IMAGE_RESIZER}/seed/${
+                seed && utils.hexlify(seed)
+              }`}
             >
               <Typography textAlign="right" flexGrow={1}>
                 {t("menu_share")}

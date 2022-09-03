@@ -1,6 +1,6 @@
 import { S3 } from "@aws-sdk/client-s3";
 import { APIGatewayProxyHandler } from "aws-lambda";
-import { generateNameflick } from "@0xflick/assets";
+import { generateNameflick } from "@0xflick/assets/generate-nameflick";
 
 const s3 = new S3({
   region: "us-east-1",
@@ -9,7 +9,11 @@ const s3 = new S3({
 if (!process.env.BUCKET_NAME) {
   throw new Error("BUCKET_NAME env var not set");
 }
+if (!process.env.IMAGE_HOST) {
+  throw new Error("IMAGE_HOST env var not set");
+}
 const bucketName = process.env.BUCKET_NAME;
+const IMAGE_HOST = process.env.IMAGE_HOST;
 
 async function s3Exists({
   key,
@@ -80,7 +84,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       return {
         statusCode: 302,
         headers: {
-          ["Location"]: `https://image.0xflick.com/${s3Key}`,
+          ["Location"]: `https://${IMAGE_HOST}/${s3Key}`,
         },
         body: "",
       };
@@ -90,7 +94,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     return {
       statusCode: 302,
       headers: {
-        ["Location"]: `https://image.0xflick.com/${s3Key}`,
+        ["Location"]: `https://${IMAGE_HOST}/${s3Key}`,
       },
       body: "",
     };

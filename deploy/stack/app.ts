@@ -51,6 +51,7 @@ const { api: graphqlApi } = new GraphqlStack(app, "Graphql", {
 
 new ImageStack(app, "Image", {
   domain: ["image", "0xflick.com"],
+  corsAllowedOrigins: ["https://0xflick.com", "http://localhost:3000"],
   infuraIpfsAuth: `Basic ${Buffer.from(
     `${secretsJson.infraIpfsProjectId}:${secretsJson.infraIpfsSecret}`
   ).toString("base64")}`,

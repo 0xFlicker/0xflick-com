@@ -4,26 +4,23 @@ import { generateAxolotlValleyFromSeed, renderCanvas } from "@0xflick/assets";
 import { utils } from "ethers";
 import type { Readable } from "stream";
 import { APIGatewayProxyHandler } from "aws-lambda";
-import { SSM } from "@aws-sdk/client-ssm";
-
-const ssm = new SSM({
-  region: "us-east-1",
-});
 
 const s3 = new S3({
   region: "us-east-1",
 });
 
-const params = Promise.all([
-  ssm
-    .getParameter({ Name: "/edge/PublicNextPage" })
-    .then((r) => r.Parameter?.Value),
-  ssm
-    .getParameter({ Name: "/edge/AxolotlSeedBucket" })
-    .then((r) => r.Parameter?.Value),
-]);
-
-const [generativeAssetsBucket, seedImageBucket] = await params;
+if (!process.env.ASSET_BUCKET) {
+  throw new Error("ASSET_BUCKET not set");
+}
+if (!process.env.SEED_BUCKET) {
+  throw new Error("SEED_BUCKET not set");
+}
+if (!process.env.IMAGE_HOST) {
+  throw new Error("IMAGE_HOST not set");
+}
+const generativeAssetsBucket = process.env.ASSET_BUCKET;
+const seedImageBucket = process.env.SEED_BUCKET;
+const imageHost = process.env.IMAGE_HOST;
 
 async function s3Exists({
   key,
@@ -149,7 +146,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       return {
         statusCode: 302,
         headers: {
-          ["Location"]: `https://image.0xflick.com/${s3Key}`,
+          ["Location"]: `https://${imageHost}/${s3Key}`,
         },
         body: "",
       };
@@ -159,7 +156,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     return {
       statusCode: 302,
       headers: {
-        ["Location"]: `https://image.0xflick.com/${s3Key}`,
+        ["Location"]: `https://${imageHost}/${s3Key}`,
       },
       body: "",
     };

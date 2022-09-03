@@ -7,9 +7,9 @@
     "outDir": "dist" /* Specify an output folder for all emitted files. */,
     "paths": {
       "@0xflick/assets": ["../../packages/assets/src/index"],
-      "@0xflick/assets/*": ["../../package/assets/src/*"],
+      "@0xflick/assets/*": ["../../packages/assets/src/*"],
       "@0xflick/backend": ["../../packages/backend/src/index"],
-      "@0xflick/backend/*": ["../../package/backend/src/*"],
+      "@0xflick/backend/*": ["../../packages/backend/src/*"],
       "@0xflick/graphql": ["../../packages/graphql/src/index"],
       "@0xflick/graphql/*": ["../../package/graphql/src/*"]
     },

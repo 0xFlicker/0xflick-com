@@ -17,6 +17,7 @@ import * as cr from "aws-cdk-lib/custom-resources";
 export interface ImageProps extends cdk.StackProps {
   readonly domain: [string, string] | string;
   readonly infuraIpfsAuth: string;
+  readonly corsAllowedOrigins: string[];
 }
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -24,7 +25,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export class ImageStack extends cdk.Stack {
   public readonly api: apigateway.RestApi;
   constructor(scope: cdk.Stage, id: string, props: ImageProps) {
-    const { domain, infuraIpfsAuth, ...rest } = props;
+    const { domain, infuraIpfsAuth, corsAllowedOrigins, ...rest } = props;
     super(scope, id, rest);
 
     // Fetch table names from SSM Parameter Store
@@ -126,6 +127,17 @@ export class ImageStack extends cdk.Stack {
         tier: ssm.ParameterTier.STANDARD,
       }
     );
+    const imageCorsAllowedOrigins = new ssm.StringParameter(
+      this,
+      "image-origin-cors-allowed-origins",
+      {
+        allowedPattern: ".*",
+        description: "The allowed CORS origins for the image distribution",
+        parameterName: "/edge/ImageCorsAllowedOrigins",
+        stringValue: JSON.stringify(corsAllowedOrigins),
+        tier: ssm.ParameterTier.STANDARD,
+      }
+    );
     const generativeAssetBucket = new s3.Bucket(this, "GenerativeAsset", {
       transferAcceleration: true,
     });
@@ -138,17 +150,6 @@ export class ImageStack extends cdk.Stack {
       ],
       destinationBucket: generativeAssetBucket,
     });
-    const axolotlOriginPublicNextPage = new ssm.StringParameter(
-      this,
-      "PublicNextPage",
-      {
-        allowedPattern: ".*",
-        description: "The bucket name for the generative assets",
-        parameterName: "/edge/PublicNextPage",
-        stringValue: generativeAssetBucket.bucketName,
-        tier: ssm.ParameterTier.STANDARD,
-      }
-    );
     // Bucket with a single image
     const seedBucket = new s3.Bucket(this, "seed-bucket", {
       publicReadAccess: true,
@@ -156,17 +157,6 @@ export class ImageStack extends cdk.Stack {
     });
 
     // Create the origin lambda
-    const seedBucketParam = new ssm.StringParameter(
-      this,
-      "axolotl-seed-bucket",
-      {
-        allowedPattern: ".*",
-        description: "The bucket name cached seeds",
-        parameterName: "/edge/AxolotlSeedBucket",
-        stringValue: seedBucket.bucketName,
-        tier: ssm.ParameterTier.STANDARD,
-      }
-    );
     const imageOrigin = new cloudfront.experimental.EdgeFunction(this, "io", {
       runtime: lambda.Runtime.NODEJS_14_X,
       code: lambda.Code.fromAsset(
@@ -191,6 +181,7 @@ export class ImageStack extends cdk.Stack {
 
     imageOriginBucketParam.grantRead(imageOrigin);
     imageOriginIpfsAuth.grantRead(imageOrigin);
+    imageCorsAllowedOrigins.grantRead(imageOrigin);
     resizerBucket.grantPut(imageOrigin);
     resizerBucket.grantRead(imageOrigin);
 
@@ -208,13 +199,16 @@ export class ImageStack extends cdk.Stack {
           }
         ),
         memorySize: 1536,
+        environment: {
+          SEED_BUCKET: seedBucket.bucketName,
+          ASSET_BUCKET: generativeAssetBucket.bucketName,
+          IMAGE_HOST: domainName,
+        },
       }
     );
     seedBucket.grantReadWrite(axolotlOrigin);
     seedBucket.grantPutAcl(axolotlOrigin);
     generativeAssetBucket.grantRead(axolotlOrigin);
-    seedBucketParam.grantRead(axolotlOrigin);
-    axolotlOriginPublicNextPage.grantRead(axolotlOrigin);
 
     const axolotlHttpApi = new apigateway.RestApi(this, "axolotlApi", {});
     const axolotlResource = axolotlHttpApi.root
@@ -254,6 +248,7 @@ export class ImageStack extends cdk.Stack {
         memorySize: 512,
         environment: {
           BUCKET_NAME: nameflickImageBucket.bucketName,
+          IMAGE_HOST: domainName,
         },
       }
     );

@@ -14,7 +14,7 @@ function randomAddress() {
 export const token1: INameflickToken = {
   tokenId: 1,
   metadata: {
-    image: "https://image.0xflick.com/nameflick-image/example.nameflick.eth/1",
+    image: `${process.env.NEXT_PUBLIC_IMAGE_RESIZER}/nameflick-image/example.nameflick.eth/1`,
     name: "Nameflick #1",
     status: "FREE_USE",
     wrappedEns: "*.nameflick.eth",
@@ -37,7 +37,7 @@ export const token1: INameflickToken = {
 export const token2: INameflickToken = {
   tokenId: 2,
   metadata: {
-    image: "https://image.0xflick.com/nameflick-image/name.eth/2",
+    image: `${process.env.NEXT_PUBLIC_IMAGE_RESIZER}/nameflick-image/name.eth/2`,
     name: "Nameflick #2",
     status: "PERSONAL_USE",
     wrappedEns: "name.eth",
@@ -65,7 +65,7 @@ function* range(start: number, end: number, pad: number = 0) {
 export const token3: INameflickToken = {
   tokenId: 3,
   metadata: {
-    image: "https://image.0xflick.com/nameflick-image/nft.eth/3",
+    image: `${process.env.NEXT_PUBLIC_IMAGE_RESIZER}/nameflick-image/nft.eth/3`,
     name: "Nameflick #3",
     status: "COMMUNITY_USE",
     wrappedEns: "nft.eth",

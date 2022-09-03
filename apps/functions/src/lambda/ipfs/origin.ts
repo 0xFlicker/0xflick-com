@@ -19,14 +19,10 @@ const ssm = new SSM({
   region: "us-east-1",
 });
 
-const cors = {
-  allow: ["http://localhost:3000", "https://0xflick.com"],
-  allowCredentials: true,
-};
-
 const params = Promise.all([
   ssm.getParameter({ Name: "/edge/IpfsOriginBucket" }),
   ssm.getParameter({ Name: "/edge/IpfsOriginIPFSApiAuth" }),
+  ssm.getParameter({ Name: "/edge/ImageCorsAllowedOrigins" }),
 ]);
 
 export async function loadIpfsContent(
@@ -45,10 +41,11 @@ export const handler = async (
   _: void,
   callback: CloudFrontResponseCallback
 ): Promise<void> => {
-  const [bucketResult, ipfsApiAuth] = await params;
+  const [bucketResult, ipfsApiAuth, corsAllowedHosts] = await params;
 
   const BUCKET = bucketResult.Parameter?.Value;
   const IPFS_AUTH = ipfsApiAuth.Parameter?.Value;
+  const CORS_ALLOWED_ORIGINS = JSON.parse(corsAllowedHosts.Parameter?.Value);
 
   if (!BUCKET) {
     throw new Error("BUCKET is not set");
@@ -67,6 +64,11 @@ export const handler = async (
     },
   });
 
+  const cors = {
+    allow: CORS_ALLOWED_ORIGINS,
+    allowCredentials: true,
+  };
+
   const s3Exists = async (key: string) => {
     try {
       await s3.headObject({
@@ -83,7 +85,10 @@ export const handler = async (
 
   console.log("Response status code :%s", response.status);
   try {
-    if ("origin" in request.headers && isAllowed(request.headers.origin)) {
+    if (
+      "origin" in request.headers &&
+      isAllowed(cors, request.headers.origin)
+    ) {
       response.headers["access-control-allow-origin"] = [
         {
           key: "Access-Control-Allow-Origin",
@@ -181,6 +186,10 @@ export const handler = async (
 };
 
 const isAllowed = (
+  cors: {
+    allow: string[];
+    allowCredentials: boolean;
+  },
   origin: {
     key?: string | undefined;
     value: string;

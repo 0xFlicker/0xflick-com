@@ -21,18 +21,20 @@ const ssm = new AWS.SSM({
   region: "us-east-1",
 });
 
-const cors = {
-  allow: ["http://localhost:3000", "https://0xflick.com"],
-  allowCredentials: true,
-};
-
-const [bucketResult, ipfsApiAuth] = await Promise.all([
+const [bucketResult, ipfsApiAuth, corsAllowedHost] = await Promise.all([
   ssm.getParameter({ Name: "/edge/ImageOriginBucket" }).promise(),
   ssm.getParameter({ Name: "/edge/ImageOriginIPFSApiAuth" }).promise(),
+  ssm.getParameter({ Name: "/edge/ImageCorsAllowedOrigins" }).promise(),
 ]);
 
 const BUCKET = bucketResult.Parameter?.Value;
 const IPFS_AUTH = ipfsApiAuth.Parameter?.Value;
+const CORS_ALLOWED_ORIGINS = corsAllowedHost.Parameter?.Value;
+
+const cors = {
+  allow: JSON.parse(CORS_ALLOWED_ORIGINS),
+  allowCredentials: true,
+};
 
 if (!BUCKET) {
   throw new Error("BUCKET is not set");

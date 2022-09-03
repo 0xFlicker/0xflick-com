@@ -47,7 +47,7 @@ const HomePage: NextPage<{ seed?: string; metadata?: IAttributeMetadata }> = ({
         <meta property="og:description" content={description} />
         <meta
           property="og:image"
-          content={`https://image.0xflick.com/axolotl-seed/${seedStr}`}
+          content={`${process.env.NEXT_PUBLIC_IMAGE_RESIZER}/axolotl-seed/${seedStr}`}
         />
       </Head>
       <Seed seed={seed} />
