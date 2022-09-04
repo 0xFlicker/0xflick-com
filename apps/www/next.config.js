@@ -17,9 +17,10 @@ function jsonFromSecret(file) {
   return JSON.parse(stdout);
 }
 
-const secretsJson = jsonFromSecret("deploy-secrets.json");
-const jwtJson = jsonFromSecret("jwt-secret.json");
-const twitter = jsonFromSecret("twitter-secrets.json");
+const deployment = process.env.DEPLOYMENT || "localhost";
+const secretsJson = jsonFromSecret(`${deployment}/deploy-secrets.json`);
+const jwtJson = jsonFromSecret(`${deployment}/jwt-secret.json`);
+const twitter = jsonFromSecret(`${deployment}/twitter-secrets.json`);
 
 const INFURA_IPFS_AUTH = `Basic ${Buffer.from(
   `${secretsJson.infraIpfsProjectId}:${secretsJson.infraIpfsSecret}`

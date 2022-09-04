@@ -10,22 +10,29 @@ import { dirname, resolve } from "path";
 const { Builder } = pkg;
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-
+const deployment = process.argv[2];
+if (!deployment) {
+  console.log("Please provide a domain name");
+  process.exit(1);
+}
+if (!["0xflick.com", "nameflick.com"].includes(deployment)) {
+  throw new Error(`Invalid domain ${deployment}`);
+}
 
 try {
   renameSync(resolve(__dirname, "./.env.local"), resolve(__dirname, "./.env.backup"));
-  const { stdout } = spawnSync("sops", ["--decrypt", ".env.production.enc"], {
+  const { stdout } = spawnSync("sops", ["--decrypt", `.env.${deployment}.enc`], {
     env: process.env,
     cwd: __dirname,
   });
   const env = parse(stdout);
-  process.env = { ...process.env, ...env };
+  process.env = { ...process.env, ...env, DEPLOYMENT: deployment };
   const builder = new Builder(
     ".",
     "../../deploy/.layers",
     {
       args: ["build", "--no-lint"],
-      
+
     }
   );
   await builder

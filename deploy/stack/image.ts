@@ -18,6 +18,7 @@ export interface ImageProps extends cdk.StackProps {
   readonly domain: [string, string] | string;
   readonly infuraIpfsAuth: string;
   readonly corsAllowedOrigins: string[];
+  readonly rootDomain: string;
 }
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -25,7 +26,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export class ImageStack extends cdk.Stack {
   public readonly api: apigateway.RestApi;
   constructor(scope: cdk.Stage, id: string, props: ImageProps) {
-    const { domain, infuraIpfsAuth, corsAllowedOrigins, ...rest } = props;
+    const { domain, infuraIpfsAuth, corsAllowedOrigins, rootDomain, ...rest } = props;
     super(scope, id, rest);
 
     // Fetch table names from SSM Parameter Store
@@ -218,7 +219,7 @@ export class ImageStack extends cdk.Stack {
       allowOrigins: [
         "http://localhost:3000",
         "https://localhost:9000",
-        "https://0xflick.com",
+        `https://${rootDomain}`,
       ],
       allowMethods: ["GET", "OPTION"],
     });
@@ -267,8 +268,7 @@ export class ImageStack extends cdk.Stack {
       allowOrigins: [
         "http://localhost:3000",
         "https://localhost:9000",
-        "https://0xflick.com",
-        "https://nameflick.com",
+        `https://${rootDomain}`,
       ],
       allowMethods: ["GET", "OPTION"],
     });

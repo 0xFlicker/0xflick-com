@@ -14,6 +14,7 @@ import * as route53 from "aws-cdk-lib/aws-route53";
 export interface IpfsProps extends cdk.StackProps {
   readonly domain: [string, string] | string;
   readonly infuraIpfsAuth: string;
+  readonly corsAllowedOrigins: string[];
 }
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -21,7 +22,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export class IpfsStack extends cdk.Stack {
   public readonly api: apigateway.RestApi;
   constructor(scope: cdk.Stage, id: string, props: IpfsProps) {
-    const { domain, infuraIpfsAuth, ...rest } = props;
+    const { domain, infuraIpfsAuth, corsAllowedOrigins, ...rest } = props;
     super(scope, id, rest);
 
     // Domain
@@ -66,6 +67,17 @@ export class IpfsStack extends cdk.Stack {
         tier: ssm.ParameterTier.STANDARD,
       }
     );
+    const ipfsCorsAllowedOrigins = new ssm.StringParameter(
+      this,
+      "ipfs-origin-cors-allowed-origins",
+      {
+        allowedPattern: ".*",
+        description: "The allowed CORS origins for the image distribution",
+        parameterName: "/edge/IpfsCorsAllowedOrigins",
+        stringValue: JSON.stringify(corsAllowedOrigins),
+        tier: ssm.ParameterTier.STANDARD,
+      }
+    );
     const ipfsOrigin = new cloudfront.experimental.EdgeFunction(this, "ipfs", {
       runtime: lambda.Runtime.NODEJS_16_X,
       code: lambda.Code.fromAsset(
@@ -78,8 +90,9 @@ export class IpfsStack extends cdk.Stack {
 
     ipfsOriginBucketParam.grantRead(ipfsOrigin);
     ipfsOriginIpfsAuth.grantRead(ipfsOrigin);
-    storageBucket.grantPut(ipfsOrigin);
-    storageBucket.grantRead(ipfsOrigin);
+    ipfsCorsAllowedOrigins.grantRead(ipfsOrigin);
+    storageBucket.grantReadWrite(ipfsOrigin);
+    storageBucket.grantPutAcl(ipfsOrigin);
 
     const cf = new cloudfront.Distribution(this, "image-distribution", {
       defaultBehavior: {

@@ -15,8 +15,7 @@ export class SopsStack extends cdk.Stack {
     const accessKeyRole = new iam.Role(this, "SopsUserAccessKeyRole", {
       assumedBy: new iam.CompositePrincipal(
         sopsUser,
-        iam.User.fromUserName(this, "AdminUser", "admin"),
-        iam.User.fromUserName(this, "InfraUser", "infra")
+        iam.User.fromUserName(this, "AdminUser", "admin")
       ),
     });
     const kmsKey = new kms.Key(this, "SopsKmsKey", {

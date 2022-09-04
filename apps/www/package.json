@@ -5,7 +5,8 @@
   "scripts": {
     "dev:start": "concurrently \"yarn dev:ssl\" \"yarn dev | bunyan\"",
     "dev": "next dev",
-    "build": "node build.mjs",
+    "build:0xflick": "node build.mjs 0xflick.com",
+    "build:nameflick": "node build.mjs nameflick.com",
     "dev:ssl": "local-ssl-proxy --source 9000 --target 3000",
     "typegen": "tsgql typegen",
     "start": "next start",

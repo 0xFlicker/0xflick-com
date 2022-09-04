@@ -18,8 +18,7 @@
     "strictNullChecks": false
     // "strictPropertyInitialization": false
   },
-  "include": ["**/*.ts"],
-  "exclude": ["**/node_modules", "**/.*/", "dist", "build"],
+  "include": ["src/**/*.ts"],
   "references": [
     {
       "path": "../../packages/models"

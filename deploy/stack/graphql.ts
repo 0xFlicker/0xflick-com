@@ -25,6 +25,7 @@ export interface ApiProps extends cdk.StackProps {
   readonly jwk: string;
   readonly jwtPublicKey: string;
   readonly jwtClaimIssuer: string;
+  readonly rootDomain: string;
 }
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -44,6 +45,7 @@ export class GraphqlStack extends cdk.Stack {
       jwk,
       jwtClaimIssuer,
       jwtPublicKey,
+      rootDomain,
       ...rest
     } = props;
     super(scope, id, rest);
@@ -80,13 +82,13 @@ export class GraphqlStack extends cdk.Stack {
         NFT_CONTRACT_ADDRESS: nftRootCollection,
         WEB3_RPC_URL: web3RpcUrl,
         CHAIN_ID: chainId,
-        NEXT_PUBLIC_APP_NAME: "https://0xflick.com",
+        NEXT_PUBLIC_APP_NAME: `https://${rootDomain}`,
         FLICK_ENS_DOMAIN: "0xflick.eth",
         IPFS_API_URL: ipfsApiUrl,
         IPFS_API_PROJECT: ipfsApiProject,
         IPFS_API_SECRET: ipfsApiSecret,
-        NEXT_PUBLIC_IMAGE_RESIZER: "https://image.0xflick.com",
-        NEXT_PUBLIC_IPFS: "https://ipfs.0xflick.com",
+        NEXT_PUBLIC_IMAGE_RESIZER: `https://image.${rootDomain}`,
+        NEXT_PUBLIC_IPFS: `https://ipfs.${rootDomain}`,
         SSM_PARAM_NAME: tableNamesParam.parameterName,
         SSM_REGION: "us-east-2",
         NEXT_PUBLIC_JWT_PUBLIC_KEY: jwtPublicKey,

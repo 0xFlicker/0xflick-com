@@ -22,7 +22,11 @@ export function jsonFromSecret(file: string) {
   return JSON.parse(stdout);
 }
 
-const config: IDeployConfig = jsonFromSecret("deploy-secrets.json");
+const deployment = process.env.DEPLOYMENT || "localhost";
+
+const config: IDeployConfig = jsonFromSecret(
+  `${deployment}/deploy-secrets.json`
+);
 
 createContext(config)
   .then((context) => {

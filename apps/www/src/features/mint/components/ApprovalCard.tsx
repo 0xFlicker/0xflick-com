@@ -1,20 +1,17 @@
 import { FC, useEffect, useState, useCallback, useMemo } from "react";
 import {
-  Backdrop,
   Box,
   Button,
   Card,
   CardActions,
   CardHeader,
   CardContent,
-  Slider,
-  Modal,
   Typography,
   LinearProgress,
 } from "@mui/material";
 import { useLocale } from "locales/hooks";
-import { useAppDispatch, useAppSelector } from "app/store";
-import { Connect, selectors as web3Selectors, useWeb3 } from "features/web3";
+import { useAppDispatch } from "app/store";
+import { Connect, useWeb3 } from "features/web3";
 
 import { useLazyRequestPresaleApprovalQuery } from "../api";
 import { useAuth } from "features/auth/hooks";

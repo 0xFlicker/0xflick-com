@@ -3,7 +3,7 @@ import type {
   CloudFrontResponseEvent,
 } from "aws-lambda";
 import type { Readable } from "stream";
-import { cidPath as isCidPath } from "is-ipfs";
+import { cidPath as isCidPath, cid as isCid } from "is-ipfs";
 import { S3 } from "@aws-sdk/client-s3";
 import { SSM } from "@aws-sdk/client-ssm";
 import {
@@ -22,7 +22,7 @@ const ssm = new SSM({
 const params = Promise.all([
   ssm.getParameter({ Name: "/edge/IpfsOriginBucket" }),
   ssm.getParameter({ Name: "/edge/IpfsOriginIPFSApiAuth" }),
-  ssm.getParameter({ Name: "/edge/ImageCorsAllowedOrigins" }),
+  ssm.getParameter({ Name: "/edge/IpfsCorsAllowedOrigins" }),
 ]);
 
 export async function loadIpfsContent(
@@ -112,10 +112,12 @@ export const handler = async (
       // read the S3 key from the path variable.
       // Ex: path variable QM234234234/image.png
       const key = path.substring(1);
+      console.log(`key: ${key}`);
 
       // Check if the image does not exist in S3
       let buffer: Buffer;
-      if (!isCidPath(key)) {
+      if (!isCidPath(key) && !isCid(key)) {
+        console.log("Not a CID");
         return callback(null, {
           status: "404",
           body: "Not Found",
@@ -124,13 +126,17 @@ export const handler = async (
           },
         });
       }
+      let isJson = false;
       if (!(await s3Exists(key))) {
+        console.log("Not in S3");
         buffer = await loadIpfsContent(ipfsClient, key);
-        let isJson = false;
+
         try {
           JSON.parse(buffer.toString());
+          console.log("JSON");
           isJson = true;
         } catch (_) {
+          console.log("Not JSON");
           // nothing
         }
         // Cache the image in S3
@@ -142,6 +148,7 @@ export const handler = async (
           Key: key,
           StorageClass: "STANDARD",
         });
+        console.log("Cached in S3");
       } else {
         // Fetch from S3
         console.log("Fetching from S3");
@@ -156,6 +163,7 @@ export const handler = async (
           stream.once("end", () => resolve(Buffer.concat(chunks)));
           stream.once("error", reject);
         });
+        isJson = response.ContentType === "application/json";
       }
 
       // generate a binary response
@@ -165,10 +173,18 @@ export const handler = async (
         bodyEncoding: "base64",
         headers: {
           ...response.headers,
+          ...(isJson
+            ? {
+                "content-type": [
+                  { key: "Content-Type", value: "application/json" },
+                ],
+              }
+            : {}),
         },
       });
     } // end of if block checking response statusCode
     else {
+      console.log("Not a 404 or 403");
       // allow the response to pass through
       return callback(null, response);
     }
@@ -203,3 +219,7 @@ const isAllowed = (
       .reduce((prev, current) => prev || current)
   );
 };
+
+process.on("uncaughtException", (err, origin) => {
+  console.error(err, origin);
+});
