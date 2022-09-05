@@ -26,6 +26,12 @@ export interface ApiProps extends cdk.StackProps {
   readonly jwtPublicKey: string;
   readonly jwtClaimIssuer: string;
   readonly rootDomain: string;
+  readonly twitterOauthClientSecret: string;
+  readonly twitterOauthClientId: string;
+  readonly twitterAppKey: string;
+  readonly twitterAppSecret: string;
+  readonly twitterFollowUserId: string;
+  readonly twitterFollowUserName: string;
 }
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -46,6 +52,12 @@ export class GraphqlStack extends cdk.Stack {
       jwtClaimIssuer,
       jwtPublicKey,
       rootDomain,
+      twitterOauthClientSecret,
+      twitterOauthClientId,
+      twitterAppKey,
+      twitterAppSecret,
+      twitterFollowUserId,
+      twitterFollowUserName,
       ...rest
     } = props;
     super(scope, id, rest);
@@ -96,6 +108,12 @@ export class GraphqlStack extends cdk.Stack {
         JWK: jwk,
         NEXT_PUBLIC_JWT_CLAIM_ISSUER: jwtClaimIssuer,
         SIWE_EXPIRATION_TIME_SECONDS: "604800",
+        TWITTER_OAUTH_CLIENT_SECRET: twitterOauthClientSecret,
+        NEXT_PUBLIC_TWITTER_OAUTH_CLIENT_ID: twitterOauthClientId,
+        TWITTER_APP_KEY: twitterAppKey,
+        TWITTER_APP_SECRET: twitterAppSecret,
+        TWITTER_FOLLOW_USER_ID: twitterFollowUserId,
+        NEXT_PUBLIC_TWITTER_FOLLOW_NAME: twitterFollowUserName,
       },
     });
     urlShortenerTable.grantReadWriteData(graphqlHandler);

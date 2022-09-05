@@ -75,6 +75,7 @@ type Web3User {
   roles: [Role!]!
   allowedActions: [Permission!]!
   bindToRole(roleId: String!): Web3User!
+  isTwitterFollower: Boolean!
 }
 
 type Web3LoginUser {
@@ -187,11 +188,12 @@ type Query {
 type Mutation {
   createOrUpdateNameflick(domain: ID!, ttl: Int, fields: NameflickFieldsInput!): Nameflick!
   deleteNameflick(domain: ID!): Boolean!
+  role(id: ID!): Role!
+  roles: [Role!]!
+  createRole(name: String!, permissions: [PermissionInput!]!): Role!
   nonceForAddress(address: String!): Nonce
   signIn(address: String!, jwe: String!, issuedAt: String!, chainId: Int!): Web3LoginUser
   signOut: Boolean!
   self: Web3User
-  role(id: ID!): Role!
-  roles: [Role!]!
-  createRole(name: String!, permissions: [PermissionInput!]!): Role!
+  requestPresaleApproval(affiliate: String): Boolean!
 }

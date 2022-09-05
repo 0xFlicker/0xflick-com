@@ -80,6 +80,7 @@ export type Mutation = {
   createRole: Role;
   deleteNameflick: Scalars['Boolean'];
   nonceForAddress?: Maybe<Nonce>;
+  requestPresaleApproval: Scalars['Boolean'];
   role: Role;
   roles: Array<Role>;
   self?: Maybe<Web3User>;
@@ -108,6 +109,11 @@ export type MutationDeleteNameflickArgs = {
 
 export type MutationNonceForAddressArgs = {
   address: Scalars['String'];
+};
+
+
+export type MutationRequestPresaleApprovalArgs = {
+  affiliate?: InputMaybe<Scalars['String']>;
 };
 
 
@@ -314,6 +320,7 @@ export type Web3User = {
   address: Scalars['ID'];
   allowedActions: Array<Permission>;
   bindToRole: Web3User;
+  isTwitterFollower: Scalars['Boolean'];
   nonce: Scalars['Int'];
   roles: Array<Role>;
 };
@@ -512,6 +519,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   createRole?: Resolver<ResolversTypes['Role'], ParentType, ContextType, RequireFields<MutationCreateRoleArgs, 'name' | 'permissions'>>;
   deleteNameflick?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteNameflickArgs, 'domain'>>;
   nonceForAddress?: Resolver<Maybe<ResolversTypes['Nonce']>, ParentType, ContextType, RequireFields<MutationNonceForAddressArgs, 'address'>>;
+  requestPresaleApproval?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, Partial<MutationRequestPresaleApprovalArgs>>;
   role?: Resolver<ResolversTypes['Role'], ParentType, ContextType, RequireFields<MutationRoleArgs, 'id'>>;
   roles?: Resolver<Array<ResolversTypes['Role']>, ParentType, ContextType>;
   self?: Resolver<Maybe<ResolversTypes['Web3User']>, ParentType, ContextType>;
@@ -613,6 +621,7 @@ export type Web3UserResolvers<ContextType = any, ParentType extends ResolversPar
   address?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   allowedActions?: Resolver<Array<ResolversTypes['Permission']>, ParentType, ContextType>;
   bindToRole?: Resolver<ResolversTypes['Web3User'], ParentType, ContextType, RequireFields<Web3UserBindToRoleArgs, 'roleId'>>;
+  isTwitterFollower?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   nonce?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   roles?: Resolver<Array<ResolversTypes['Role']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;

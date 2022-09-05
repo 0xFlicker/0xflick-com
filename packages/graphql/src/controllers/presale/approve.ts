@@ -7,10 +7,15 @@ import {
   not,
   UserWithRolesModel,
 } from "@0xflick/models";
-import { createJwtToken } from "@0xflick/backend";
+import { createJwtToken, createLogger } from "@0xflick/backend";
 import { TContext } from "../../context";
 import { verifyAuthorizedUser } from "../auth/authorized";
 import { PresaleError } from "../../errors/presale";
+import { isTwitterFollowing } from "../twitter/isFollowing";
+
+const logger = createLogger({
+  name: "graphql/resolvers/presale/approve",
+});
 
 const canPerformAction = allOf(
   not(
@@ -41,10 +46,14 @@ export async function requestApproval(
       affiliate
     );
   }
+  const isFollowing = await isTwitterFollowing(context, user);
+  if (!isFollowing) {
+    throw new PresaleError(`User is not following `, "NOT_TWITTER_FOLLOWING");
+  }
   const { rolesDao, rolePermissionsDao, userRolesDao, setToken } = context;
   const availableRoles = await rolesDao.getRoleByName("presale");
   if (!availableRoles || !availableRoles.length) {
-    console.warn(`No presale roles found`);
+    logger.warn(`No presale roles found`);
     throw new PresaleError(
       "No presale roles found",
       "NO_PRESALE_ROLE_FOUND",
@@ -62,6 +71,7 @@ export async function requestApproval(
     permissions: rolePermissions,
   }));
   let roleId: string;
+
   const exactMatchRole = rolePermissions.find((rp) =>
     rp.permissions.some((p) => p.identifier === affiliate)
   );
@@ -76,7 +86,7 @@ export async function requestApproval(
     if (narrowestRole) {
       roleId = narrowestRole.role.id;
     } else {
-      console.warn(`No presale roles found`);
+      logger.warn(`No presale roles found`);
       throw new PresaleError(
         "No presale roles found",
         "NO_PRESALE_ROLE_FOUND",
@@ -84,7 +94,7 @@ export async function requestApproval(
       );
     }
   }
-  console.log(`Apply role ${roleId} to user ${user.address}`);
+  logger.info(`Apply role ${roleId} to user ${user.address}`);
   await userRolesDao.bind({
     address: user.address,
     roleId,

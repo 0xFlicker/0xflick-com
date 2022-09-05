@@ -1,15 +1,15 @@
 export interface IAccountUser {
   address: string;
-  follower: boolean;
+  twitterFollower: boolean;
 }
 
 export class AccountUserModel implements IAccountUser {
   public readonly address: string;
-  public readonly follower: boolean;
+  public readonly twitterFollower: boolean;
 
   constructor(other: IAccountUser) {
     this.address = other.address;
-    this.follower = other.follower;
+    this.twitterFollower = other.twitterFollower;
   }
 
   public static fromJSON(json: any): AccountUserModel {
@@ -19,7 +19,7 @@ export class AccountUserModel implements IAccountUser {
   public toJSON(): IAccountUser {
     return {
       address: this.address,
-      follower: this.follower,
+      twitterFollower: this.twitterFollower,
     };
   }
 }

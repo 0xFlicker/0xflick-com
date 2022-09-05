@@ -51,7 +51,7 @@ export default async function handler(
     if (!provider) {
       return res.status(200).json({ needsLogin: true });
     }
-    let following = accountUser.follower;
+    let following = accountUser.twitterFollower;
     if (
       !following &&
       provider.oauthV1Secret &&
@@ -74,7 +74,7 @@ export default async function handler(
         following = isFollowerResponse.relationship.source.following;
         await accountUserDao.create({
           ...accountUser,
-          follower: following,
+          twitterFollower: following,
         });
       }
     }

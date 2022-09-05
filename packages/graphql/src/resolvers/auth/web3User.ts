@@ -6,6 +6,7 @@ import { TContext } from "../../context";
 import { bindUserToRole } from "../../controllers/admin/roles";
 import { authorizedUser } from "../../controllers/auth/user";
 import { Resolvers } from "../../resolvers.generated";
+import { isTwitterFollowing } from "../../controllers/twitter/isFollowing";
 
 export const typeSchema = gql`
   type Web3User {
@@ -14,6 +15,7 @@ export const typeSchema = gql`
     roles: [Role!]!
     allowedActions: [Permission!]!
     bindToRole(roleId: String!): Web3User!
+    isTwitterFollower: Boolean!
   }
 
   type Web3LoginUser {
@@ -91,6 +93,9 @@ export const resolvers: Resolvers<TContext> = {
           };
         })
       );
+    },
+    isTwitterFollower: async (user, _, context) => {
+      return await isTwitterFollowing(context, user);
     },
   },
 };

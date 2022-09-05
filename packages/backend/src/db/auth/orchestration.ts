@@ -88,7 +88,7 @@ export class AuthOrchestrationDao {
       }),
       this.accountUserDao.create({
         address: account.address,
-        follower: follower,
+        twitterFollower: follower,
       }),
     ]);
   }

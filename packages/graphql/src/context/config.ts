@@ -13,6 +13,10 @@ const publicEnsDomain =
 
 const adminEnsDomain = process.env.ADMIN_ENS_DOMAIN || "admin.nameflick.eth";
 
+const twitterFollowUserId = process.env.TWITTER_FOLLOW_USER_ID || "";
+const twitterFollowName =
+  process.env.NEXT_PUBLIC_TWITTER_FOLLOW_NAME || "@UNKNOWN";
+
 export function createConfig(providedConfig: Partial<IDeployConfig>) {
   const config = {
     chains: providedConfig.chains,
@@ -21,6 +25,8 @@ export function createConfig(providedConfig: Partial<IDeployConfig>) {
     infraIpfsUrl: providedConfig.infraIpfsUrl,
     publicEnsDomain,
     adminEnsDomain,
+    twitterFollowUserId,
+    twitterFollowName,
     swie: {
       expirationTime: siweExpirationTime,
       domain: appName,

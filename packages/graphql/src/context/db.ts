@@ -9,6 +9,8 @@ import {
   UserRolesDAO,
   fetchTableNames,
   createDb as _createDb,
+  AccountProviderDao,
+  AccountUserDao,
 } from "@0xflick/backend";
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 
@@ -32,6 +34,8 @@ async function createDb({
 }
 
 export interface IDbContext {
+  accountProviderDao: AccountProviderDao;
+  accountUserDao: AccountUserDao;
   authOrchestrationDao: AuthOrchestrationDao;
   drinkerDao: DrinkerDAO;
   rolePermissionsDao: RolePermissionsDAO;
@@ -52,6 +56,8 @@ export async function createDbContext({
   });
   return {
     authOrchestrationDao: new AuthOrchestrationDao(db),
+    accountProviderDao: new AccountProviderDao(db),
+    accountUserDao: new AccountUserDao(db),
     drinkerDao: new DrinkerDAO(db),
     rolePermissionsDao: new RolePermissionsDAO(db),
     rolesDao: new RolesDAO(db),

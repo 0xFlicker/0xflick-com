@@ -24,6 +24,7 @@ import {
   mutationResolvers as mutationResolversNameflick,
   queryResolvers as queryResolversNameflick,
 } from "./nameflick";
+import { mutationResolver as mutationResolverPresale } from "./presale";
 import { Resolvers } from "../resolvers.generated";
 import { TContext } from "../context";
 
@@ -63,6 +64,7 @@ export const typeDefs = gql`
     ): Web3LoginUser
     signOut: Boolean!
     self: Web3User
+    requestPresaleApproval(affiliate: String): Boolean!
   }
 `;
 
@@ -77,6 +79,7 @@ export const resolvers: Resolvers<TContext> = {
     ...mutationResolversNameflick,
     ...mutationResolversAuth,
     ...mutationResolvesAdmin,
+    ...mutationResolverPresale,
   },
   ...resolversNfts,
   ...resolversAuth,

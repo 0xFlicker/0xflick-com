@@ -68,7 +68,7 @@ export function stateDBItemToModel(
 
 export interface IUserDB extends IPrimaryDB {
   address: string;
-  follower: boolean;
+  twitterFollower: boolean;
 }
 
 export function userToPrimaryKey(address: string): TPK {
@@ -84,14 +84,14 @@ export function userToDBItem(user: IAccountUser): IUserDB {
     pk: userToPrimaryKey(user.address),
     sk: userToSortKey(user.address),
     address: user.address,
-    follower: user.follower,
+    twitterFollower: user.twitterFollower,
   };
 }
 
 export function userDBItemToModel(item: Record<string, any>): AccountUserModel {
   return new AccountUserModel({
     address: item.address,
-    follower: item.follower,
+    twitterFollower: item.twitterFollower,
   });
 }
 
