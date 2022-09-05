@@ -1,18 +1,16 @@
 import { IFieldResolver } from "@graphql-tools/utils";
-import { IOwnedToken, urlToShortUrl } from "@0xflick/models";
+import { urlToShortUrl } from "@0xflick/models";
 import { createLogger } from "@0xflick/backend";
 import { TContext } from "../../context";
 import { fetchMetadata } from "./common";
 import { IERC721Metadata__factory } from "@0xflick/contracts";
 import { BigNumber } from "ethers";
 import { publicImageResizerUrl } from "../../utils/config";
-import { IChainContext } from "../chain";
+import { ChainQuery, NftToken } from "../../resolvers.generated";
 
 const logger = createLogger({
   name: "graphql/resolvers/nfts/token",
 });
-
-export type TTokenContext = IOwnedToken & IChainContext;
 
 function formatSizeParams(params: URLSearchParams) {
   let hasParams = false;
@@ -24,7 +22,7 @@ function formatSizeParams(params: URLSearchParams) {
 }
 
 export const resolveNftTokenImage: IFieldResolver<
-  TTokenContext,
+  NftToken,
   TContext,
   {
     width?: number;
@@ -68,7 +66,7 @@ export const resolveNftTokenImage: IFieldResolver<
 };
 
 export const resolveImage: IFieldResolver<
-  TTokenContext,
+  ChainQuery,
   TContext,
   {
     contract: string;
@@ -79,7 +77,7 @@ export const resolveImage: IFieldResolver<
   Promise<string | null>
 > = async (nft, { contract, tokenId, width, height }, context) => {
   const { providerForChain, urlShortenerDao } = context;
-  const provider = providerForChain(nft.chainId);
+  const provider = providerForChain(Number(nft.chainId));
   const contractMetadata = IERC721Metadata__factory.connect(contract, provider);
   const metadata = await fetchMetadata(
     logger,
@@ -88,7 +86,7 @@ export const resolveImage: IFieldResolver<
   );
   const image = metadata?.image;
   if (!image) {
-    logger.info(`No image found for ${nft.tokenId} so cannot return image`);
+    logger.info("No image found so cannot return image");
     return null;
   }
   const params = new URLSearchParams();

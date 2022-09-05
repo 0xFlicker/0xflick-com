@@ -3,17 +3,9 @@ import { IFieldResolver } from "@graphql-tools/utils";
 import { IUser } from "@0xflick/models";
 
 import { TContext } from "../../context";
-import { TGraphqlResolver } from "../../types";
-import { IGraphqlRole, IGraphqlPermission } from "../admin/roles";
 import { bindUserToRole } from "../../controllers/admin/roles";
 import { authorizedUser } from "../../controllers/auth/user";
-
-export interface IGraphqlWeb3User {
-  address: string;
-  nonce: number;
-  roles: IGraphqlRole[];
-  allowedActions: IGraphqlPermission[];
-}
+import { Resolvers } from "../../resolvers.generated";
 
 export const typeSchema = gql`
   type Web3User {
@@ -31,28 +23,20 @@ export const typeSchema = gql`
   }
 `;
 
-export const querySchema = `
-  self: Web3User
-`;
-
 const selfResolver: IFieldResolver<
-  void,
+  unknown,
   TContext,
-  void,
+  unknown,
   Promise<IUser>
 > = async (_, __, context) => {
   return await authorizedUser(context);
 };
 
-export const queryResolvers = {
+export const queryResolvers: Resolvers<TContext>["Query"] = {
   self: selfResolver,
 };
 
-export const mutationSchema = `
-  self: Web3User
-`;
-
-export const mutationResolvers = {
+export const mutationResolvers: Resolvers<TContext>["Mutation"] = {
   self: selfResolver,
 };
 
@@ -68,10 +52,10 @@ const roleBindToUserResolver: IFieldResolver<
   });
 };
 
-export const resolvers = {
+export const resolvers: Resolvers<TContext> = {
   Web3User: {
     bindToRole: roleBindToUserResolver,
-    allowedActions: (async (
+    allowedActions: async (
       user,
       _,
       { userDao, userRolesDao, rolePermissionsDao }
@@ -83,13 +67,8 @@ export const resolvers = {
       return await rolePermissionsDao.allowedActionsForRoleIds(
         userRoles.roleIds
       );
-    }) as IFieldResolver<
-      IUser,
-      TContext,
-      unknown,
-      Promise<IGraphqlPermission[]>
-    >,
-    roles: (async (
+    },
+    roles: async (
       user,
       _,
       { rolePermissionsDao, rolesDao, userDao, userRolesDao }
@@ -112,6 +91,6 @@ export const resolvers = {
           };
         })
       );
-    }) as IFieldResolver<IUser, TContext, unknown, Promise<IGraphqlRole[]>>,
+    },
   },
-} as TGraphqlResolver;
+};

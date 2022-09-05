@@ -1,16 +1,16 @@
 import { IFieldResolver } from "@graphql-tools/utils";
 import { gql } from "apollo-server-core";
-import { INameflick } from "@0xflick/models";
 import { TContext } from "../../context";
 import { NameflickFieldsInput, Nameflick } from "../../types.generated";
 import { createOrUpdateNameFlickRecord } from "../../controllers/nameflick/createOrUpdateRecord";
-import { nameflickModelToGraphql } from "./transforms";
+import { nameflickModelToGraphql } from "../../transforms/nameflick";
 import { deleteNameflickRecordByFqdn } from "../../controllers/nameflick/deleteRecord";
 import {
   fetchNameflickRecordsByRootDomain,
   fetchNameflickRecordByEnsHash,
   fetchNameflickRecordByFqdn,
 } from "../../controllers/nameflick/fetchRecord";
+import { Resolvers } from "../../resolvers.generated";
 
 export const typeSchema = gql`
   type NameflickAddress {
@@ -68,14 +68,8 @@ export const typeSchema = gql`
   }
 `;
 
-export const querySchema = `
-  nameflickByFqdn(fqdn: ID!): Nameflick
-  nameflickByEnsHash(ensHash: String!): Nameflick
-  nameflicksByRootDomain(rootDomain: String!): [Nameflick!]!
-`;
-
 const nameFlickByFqdnResolver: IFieldResolver<
-  void,
+  unknown,
   TContext,
   { fqdn: string }
 > = async (source, { fqdn }, context) => {
@@ -83,7 +77,7 @@ const nameFlickByFqdnResolver: IFieldResolver<
 };
 
 const nameFlickByEnsHashResolver: IFieldResolver<
-  void,
+  unknown,
   TContext,
   { ensHash: string }
 > = async (source, { ensHash }, context) => {
@@ -91,30 +85,22 @@ const nameFlickByEnsHashResolver: IFieldResolver<
 };
 
 const nameFlicksByRootDomainResolver: IFieldResolver<
-  void,
+  unknown,
   TContext,
   { rootDomain: string }
 > = async (source, { rootDomain }, context) => {
   return await fetchNameflickRecordsByRootDomain(context, { rootDomain });
 };
 
-export const queryResolvers = {
+export const queryResolvers: Resolvers<TContext>["Query"] = {
   nameflickByFqdn: nameFlickByFqdnResolver,
   nameflickByEnsHash: nameFlickByEnsHashResolver,
   nameflicksByRootDomain: nameFlicksByRootDomainResolver,
 };
 
-export const mutationSchema = `
-  createOrUpdateNameflick(
-    domain: ID!,
-    ttl: Int,
-    fields: NameflickFieldsInput!
-  ): Nameflick!
-  deleteNameflick(domain: ID!): Boolean!
-`;
 
 const createOrUpdateNameflickResolver: IFieldResolver<
-  void,
+  unknown,
   TContext,
   { domain: string; fields: NameflickFieldsInput; ttl?: number },
   Promise<Nameflick>
@@ -130,7 +116,7 @@ const createOrUpdateNameflickResolver: IFieldResolver<
 };
 
 const deleteNameflickResolver: IFieldResolver<
-  void,
+  unknown,
   TContext,
   { domain: string },
   Promise<boolean>
@@ -139,22 +125,7 @@ const deleteNameflickResolver: IFieldResolver<
   return true;
 };
 
-export const mutationResolvers = {
+export const mutationResolvers: Resolvers<TContext>["Mutation"] = {
   createOrUpdateNameflick: createOrUpdateNameflickResolver,
   deleteNameflick: deleteNameflickResolver,
-};
-
-const nameflickEtherscanResolver: IFieldResolver<
-  Nameflick,
-  TContext,
-  {},
-  Promise<string>
-> = async (source, _, context) => {
-  return `https://etherscan.io/enslookup-search?search=${source.domain}`;
-};
-
-export const resolvers = {
-  Nameflick: {
-    etherscan: nameflickEtherscanResolver,
-  },
 };

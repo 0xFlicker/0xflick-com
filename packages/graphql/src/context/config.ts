@@ -11,6 +11,8 @@ const appName =
 const publicEnsDomain =
   process.env.NEXT_PUBLIC_ENS_DOMAIN || "public.nameflick.eth";
 
+const adminEnsDomain = process.env.ADMIN_ENS_DOMAIN || "admin.nameflick.eth";
+
 export function createConfig(providedConfig: Partial<IDeployConfig>) {
   const config = {
     chains: providedConfig.chains,
@@ -18,6 +20,7 @@ export function createConfig(providedConfig: Partial<IDeployConfig>) {
     infraIpfsSecret: providedConfig.infraIpfsSecret,
     infraIpfsUrl: providedConfig.infraIpfsUrl,
     publicEnsDomain,
+    adminEnsDomain,
     swie: {
       expirationTime: siweExpirationTime,
       domain: appName,

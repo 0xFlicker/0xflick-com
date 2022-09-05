@@ -1,0 +1,33 @@
+{
+  "name": "@xflick/cli",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "type": "commonjs",
+  "license": "MIT",
+  "scripts": {
+    "bootstrap": "node --loader ts-node/esm ./src/bootstrap.ts",
+    "token": "node --loader ts-node/esm ./src/printToken.ts",
+    "add-affiliate": "node --loader ts-node/esm ./src/addAffiliate.ts",
+    "generate": "yarn generate:schema && yarn generate:types",
+    "generate:schema": "yarn --cwd ../../packages/graphql schema:build",
+    "generate:types": "graphql-codegen --config codegen.yml"
+  },
+  "dependencies": {
+    "ethers": "^5.7.0",
+    "graphql": "16.5.0",
+    "graphql-request": "^5.0.0"
+  },
+  "devDependencies": {
+    "@graphql-codegen/cli": "2.12.0",
+    "@graphql-codegen/near-operation-file-preset": "^2.4.1",
+    "@graphql-codegen/typescript": "2.7.3",
+    "@graphql-codegen/typescript-graphql-request": "^4.5.4",
+    "@graphql-codegen/typescript-operations": "2.5.3",
+    "@types/dotenv": "^8.2.0",
+    "bunyan": "^1.8.15",
+    "dotenv": "^16.0.1",
+    "ts-node": "^10.9.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^4.7.4"
+  }
+}

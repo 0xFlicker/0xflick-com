@@ -1,9 +1,8 @@
 import { gql } from "apollo-server-core";
-import { resolveFlick, resolveImage } from "./nfts";
-import { TGraphqlResolver } from "../types";
 import { IFieldResolver } from "@graphql-tools/utils";
 import { TContext } from "../context";
 import { ChainError } from "../errors/chain";
+import { ChainQuery, Resolvers } from "../resolvers.generated";
 
 export const typeSchema = gql`
   type ChainQuery {
@@ -15,20 +14,11 @@ export const typeSchema = gql`
   }
 `;
 
-export const querySchema = `
-  chain(id: ID!): ChainQuery!
-`;
-
-export interface IChainContext {
-  chainId: number;
-  chainName: string;
-  ensRegistry?: string;
-}
 const chainResolver: IFieldResolver<
-  void,
+  unknown,
   TContext,
   { id: string },
-  Promise<IChainContext>
+  Promise<ChainQuery>
 > = async (_, { id }, { config }) => {
   try {
     const chainId = parseInt(id, 10);
@@ -37,7 +27,7 @@ const chainResolver: IFieldResolver<
       throw new ChainError("Chain not found", "INVALID_CHAIN_ID", chainId);
     }
     return {
-      chainId,
+      chainId: chainId.toString(),
       chainName: chain.name,
       ensRegistry: chain.ens ? chain.ens.registry : undefined,
     };
@@ -46,13 +36,6 @@ const chainResolver: IFieldResolver<
   }
 };
 
-export const queryResolvers: TGraphqlResolver["Query"] = {
+export const queryResolvers: Resolvers["Query"] = {
   chain: chainResolver,
-};
-
-export const resolvers = {
-  ChainQuery: {
-    flick: resolveFlick,
-    image: resolveImage,
-  },
 };

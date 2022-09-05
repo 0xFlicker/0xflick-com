@@ -1,7 +1,6 @@
 import { GraphQLResolveInfo } from "graphql";
-import { INameflick } from "@0xflick/models";
 import { TContext } from "../../context";
-import { NameflickFieldsInput } from "../../types.generated";
+import { NameflickFieldsInput } from "../../resolvers.generated";
 import { utils } from "ethers";
 import { NameflickError } from "../../errors/nameflick";
 

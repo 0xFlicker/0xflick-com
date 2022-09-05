@@ -1,0 +1,5 @@
+mutation getNonce($address: String!) {
+  nonceForAddress(address: $address) {
+    nonce
+  }
+}

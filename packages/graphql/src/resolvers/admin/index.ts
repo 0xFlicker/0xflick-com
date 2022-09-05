@@ -1,9 +1,9 @@
 import { gql } from "apollo-server-core";
+import { TContext } from "../../context";
+import { Resolvers } from "../../resolvers.generated";
 import {
-  mutationSchema as mutationSchemaRoles,
   mutationResolvers as mutationResolversRoles,
   queryResolvers as queryResolversRoles,
-  querySchema as querySchemaRoles,
   typeSchema as typeSchemaRoles,
   resolvers as resolversRoles,
 } from "./roles";
@@ -12,22 +12,14 @@ export const typeSchema = gql`
   ${typeSchemaRoles}
 `;
 
-export const querySchema = `
-  ${querySchemaRoles}
-`;
-
-export const mutationSchema = `
-  ${mutationSchemaRoles}
-`;
-
-export const mutationResolves = {
+export const mutationResolves: Resolvers<TContext>["Mutation"] = {
   ...mutationResolversRoles,
 };
 
-export const queryResolvers = {
+export const queryResolvers: Resolvers<TContext>["Query"] = {
   ...queryResolversRoles,
 };
 
-export const resolvers  = {
+export const resolvers: Resolvers<TContext> = {
   ...resolversRoles,
-}
+};

@@ -1,5 +1,12 @@
 overwrite: true
-schema: "src/resolvers/**/*.ts"
+schema: "schema.graphql"
 generates:
-  src/types.generated.ts:
-    - typescript
+  src/resolvers.generated.ts:
+    config:
+      mappers:
+        Web3User: "@0xflick/models#IUser"
+        Role: "./models#TRole"
+        Permission: "./models#TPermission"
+    plugins:
+      - typescript
+      - typescript-resolvers

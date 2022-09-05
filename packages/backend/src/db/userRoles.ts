@@ -147,22 +147,23 @@ export class UserRolesDAO {
     )) {
       entriesToDeleteIds.push(item);
     }
-
-    await this.db.send(
-      new BatchWriteCommand({
-        RequestItems: {
-          [UserRolesDAO.TABLE_NAME]: entriesToDeleteIds.map(
-            (Address_RoleID) => ({
-              DeleteRequest: {
-                Key: {
-                  Address_RoleID,
+    if (entriesToDeleteIds.length > 0) {
+      await this.db.send(
+        new BatchWriteCommand({
+          RequestItems: {
+            [UserRolesDAO.TABLE_NAME]: entriesToDeleteIds.map(
+              (Address_RoleID) => ({
+                DeleteRequest: {
+                  Key: {
+                    Address_RoleID,
+                  },
                 },
-              },
-            })
-          ),
-        },
-      })
-    );
+              })
+            ),
+          },
+        })
+      );
+    }
 
     return this;
   }

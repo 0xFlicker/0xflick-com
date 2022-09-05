@@ -4,12 +4,13 @@ import {
   EActions,
   EResource,
   isActionOnResource,
+  RoleModel,
 } from "@0xflick/models";
 import { TContext } from "../../context";
-import { IGraphqlPermission } from "../../resolvers/admin/roles";
 import { verifyAuthorizedUser } from "../auth/authorized";
 import { GraphQLResolveInfo } from "graphql";
 import { MutationError } from "../../errors/mutation";
+import { TPermission, TRole } from "../../models";
 
 const canPerformBindRoleToUserAction = defaultAdminStrategyAll(
   EResource.PERMISSION,
@@ -63,7 +64,7 @@ const canPerformCreateRoleAction = defaultAdminStrategyAll(
 export async function createRole(
   context: TContext,
   info: GraphQLResolveInfo,
-  { name, permissions }: { name: string; permissions: IGraphqlPermission[] }
+  { name, permissions }: { name: string; permissions: TPermission[] }
 ) {
   context.requireMutation(info);
   await verifyAuthorizedUser(context, canPerformCreateRoleAction);
@@ -109,5 +110,49 @@ export async function unlinkUserFromRole(
     roleId,
     rolesDao,
   });
+  return true;
+}
+
+const canPerformUListAllRoles = defaultAdminStrategyAll(
+  EResource.PERMISSION,
+  isActionOnResource({
+    action: EActions.LIST,
+    resource: EResource.PERMISSION,
+  })
+);
+
+export async function listAllRoles(context: TContext) {
+  await verifyAuthorizedUser(context, canPerformUListAllRoles);
+  const { rolesDao, rolePermissionsDao } = context;
+  const roleModels: RoleModel[] = [];
+  for await (const role of rolesDao.listAll()) {
+    roleModels.push(role);
+  }
+  return await Promise.all(
+    roleModels.map(async (role) => ({
+      id: role.id,
+      name: role.name,
+      permissions: await rolePermissionsDao.getAllPermissions(role.id),
+    }))
+  );
+}
+
+const canPerformDeleteRoleAction = defaultAdminStrategyAll(
+  EResource.PERMISSION,
+  isActionOnResource({
+    action: EActions.DELETE,
+    resource: EResource.ROLE,
+  })
+);
+
+export async function deleteRole(
+  context: TContext,
+  info: GraphQLResolveInfo,
+  roleId: string
+) {
+  context.requireMutation(info);
+  await verifyAuthorizedUser(context, canPerformDeleteRoleAction);
+  const { rolesDao, userRolesDao, rolePermissionsDao } = context;
+  await rolesDao.deleteRole(userRolesDao, rolePermissionsDao, roleId);
   return true;
 }

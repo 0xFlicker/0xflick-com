@@ -1,99 +1,72 @@
 import { gql } from "apollo-server-core";
-import { resolveFlick, resolveImage, resolveNftTokenImage } from "./nfts";
+import {
+  resolvers as resolversNfts,
+  typeSchema as typeSchemaNfts,
+} from "./nfts";
 import {
   typeSchema as typeSchemaAuth,
   resolvers as resolversAuth,
-  mutationSchema as mutationSchemaAuth,
   mutationResolvers as mutationResolversAuth,
   queryResolvers as queryResolversAuth,
-  querySchema as querySchemaAuth,
 } from "./auth";
 import {
   typeSchema as typeSchemaChain,
-  querySchema as querySchemaChain,
-  resolvers as resolversChain,
   queryResolvers as queryResolversChain,
 } from "./chain";
 import {
   typeSchema as typeSchemaAdmin,
-  mutationSchema as mutationSchemaAdmin,
   mutationResolves as mutationResolvesAdmin,
-  querySchema as querySchemaAdmin,
   queryResolvers as queryResolversAdmin,
   resolvers as resolversAdmin,
 } from "./admin";
 import {
   typeSchema as typeSchemaNameflick,
-  querySchema as querySchemaNameflick,
   mutationResolvers as mutationResolversNameflick,
-  mutationSchema as mutationSchemaNameflick,
   queryResolvers as queryResolversNameflick,
-  resolvers as resolversNameflick,
 } from "./nameflick";
-import { TGraphqlResolver } from "../types";
+import { Resolvers } from "../resolvers.generated";
+import { TContext } from "../context";
 
 export const typeDefs = gql`
   ${typeSchemaNameflick}
   ${typeSchemaChain}
   ${typeSchemaAuth}
   ${typeSchemaAdmin}
-  type MetadataProperties {
-    name: String!
-    value: String!
-  }
-  type MetadataAttributeString {
-    value: String!
-    trait_type: String!
-    colors: [String!]
-  }
-  type MetadataAttributeNumeric {
-    value: Float!
-    trait_type: String
-    display_type: String
-  }
-  union MetadataAttribute = MetadataAttributeString | MetadataAttributeNumeric
-  type Metadata {
-    image: String
-    description: String
-    tokenId: String!
-    id: String!
-    externalUrl: String
-    name: String
-    attributes: [MetadataAttribute!]
-    properties: [MetadataProperties!]
-    edition: String
-  }
-  type NftToken {
-    id: ID!
-    tokenId: String!
-    image(width: Int, height: Int): String
-    metadata: Metadata
-  }
-  type Nft {
-    collectionName: String!
-    contractAddress: String!
-    ownedTokens: [NftToken!]!
-  }
-
-  type Flick {
-    nfts: [Nft!]
-  }
+  ${typeSchemaNfts}
 
   type Query {
-    ${querySchemaNameflick}
-    ${querySchemaChain}
-    ${querySchemaAuth}
-    ${querySchemaAdmin}
+    nameflickByFqdn(fqdn: ID!): Nameflick
+    nameflickByEnsHash(ensHash: String!): Nameflick
+    nameflicksByRootDomain(rootDomain: String!): [Nameflick!]!
+    chain(id: ID!): ChainQuery!
+    self: Web3User
+    role(id: ID!): Role!
+    roles: [Role!]!
   }
 
   type Mutation {
-    ${mutationSchemaNameflick}
-    ${mutationSchemaAuth}
-    ${mutationSchemaAdmin}
+    createOrUpdateNameflick(
+      domain: ID!
+      ttl: Int
+      fields: NameflickFieldsInput!
+    ): Nameflick!
+    deleteNameflick(domain: ID!): Boolean!
+    role(id: ID!): Role!
+    roles: [Role!]!
+    createRole(name: String!, permissions: [PermissionInput!]!): Role!
+    nonceForAddress(address: String!): Nonce
+    signIn(
+      address: String!
+      jwe: String!
+      issuedAt: String!
+      chainId: Int!
+    ): Web3LoginUser
+    signOut: Boolean!
+    self: Web3User
   }
 `;
 
-export const resolvers = {
+export const resolvers: Resolvers<TContext> = {
   Query: {
     ...queryResolversNameflick,
     ...queryResolversChain,
@@ -105,11 +78,7 @@ export const resolvers = {
     ...mutationResolversAuth,
     ...mutationResolvesAdmin,
   },
-  NftToken: {
-    image: resolveNftTokenImage,
-  },
-  ...resolversChain,
+  ...resolversNfts,
   ...resolversAuth,
   ...resolversAdmin,
-  ...resolversNameflick,
-} as TGraphqlResolver;
+};

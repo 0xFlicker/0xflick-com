@@ -9,14 +9,19 @@ export async function verifyAuthorizedUser(
   authorizer: (item: TAllowedAction[]) => boolean
 ) {
   const user = await authorizedUser(context);
-  const { getToken, rolePermissionsDao, ownerForChain } = context;
+  const { rolePermissionsDao, providerForChain, config } = context;
   const permissionsFromDb = await rolePermissionsDao.allowedActionsForRoleIds(
     user.roleIds
   );
 
   let isAuthorized = authorizer(permissionsFromDb);
-  const contractOwner = await ownerForChain(Number(defaultChainId()));
-  if (!isAuthorized && contractOwner === user.address) {
+  if (isAuthorized) {
+    return user;
+  }
+  const provider = providerForChain(Number(defaultChainId()));
+  const adminEns = config.adminEnsDomain;
+  const adminAddress = await provider.resolveName(adminEns);
+  if (adminAddress === user.address) {
     isAuthorized = true;
   }
   if (!isAuthorized) {

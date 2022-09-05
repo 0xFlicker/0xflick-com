@@ -4,28 +4,17 @@ import {
   decryptJweToken,
 } from "@0xflick/backend";
 import { authMessage, IUser } from "@0xflick/models";
-import { IFieldResolver } from "@graphql-tools/utils";
 import { utils } from "ethers";
 import { TContext } from "../../context";
 import { AuthError } from "../../errors/auth";
-import { TGraphqlResolver } from "../../types";
+import { Resolvers } from "../../resolvers.generated";
 
 const logger = createLogger({
   name: "graphql/resolvers/auth/signIn",
 });
 
-export interface IGraphqlWeb3LoginUser {
-  address: string;
-  user: IUser;
-  token: string;
-}
-
-export const mutationSchema = `
-  signIn(address: String!, jwe: String!, issuedAt: String!, chainId: Int!): Web3LoginUser
-`;
-
-export const mutations = {
-  signIn: (async (
+export const mutations: Resolvers<TContext>["Mutation"] = {
+  signIn: async (
     _,
     { address, jwe, issuedAt: issuedAtStr, chainId },
     { userDao, userRolesDao, setToken, clearToken, config }
@@ -91,10 +80,5 @@ export const mutations = {
       },
       token,
     };
-  }) as IFieldResolver<
-    any,
-    TContext,
-    { address: string; jwe: string; issuedAt: string; chainId: number },
-    Promise<IGraphqlWeb3LoginUser>
-  >,
-} as TGraphqlResolver;
+  },
+};

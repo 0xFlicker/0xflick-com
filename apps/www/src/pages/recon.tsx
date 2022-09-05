@@ -11,7 +11,7 @@ const HomePage: NextPage<{ i18n: InitOptions }> = ({ i18n }) => {
   return (
     <DefaultProvider i18n={i18n}>
       <Head>
-        <title>0xflick</title>
+        <title>Recon</title>
       </Head>
       <Recon />
     </DefaultProvider>

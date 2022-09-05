@@ -71,18 +71,33 @@ export type MetadataProperties = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  createOrUpdateNameflick: Nameflick;
   createRole: Role;
+  deleteNameflick: Scalars['Boolean'];
   nonceForAddress?: Maybe<Nonce>;
   role: Role;
+  roles: Array<Role>;
   self?: Maybe<Web3User>;
   signIn?: Maybe<Web3LoginUser>;
   signOut: Scalars['Boolean'];
 };
 
 
+export type MutationCreateOrUpdateNameflickArgs = {
+  domain: Scalars['ID'];
+  fields: NameflickFieldsInput;
+  ttl?: InputMaybe<Scalars['Int']>;
+};
+
+
 export type MutationCreateRoleArgs = {
   name: Scalars['String'];
   permissions: Array<PermissionInput>;
+};
+
+
+export type MutationDeleteNameflickArgs = {
+  domain: Scalars['ID'];
 };
 
 
@@ -109,6 +124,7 @@ export type Nameflick = {
   content?: Maybe<Scalars['String']>;
   domain: Scalars['ID'];
   ensHash?: Maybe<Scalars['String']>;
+  etherscan: Scalars['String'];
   rootDomain: Scalars['String'];
   textRecord: NameflickTextRecord;
   ttl?: Maybe<Scalars['Int']>;
@@ -193,6 +209,7 @@ export type Nonce = {
 export type Permission = {
   __typename?: 'Permission';
   action: PermissionAction;
+  identifier?: Maybe<Scalars['String']>;
   resource: PermissionResource;
 };
 
@@ -208,6 +225,7 @@ export enum PermissionAction {
 
 export type PermissionInput = {
   action: PermissionAction;
+  identifier?: InputMaybe<Scalars['String']>;
   resource: PermissionResource;
 };
 
@@ -225,13 +243,32 @@ export enum PermissionResource {
 export type Query = {
   __typename?: 'Query';
   chain: ChainQuery;
+  nameflickByEnsHash?: Maybe<Nameflick>;
+  nameflickByFqdn?: Maybe<Nameflick>;
+  nameflicksByRootDomain: Array<Nameflick>;
   role: Role;
+  roles: Array<Role>;
   self?: Maybe<Web3User>;
 };
 
 
 export type QueryChainArgs = {
   id: Scalars['ID'];
+};
+
+
+export type QueryNameflickByEnsHashArgs = {
+  ensHash: Scalars['String'];
+};
+
+
+export type QueryNameflickByFqdnArgs = {
+  fqdn: Scalars['ID'];
+};
+
+
+export type QueryNameflicksByRootDomainArgs = {
+  rootDomain: Scalars['String'];
 };
 
 
@@ -242,6 +279,7 @@ export type QueryRoleArgs = {
 export type Role = {
   __typename?: 'Role';
   bindToUser: Web3User;
+  delete: Scalars['Boolean'];
   id: Scalars['ID'];
   name: Scalars['String'];
   permissions: Array<Permission>;

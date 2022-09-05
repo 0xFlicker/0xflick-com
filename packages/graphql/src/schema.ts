@@ -22,6 +22,16 @@ Promise.resolve()
         printableSchema,
         "utf8"
       ),
+      fs.promises.writeFile(
+        resolve(__dirname, "../../../apps/cli/schema.graphql"),
+        printableSchema,
+        "utf8"
+      ),
+      fs.promises.writeFile(
+        resolve(__dirname, "../schema.graphql"),
+        printableSchema,
+        "utf8"
+      ),
     ]);
   })
   .catch((err) => console.error(err));

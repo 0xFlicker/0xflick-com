@@ -1,22 +1,16 @@
 import { gql } from "apollo-server-core";
-import { TGraphqlResolver } from "../../types";
+import { TContext } from "../../context";
+import { Resolvers } from "../../resolvers.generated";
 
 export const typeSchema = gql`
   type Nonce {
     nonce: Int!
   }
 `;
-export interface IGraphqlNonce {
-  nonce: number;
-}
 
-export const mutationSchema = `
-  nonceForAddress(address: String!): Nonce
-`;
+export const resolvers = {} as Resolvers<TContext>;
 
-export const resolvers = {} as TGraphqlResolver;
-
-export const mutation = {
+export const mutation: Resolvers<TContext>["Mutation"] = {
   async nonceForAddress(_, { address }, { userDao }) {
     const user = await userDao.getUser(address);
     if (!user) {
@@ -24,4 +18,4 @@ export const mutation = {
     }
     return { nonce: user.nonce };
   },
-} as TGraphqlResolver;
+};

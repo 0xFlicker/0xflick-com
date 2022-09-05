@@ -3,9 +3,9 @@ import { providers } from "ethers";
 import { createLogger } from "@0xflick/backend";
 import { EnsError } from "../../errors/ens";
 import { flickEnsDomain, nftCollectionsOfInterest } from "../../utils/config";
-import { getEnumerableNftTokens, Nft } from "./common";
+import { getEnumerableNftTokens } from "./common";
 import { TContext } from "../../context";
-import { IChainContext } from "../chain";
+import { ChainQuery, Flick } from "../../resolvers.generated";
 
 const logger = createLogger({
   name: "graphql/resolvers/nfts/flick",
@@ -15,13 +15,13 @@ async function flickAddress(provider: providers.JsonRpcProvider) {
   return await provider.resolveName(flickEnsDomain.get());
 }
 export const resolveFlick: IFieldResolver<
-  IChainContext,
+  ChainQuery,
   TContext,
-  void,
-  Promise<{ nfts: Nft[] }>
+  unknown,
+  Promise<Flick>
 > = async ({ chainId }, __, context) => {
   const { providerForChain } = context;
-  const provider = providerForChain(chainId);
+  const provider = providerForChain(Number(chainId));
   let myAddress: string;
   try {
     myAddress = await flickAddress(provider);
@@ -34,17 +34,16 @@ export const resolveFlick: IFieldResolver<
   }
   logger.debug(`Resolved ENS to ${myAddress}`);
   const nfts = await Promise.all(
-    nftCollectionsOfInterest
-      .get()
-      .map((collection) =>
-        getEnumerableNftTokens(
-          logger,
-          myAddress,
-          collection.address,
-          provider,
-          collection.isEnumerable
-        )
-      )
+    nftCollectionsOfInterest.get().map((collection) => ({
+      ...getEnumerableNftTokens(
+        logger,
+        myAddress,
+        collection.address,
+        provider,
+        collection.isEnumerable
+      ),
+      id: collection.address,
+    }))
   );
   return { nfts };
 };

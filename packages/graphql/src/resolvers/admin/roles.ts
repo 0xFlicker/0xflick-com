@@ -1,32 +1,20 @@
 import { gql } from "apollo-server-core";
-import {
-  defaultAdminStrategyAll,
-  EActions,
-  EResource,
-  isActionOnResource,
-  IUser,
-  verifyJwtToken,
-} from "@0xflick/models";
-import { IFieldResolver } from "@graphql-tools/utils";
+import { EActions, EResource, IUser } from "@0xflick/models";
 import { TContext } from "../../context";
 import { RoleError } from "../../errors/roles";
 import {
   bindUserToRole,
   createRole,
+  deleteRole,
+  listAllRoles,
   unlinkUserFromRole,
 } from "../../controllers/admin/roles";
-import { OperationTypeNode } from "graphql";
-
-export interface IGraphqlPermission {
-  action: EActions;
-  resource: EResource;
-}
-
-export interface IGraphqlRole {
-  id: string;
-  name: string;
-  permissions: IGraphqlPermission[];
-}
+import { Resolvers } from "../../resolvers.generated";
+import {
+  graphqlPermissionToModel,
+  modelPermissionActionToGraphql,
+  modelPermissionResourceToGraphql,
+} from "../../transforms/permissions";
 
 export const typeSchema = gql`
   enum PermissionAction {
@@ -53,11 +41,13 @@ export const typeSchema = gql`
   type Permission {
     action: PermissionAction!
     resource: PermissionResource!
+    identifier: String
   }
 
   input PermissionInput {
     action: PermissionAction!
     resource: PermissionResource!
+    identifier: String
   }
 
   type Role {
@@ -67,85 +57,74 @@ export const typeSchema = gql`
     permissions: [Permission!]!
     bindToUser(userAddress: String!): Web3User!
     unbindFromUser(userAddress: String!): Web3User!
+    delete: Boolean!
   }
 `;
 
-export const querySchema = `
-  role(id: ID!): Role!
-`;
-
-export const mutationSchema = `
-  role(id: ID!): Role!
-  createRole(name: String!, permissions: [PermissionInput!]!): Role!
-`;
-
-const roleBindToUserResolver: IFieldResolver<
-  IGraphqlRole,
-  TContext,
-  { userAddress: string },
-  Promise<boolean>
-> = async ({ id: roleId }, { userAddress }, context, info) => {
-  await bindUserToRole(context, info, {
-    userAddress,
-    roleId,
-  });
-  return true;
-};
-
-const roleUnlinkFromUserResolver: IFieldResolver<
-  IGraphqlRole,
-  TContext,
-  { userAddress: string },
-  Promise<boolean>
-> = async ({ id: roleId }, { userAddress }, context, info) => {
-  return await unlinkUserFromRole(context, info, {
-    userAddress,
-    roleId,
-  });
-};
-
-export const resolvers = {
+export const resolvers: Resolvers<TContext> = {
+  Permission: {
+    action: (permission) => modelPermissionActionToGraphql(permission.action),
+    resource: (permission) =>
+      modelPermissionResourceToGraphql(permission.resource),
+  },
   Role: {
-    bindToUser: roleBindToUserResolver,
-    unbindFromUser: roleUnlinkFromUserResolver,
+    delete: async ({ id: roleId }, _, context, info) => {
+      return await deleteRole(context, info, roleId);
+    },
+    bindToUser: async ({ id: roleId }, { userAddress }, context, info) => {
+      const user = await bindUserToRole(context, info, {
+        userAddress,
+        roleId,
+      });
+      return user;
+    },
+    unbindFromUser: async ({ id: roleId }, { userAddress }, context, info) => {
+      const result = await unlinkUserFromRole(context, info, {
+        userAddress,
+        roleId,
+      });
+      if (!result) {
+        throw new RoleError(
+          "Failed to unlink user from role",
+          "UNABLE_TO_UNLINK_ROLE"
+        );
+      }
+      return {
+        address: userAddress,
+        // We don't actually known the nonce of the user
+        nonce: -1,
+      };
+    },
   },
 };
 
-const roleResolver: IFieldResolver<
-  void,
-  TContext,
-  { id: string },
-  Promise<IGraphqlRole>
-> = async (_, { id }, { rolesDao, rolePermissionsDao }) => {
-  const role = await rolesDao.get(id);
-  if (!role) {
-    throw new RoleError(`Role with id ${id} not found`, "ROLE_NOT_FOUND");
-  }
-  const permissions = await rolePermissionsDao.getAllPermissions(role.id);
-  return {
-    id: role.id,
-    name: role.name,
-    permissions,
-  };
+export const queryResolvers: Resolvers<TContext>["Query"] = {
+  roles: async (_, __, context) => {
+    return await listAllRoles(context);
+  },
+  role: async (_, { id }, { rolesDao, rolePermissionsDao }) => {
+    const role = await rolesDao.get(id);
+    if (!role) {
+      throw new RoleError(`Role with id ${id} not found`, "ROLE_NOT_FOUND");
+    }
+    const permissions = await rolePermissionsDao.getAllPermissions(role.id);
+    return {
+      id: role.id,
+      name: role.name,
+      permissions,
+    };
+  },
 };
 
-export const queryResolvers = {
-  role: roleResolver,
-};
-
-const createRoleResolver: IFieldResolver<
-  void,
-  TContext,
-  { name: string; permissions: IGraphqlPermission[] },
-  Promise<IGraphqlRole>
-> = async (_, { name, permissions }, context, info) => {
-  return await createRole(context, info, {
-    name,
-    permissions,
-  });
-};
-
-export const mutationResolvers = {
-  role: roleResolver,
-  createRole: createRoleResolver,
+export const mutationResolvers: Resolvers<TContext>["Mutation"] = {
+  role: queryResolvers.role,
+  roles: async (_, __, context) => {
+    return await listAllRoles(context);
+  },
+  createRole: async (_, { name, permissions }, context, info) => {
+    return await createRole(context, info, {
+      name,
+      permissions: permissions.map(graphqlPermissionToModel),
+    });
+  },
 };

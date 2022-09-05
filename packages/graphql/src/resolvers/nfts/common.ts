@@ -12,16 +12,7 @@ import { MetadataError } from "../../errors/metadata";
 import { ContractError } from "../../errors/contract";
 import Logger from "bunyan";
 import { publicImageResizerUrl, publicIpfsUrl } from "../../utils/config";
-
-export interface Nft {
-  collectionName: string;
-  contractAddress: string;
-  ownedTokens: {
-    tokenId: number;
-    metadata: IMetadata;
-    resizedImage: string;
-  }[];
-}
+import { Nft, NftToken } from "../../resolvers.generated";
 
 export const fetchMetadata = (
   logger: Logger,
@@ -75,11 +66,7 @@ export async function getEnumerableNftTokens(
   );
   const nftTokens = (await contractEnumerable.balanceOf(myAddress)).toNumber();
   logger.debug(`Found ${nftTokens} tokens`);
-  const tokenUris: Promise<{
-    tokenId: number;
-    metadata: IMetadata;
-    resizedImage: string;
-  }>[] = [];
+  const tokenUris: Promise<NftToken>[] = [];
   const erc721aEnumerable = IERC721AQueryable__factory.connect(
     contractAddress,
     provider
@@ -106,9 +93,10 @@ export async function getEnumerableNftTokens(
                   )}`;
                 }
                 return {
-                  tokenId: tokenId.toNumber(),
-                  metadata: metadata,
-                  resizedImage,
+                  tokenId: tokenId.toNumber().toString(),
+                  metadata: metadata as any,
+                  image: resizedImage,
+                  id: tokenId.toNumber().toString(),
                 };
               }
             )
@@ -155,9 +143,10 @@ export async function getEnumerableNftTokens(
                   )}`;
                 }
                 return {
-                  tokenId: tokenId.toNumber(),
-                  metadata: metadata,
-                  resizedImage,
+                  tokenId: tokenId.toNumber().toString(),
+                  metadata: metadata as any,
+                  image: resizedImage,
+                  id: tokenId.toNumber().toString(),
                 };
               }
             )

@@ -84,6 +84,7 @@ export class GraphqlStack extends cdk.Stack {
         CHAIN_ID: chainId,
         NEXT_PUBLIC_APP_NAME: `https://${rootDomain}`,
         FLICK_ENS_DOMAIN: "0xflick.eth",
+        ADMIN_ENS_DOMAIN: "0xflick.eth",
         IPFS_API_URL: ipfsApiUrl,
         IPFS_API_PROJECT: ipfsApiProject,
         IPFS_API_SECRET: ipfsApiSecret,

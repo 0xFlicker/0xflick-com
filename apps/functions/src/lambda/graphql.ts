@@ -32,8 +32,20 @@ const server = new ApolloServer({
       ...apolloContext,
       setToken: (token: string) => setCookie(express.res, token),
       getToken: () => {
-        logger.info("Getting cookie", express.req.headers.cookie);
-        return deserializeSessionCookie(express.req.headers.cookie);
+        const cookieToken = deserializeSessionCookie(
+          express.req.headers.cookie
+        );
+        if (cookieToken) {
+          return cookieToken;
+        }
+        const authHeader = express.req.headers.authorization;
+        if (authHeader) {
+          const [type, token] = authHeader.split(" ");
+          if (type === "Bearer") {
+            return token;
+          }
+        }
+        return null;
       },
       clearToken: () => {
         logger.info("Clearing cookie");

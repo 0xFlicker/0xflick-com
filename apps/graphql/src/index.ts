@@ -42,7 +42,18 @@ createContext(config)
         return {
           ...context,
           getToken: () => {
-            return deserializeSessionCookie(req.headers.cookie);
+            const cookieToken = deserializeSessionCookie(req.headers.cookie);
+            if (cookieToken) {
+              return cookieToken;
+            }
+            const authHeader = req.headers.authorization;
+            if (authHeader) {
+              const [type, token] = authHeader.split(" ");
+              if (type === "Bearer") {
+                return token;
+              }
+            }
+            return null;
           },
           setToken: (token: string) => {
             res.setHeader("set-cookie", serializeSessionCookie(token, "/"));

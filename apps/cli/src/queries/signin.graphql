@@ -1,0 +1,10 @@
+mutation signIn(
+  $address: String!
+  $jwe: String!
+  $chainId: Int!
+  $issuedAt: String!
+) {
+  signIn(address: $address, jwe: $jwe, chainId: $chainId, issuedAt: $issuedAt) {
+    token
+  }
+}

@@ -1,5 +1,5 @@
 import { INameflick } from "@0xflick/models";
-import { Nameflick } from "../../types.generated";
+import { Nameflick } from "../resolvers.generated";
 
 export function nameflickModelToGraphql(nameflickModel: INameflick): Nameflick {
   const rootDomain = nameflickModel.normalized.split(".").slice(-2).join(".");
@@ -28,5 +28,6 @@ export function nameflickModelToGraphql(nameflickModel: INameflick): Nameflick {
       comTwitter: nameflickModel.textRecord["com.twitter"],
       orgTelegram: nameflickModel.textRecord["org.telegram"],
     },
+    etherscan: `https://etherscan.io/enslookup-search?search=${nameflickModel.normalized}`,
   };
 }
