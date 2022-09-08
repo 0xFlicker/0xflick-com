@@ -14,10 +14,8 @@ import Card from "@mui/material/Card";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-import { ResolverFormDemo } from "features/resolver/components/ResolverFormDemo";
 // import { HeroBackground } from "./HeroBackground";
 import { useSpring, animated, config } from "react-spring";
-import { FAQ } from "./FAQ";
 import { LinkCollection } from "components/LinkCollection";
 
 const SlideFromSide: FC<
@@ -35,6 +33,7 @@ const SlideFromSide: FC<
     viewportHeight: number;
     viewportAtTopAtEnter: number;
     rotation: number;
+    opacity: number;
     travelDirection: "up" | "down" | null;
   }>({
     inView: false,
@@ -42,6 +41,7 @@ const SlideFromSide: FC<
     scrollYAtEnter: 0,
     viewportAtTopAtEnter: 0,
     rotation: 0,
+    opacity: 0,
     viewportHeight: 0,
     travelDirection: null,
   });
@@ -56,9 +56,11 @@ const SlideFromSide: FC<
         // When enter the viewport then positionAtEnter === scrollYAtEnter. When they diverge by viewportHeight
         // then the total rotation is 180 degrees.
         const offset =
-          (scrollY + elRef.current.clientHeight / 2 - state.scrollYAtEnter) /
+          (scrollY - state.viewportHeight + state.viewportAtTopAtEnter) /
           state.viewportHeight;
-        console.log("offset", offset);
+
+        // Opacity is 1 when offset = 0.5 and 0 when offset = 1 or 0
+        const opacity = Math.max(0, 1 - Math.abs(offset - 0.5) * 2);
         if (state.travelDirection === "up") {
           rotation = starterRot + factor * offset * rotationLength;
         } else if (state.travelDirection === "down") {
@@ -67,6 +69,7 @@ const SlideFromSide: FC<
         setState((state) => ({
           ...state,
           rotation,
+          opacity,
         }));
       }
     }
@@ -76,6 +79,7 @@ const SlideFromSide: FC<
     state.inView,
     state.scrollYAtEnter,
     state.travelDirection,
+    state.viewportAtTopAtEnter,
     state.viewportHeight,
   ]);
 
@@ -84,8 +88,7 @@ const SlideFromSide: FC<
   const fadeTransition = useSpring({
     config: config.stiff,
     to: {
-      x: !state.inView ? `${sFactor}100%` : `${sFactor}50%`,
-      opacity: !state.inView ? 0 : 1,
+      opacity: state.opacity,
       transform: `rotate(${state.rotation}deg)`,
     },
   });
@@ -105,25 +108,29 @@ const SlideFromSide: FC<
         ) {
           setState({
             inView: true,
-            positionAtEnter: waypointTop + clientHeight,
-            scrollYAtEnter: scrollY + clientHeight,
+            positionAtEnter: waypointTop,
+            scrollYAtEnter: scrollY,
             viewportAtTopAtEnter: viewportTop,
             viewportHeight: viewportBottom - viewportTop,
             rotation: right ? -rotationLength / 2 : rotationLength / 2,
             travelDirection: "up",
+            opacity: 0,
           });
         } else if (
           previousPosition === Waypoint.above &&
           currentPosition === Waypoint.inside
         ) {
+          const startingPositionYTop = waypointTop + clientHeight / 2;
+          const endpointPositionY = viewportBottom;
           setState({
             inView: true,
-            positionAtEnter: waypointTop + clientHeight,
-            scrollYAtEnter: scrollY + clientHeight,
+            positionAtEnter: waypointTop,
+            scrollYAtEnter: scrollY,
             viewportAtTopAtEnter: viewportTop,
             viewportHeight: viewportBottom - viewportTop,
             rotation: right ? rotationLength / 2 : -rotationLength / 2,
             travelDirection: "down",
+            opacity: 0,
           });
         }
       }}
@@ -155,6 +162,7 @@ const SlideFromSide: FC<
         ref={elRef}
         style={{
           ...fadeTransition,
+          x: right ? "35%" : "-35%",
           transformOrigin: `${right ? "right" : "left"} center`,
           height: "100%",
         }}
@@ -200,7 +208,7 @@ export const Hero: FC = () => {
     <>
       {/* <HeroBackground /> */}
 
-      <Parallax ref={parallax} pages={8} className="parallax-ref">
+      <Parallax ref={parallax} pages={4} className="parallax-ref">
         <ParallaxLayer
           offset={0}
           speed={0}
@@ -256,7 +264,12 @@ export const Hero: FC = () => {
             />
           </SlideFromSide>
         </ParallaxLayer>
-        <ParallaxLayer sticky={{ start: 3, end: 4.9 }} speed={0} factor={1}>
+        <ParallaxLayer offset={3} speed={0} factor={1}>
+          <Container maxWidth="xl">
+            <LinkCollection />
+          </Container>
+        </ParallaxLayer>
+        {/* <ParallaxLayer sticky={{ start: 3, end: 4.4 }} speed={0} factor={1}>
           <Card
             style={{
               ...parallaxStyleCenter,
@@ -301,7 +314,7 @@ export const Hero: FC = () => {
             </Container>
           </Card>
         </ParallaxLayer>
-        <ParallaxLayer offset={4} speed={0} factor={1}>
+        <ParallaxLayer offset={4.4} speed={0} factor={1}>
           <Card
             style={{
               ...parallaxStyleCenter,
@@ -328,11 +341,7 @@ export const Hero: FC = () => {
             </Container>
           </Card>
         </ParallaxLayer>
-        <ParallaxLayer offset={5} speed={0} factor={1}>
-          <Container maxWidth="xl">
-            <LinkCollection />
-          </Container>
-        </ParallaxLayer>
+        */}
       </Parallax>
     </>
   );
