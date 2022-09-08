@@ -8,14 +8,11 @@ import { useLocale } from "locales/hooks";
 import { FC } from "react";
 import { Main } from "./Main";
 import { useSavedTheme } from "features/appbar/hooks";
-import { useMint } from "features/mint/hooks";
-import { useHasAllowedAction } from "features/auth/hooks";
-import { canPreSaleMint } from "features/auth/matchers";
 import { ResolverFormDemo } from "features/resolver/components/ResolverFormDemo";
 import Box from "@mui/material/Box";
 
 export const Demo: FC = () => {
-  const { t } = useLocale(["mint", "common"]);
+  const { t } = useLocale(["common"]);
   const { handleChange: handleThemeChange } = useSavedTheme();
   return (
     <Main
