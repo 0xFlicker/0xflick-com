@@ -80,7 +80,7 @@ export type Mutation = {
   createRole: Role;
   deleteNameflick: Scalars['Boolean'];
   nonceForAddress?: Maybe<Nonce>;
-  requestPresaleApproval: Scalars['Boolean'];
+  requestPresaleApproval: PresaleApprovalResponse;
   role: Role;
   roles: Array<Role>;
   self?: Maybe<Web3User>;
@@ -250,6 +250,12 @@ export enum PermissionResource {
   User = 'USER',
   UserRole = 'USER_ROLE'
 }
+
+export type PresaleApprovalResponse = {
+  __typename?: 'PresaleApprovalResponse';
+  approved: Scalars['Boolean'];
+  token: Scalars['String'];
+};
 
 export type Query = {
   __typename?: 'Query';
@@ -424,6 +430,7 @@ export type ResolversTypes = {
   PermissionAction: PermissionAction;
   PermissionInput: PermissionInput;
   PermissionResource: PermissionResource;
+  PresaleApprovalResponse: ResolverTypeWrapper<PresaleApprovalResponse>;
   Query: ResolverTypeWrapper<{}>;
   Role: ResolverTypeWrapper<TRole>;
   String: ResolverTypeWrapper<Scalars['String']>;
@@ -456,6 +463,7 @@ export type ResolversParentTypes = {
   Nonce: Nonce;
   Permission: TPermission;
   PermissionInput: PermissionInput;
+  PresaleApprovalResponse: PresaleApprovalResponse;
   Query: {};
   Role: TRole;
   String: Scalars['String'];
@@ -519,7 +527,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   createRole?: Resolver<ResolversTypes['Role'], ParentType, ContextType, RequireFields<MutationCreateRoleArgs, 'name' | 'permissions'>>;
   deleteNameflick?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteNameflickArgs, 'domain'>>;
   nonceForAddress?: Resolver<Maybe<ResolversTypes['Nonce']>, ParentType, ContextType, RequireFields<MutationNonceForAddressArgs, 'address'>>;
-  requestPresaleApproval?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, Partial<MutationRequestPresaleApprovalArgs>>;
+  requestPresaleApproval?: Resolver<ResolversTypes['PresaleApprovalResponse'], ParentType, ContextType, Partial<MutationRequestPresaleApprovalArgs>>;
   role?: Resolver<ResolversTypes['Role'], ParentType, ContextType, RequireFields<MutationRoleArgs, 'id'>>;
   roles?: Resolver<Array<ResolversTypes['Role']>, ParentType, ContextType>;
   self?: Resolver<Maybe<ResolversTypes['Web3User']>, ParentType, ContextType>;
@@ -589,6 +597,12 @@ export type PermissionResolvers<ContextType = any, ParentType extends ResolversP
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type PresaleApprovalResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['PresaleApprovalResponse'] = ResolversParentTypes['PresaleApprovalResponse']> = {
+  approved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  token?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   chain?: Resolver<ResolversTypes['ChainQuery'], ParentType, ContextType, RequireFields<QueryChainArgs, 'id'>>;
   nameflickByEnsHash?: Resolver<Maybe<ResolversTypes['Nameflick']>, ParentType, ContextType, RequireFields<QueryNameflickByEnsHashArgs, 'ensHash'>>;
@@ -643,6 +657,7 @@ export type Resolvers<ContextType = any> = {
   NftToken?: NftTokenResolvers<ContextType>;
   Nonce?: NonceResolvers<ContextType>;
   Permission?: PermissionResolvers<ContextType>;
+  PresaleApprovalResponse?: PresaleApprovalResponseResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   Role?: RoleResolvers<ContextType>;
   Web3LoginUser?: Web3LoginUserResolvers<ContextType>;

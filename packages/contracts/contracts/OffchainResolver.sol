@@ -3,6 +3,7 @@ pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "./IERC721AQueryable.sol";
 import "./IExtendedResolver.sol";
 import "./SignatureVerifier.sol";
 
@@ -27,6 +28,7 @@ contract OffchainResolver is IExtendedResolver, ERC165, Ownable {
   address public parentContract;
 
   event NewSigners(address[] signers);
+
   error OffchainLookup(
     address sender,
     string[] urls,
@@ -74,6 +76,7 @@ contract OffchainResolver is IExtendedResolver, ERC165, Ownable {
     override
     returns (bytes memory)
   {
+    (foo, bar) = abi.decode(data, (bytes4, string));
     bytes memory callData = abi.encodeWithSelector(
       IResolverService.resolve.selector,
       name,

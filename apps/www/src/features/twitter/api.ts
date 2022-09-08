@@ -16,4 +16,4 @@ const api = createApi({
   }),
 });
 
-export const { reducer, useIsFollowingQuery } = api;
+export const { reducer, useIsFollowingQuery, useLazyIsFollowingQuery } = api;

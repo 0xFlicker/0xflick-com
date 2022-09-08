@@ -75,7 +75,9 @@ export type Mutation = {
   createRole: Role;
   deleteNameflick: Scalars['Boolean'];
   nonceForAddress?: Maybe<Nonce>;
+  requestPresaleApproval: PresaleApprovalResponse;
   role: Role;
+  roles: Array<Role>;
   self?: Maybe<Web3User>;
   signIn?: Maybe<Web3LoginUser>;
   signOut: Scalars['Boolean'];
@@ -102,6 +104,11 @@ export type MutationDeleteNameflickArgs = {
 
 export type MutationNonceForAddressArgs = {
   address: Scalars['String'];
+};
+
+
+export type MutationRequestPresaleApprovalArgs = {
+  affiliate?: InputMaybe<Scalars['String']>;
 };
 
 
@@ -208,6 +215,7 @@ export type Nonce = {
 export type Permission = {
   __typename?: 'Permission';
   action: PermissionAction;
+  identifier?: Maybe<Scalars['String']>;
   resource: PermissionResource;
 };
 
@@ -223,6 +231,7 @@ export enum PermissionAction {
 
 export type PermissionInput = {
   action: PermissionAction;
+  identifier?: InputMaybe<Scalars['String']>;
   resource: PermissionResource;
 };
 
@@ -237,6 +246,12 @@ export enum PermissionResource {
   UserRole = 'USER_ROLE'
 }
 
+export type PresaleApprovalResponse = {
+  __typename?: 'PresaleApprovalResponse';
+  approved: Scalars['Boolean'];
+  token: Scalars['String'];
+};
+
 export type Query = {
   __typename?: 'Query';
   chain: ChainQuery;
@@ -244,6 +259,7 @@ export type Query = {
   nameflickByFqdn?: Maybe<Nameflick>;
   nameflicksByRootDomain: Array<Nameflick>;
   role: Role;
+  roles: Array<Role>;
   self?: Maybe<Web3User>;
 };
 
@@ -275,6 +291,7 @@ export type QueryRoleArgs = {
 export type Role = {
   __typename?: 'Role';
   bindToUser: Web3User;
+  delete: Scalars['Boolean'];
   id: Scalars['ID'];
   name: Scalars['String'];
   permissions: Array<Permission>;
@@ -304,6 +321,7 @@ export type Web3User = {
   address: Scalars['ID'];
   allowedActions: Array<Permission>;
   bindToRole: Web3User;
+  isTwitterFollower: Scalars['Boolean'];
   nonce: Scalars['Int'];
   roles: Array<Role>;
 };

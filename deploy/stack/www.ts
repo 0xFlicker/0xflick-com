@@ -10,16 +10,9 @@ import * as patterns from "aws-cdk-lib/aws-route53-patterns";
 import * as route53 from "aws-cdk-lib/aws-route53";
 import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
 import * as sqs from "aws-cdk-lib/aws-sqs";
-import * as ssm from "aws-cdk-lib/aws-ssm";
 import * as lambdaEventSources from "aws-cdk-lib/aws-lambda-event-sources";
 import * as targets from "aws-cdk-lib/aws-route53-targets";
 import { HttpApi } from "@aws-cdk/aws-apigatewayv2-alpha";
-import {
-  Role,
-  ManagedPolicy,
-  ServicePrincipal,
-  CompositePrincipal,
-} from "aws-cdk-lib/aws-iam";
 import { fileURLToPath } from "url";
 import { Duration, RemovalPolicy } from "aws-cdk-lib";
 import { readAssetsDirectory } from "./utils/readAssetsDir.js";

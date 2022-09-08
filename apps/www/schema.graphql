@@ -175,6 +175,11 @@ type Flick {
   nfts: [Nft!]
 }
 
+type PresaleApprovalResponse {
+  approved: Boolean!
+  token: String!
+}
+
 type Query {
   nameflickByFqdn(fqdn: ID!): Nameflick
   nameflickByEnsHash(ensHash: String!): Nameflick
@@ -195,5 +200,5 @@ type Mutation {
   signIn(address: String!, jwe: String!, issuedAt: String!, chainId: Int!): Web3LoginUser
   signOut: Boolean!
   self: Web3User
-  requestPresaleApproval(affiliate: String): Boolean!
+  requestPresaleApproval(affiliate: String): PresaleApprovalResponse!
 }

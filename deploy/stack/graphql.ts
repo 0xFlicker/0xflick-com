@@ -65,7 +65,9 @@ export class GraphqlStack extends cdk.Stack {
     // Fetch table names from SSM Parameter Store
     const urlShortenerTable = getTable(this, "UrlShortener");
     const userNonceTable = getTable(this, "UserNonce");
-    const rolePermissionsTable = getTable(this, "RolePermissions");
+    const rolePermissionsTable = getTable(this, "RolePermissions", {
+      globalIndexes: ["RoleIDIndex"],
+    });
     const rolesTable = getTable(this, "Roles", {
       globalIndexes: ["RolesByNameIndex"],
     });
@@ -75,46 +77,51 @@ export class GraphqlStack extends cdk.Stack {
     const nameflickTable = getTable(this, "Nameflick", {
       globalIndexes: ["GSI1", "GSI2", "GSI3"],
     });
+    const extAuthTable = getTable(this, "ExternalAuth", {
+      globalIndexes: ["GSI1"],
+    });
 
     // Fetch table names from SSM Parameter Store
     const tableNamesParam = getTableNameParam(
       this,
       "Graphql_DynamoDB_TableNames"
     );
+    const graphqlEnv = {
+      LOG_LEVEL: "debug",
+      ENS_RPC_URL: ensRpcUrl,
+      NFT_COLLECTIONS_OF_INTEREST: nftCollectionsOfInterest,
+      NFT_CONTRACT_ADDRESS: nftRootCollection,
+      WEB3_RPC_URL: web3RpcUrl,
+      CHAIN_ID: chainId,
+      NEXT_PUBLIC_APP_NAME: `https://${rootDomain}`,
+      FLICK_ENS_DOMAIN: "0xflick.eth",
+      ADMIN_ENS_DOMAIN: "0xflick.eth",
+      IPFS_API_URL: ipfsApiUrl,
+      IPFS_API_PROJECT: ipfsApiProject,
+      IPFS_API_SECRET: ipfsApiSecret,
+      NEXT_PUBLIC_IMAGE_RESIZER: `https://image.${rootDomain}`,
+      NEXT_PUBLIC_IPFS: `https://ipfs.${rootDomain}`,
+      SSM_PARAM_NAME: tableNamesParam.parameterName,
+      SSM_REGION: "us-east-1",
+      NEXT_PUBLIC_JWT_PUBLIC_KEY: jwtPublicKey,
+      JWK: jwk,
+      NEXT_PUBLIC_JWT_CLAIM_ISSUER: jwtClaimIssuer,
+      SIWE_EXPIRATION_TIME_SECONDS: "604800",
+      TWITTER_OAUTH_CLIENT_SECRET: twitterOauthClientSecret,
+      NEXT_PUBLIC_TWITTER_OAUTH_CLIENT_ID: twitterOauthClientId,
+      TWITTER_APP_KEY: twitterAppKey,
+      TWITTER_APP_SECRET: twitterAppSecret,
+      TWITTER_FOLLOW_USER_ID: twitterFollowUserId,
+      NEXT_PUBLIC_TWITTER_FOLLOW_NAME: twitterFollowUserName,
+    };
+
     const graphqlHandler = new lambda.Function(this, "Graphql", {
       runtime: lambda.Runtime.NODEJS_16_X,
       code: lambda.Code.fromAsset(path.join(__dirname, "../.layers/graphql")),
       handler: "index.handler",
       timeout: cdk.Duration.seconds(120),
       memorySize: 512,
-      environment: {
-        LOG_LEVEL: "debug",
-        ENS_RPC_URL: ensRpcUrl,
-        NFT_COLLECTIONS_OF_INTEREST: nftCollectionsOfInterest,
-        NFT_CONTRACT_ADDRESS: nftRootCollection,
-        WEB3_RPC_URL: web3RpcUrl,
-        CHAIN_ID: chainId,
-        NEXT_PUBLIC_APP_NAME: `https://${rootDomain}`,
-        FLICK_ENS_DOMAIN: "0xflick.eth",
-        ADMIN_ENS_DOMAIN: "0xflick.eth",
-        IPFS_API_URL: ipfsApiUrl,
-        IPFS_API_PROJECT: ipfsApiProject,
-        IPFS_API_SECRET: ipfsApiSecret,
-        NEXT_PUBLIC_IMAGE_RESIZER: `https://image.${rootDomain}`,
-        NEXT_PUBLIC_IPFS: `https://ipfs.${rootDomain}`,
-        SSM_PARAM_NAME: tableNamesParam.parameterName,
-        SSM_REGION: "us-east-2",
-        NEXT_PUBLIC_JWT_PUBLIC_KEY: jwtPublicKey,
-        JWK: jwk,
-        NEXT_PUBLIC_JWT_CLAIM_ISSUER: jwtClaimIssuer,
-        SIWE_EXPIRATION_TIME_SECONDS: "604800",
-        TWITTER_OAUTH_CLIENT_SECRET: twitterOauthClientSecret,
-        NEXT_PUBLIC_TWITTER_OAUTH_CLIENT_ID: twitterOauthClientId,
-        TWITTER_APP_KEY: twitterAppKey,
-        TWITTER_APP_SECRET: twitterAppSecret,
-        TWITTER_FOLLOW_USER_ID: twitterFollowUserId,
-        NEXT_PUBLIC_TWITTER_FOLLOW_NAME: twitterFollowUserName,
-      },
+      environment: graphqlEnv,
     });
     urlShortenerTable.grantReadWriteData(graphqlHandler);
     userNonceTable.grantReadWriteData(graphqlHandler);
@@ -122,6 +129,7 @@ export class GraphqlStack extends cdk.Stack {
     rolesTable.grantReadWriteData(graphqlHandler);
     userRolesTable.grantReadWriteData(graphqlHandler);
     nameflickTable.grantReadWriteData(graphqlHandler);
+    extAuthTable.grantReadWriteData(graphqlHandler);
 
     tableNamesParam.grantRead(graphqlHandler);
 

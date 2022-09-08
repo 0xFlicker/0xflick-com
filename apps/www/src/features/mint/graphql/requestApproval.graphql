@@ -1,0 +1,6 @@
+mutation requestPresaleApproval($affiliate: String) {
+  requestPresaleApproval(affiliate: $affiliate) {
+    approved
+    token
+  }
+}

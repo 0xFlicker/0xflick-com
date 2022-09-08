@@ -40,5 +40,9 @@
   "approve_presale_title": "Request presale approval",
   "approve_auth_logged_in": "establish ownership of address",
   "copied_to_clipboard": "copied to clipboard",
-  "menu_navigator_share": "share this"
+  "menu_navigator_share": "share this",
+  "links_title": "links",
+  "demo_title": "demo",
+  "faq_title": "faq",
+  "presale_signup_title": "signup"
 }

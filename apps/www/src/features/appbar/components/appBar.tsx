@@ -6,7 +6,13 @@ import {
   useState,
   ReactNode,
 } from "react";
-import { AppBar as MuiAppBar, Toolbar, Box, IconButton } from "@mui/material";
+import {
+  AppBar as MuiAppBar,
+  Toolbar,
+  Box,
+  IconButton,
+  Typography,
+} from "@mui/material";
 import { Menu as MenuIcon } from "@mui/icons-material";
 import NextImage from "next/image";
 import { ETheme } from "../hooks";
@@ -16,7 +22,8 @@ import { HomeMenu } from "./HomeMenu";
 export const AppBar: FC<{
   onFlick?: MouseEventHandler;
   menu: ReactNode;
-}> = ({ menu, onFlick }) => {
+  title?: ReactNode;
+}> = ({ menu, title, onFlick }) => {
   const [menuAnchorEl, setMenuAnchorEl] = useState<Element | null>(null);
 
   const onMenuClose = useCallback(() => {
@@ -30,9 +37,14 @@ export const AppBar: FC<{
       <MuiAppBar color="default">
         <Toolbar>
           <MenuIcon onClick={handleMenu} />
-          <IconButton onClick={onFlick} title={onFlick ? "flick me" : ""}>
+          <IconButton
+            onClick={onFlick}
+            title={onFlick ? "flick me" : ""}
+            sx={{ ml: 2 }}
+          >
             <NextImage src="/flick.png" width={40} height={40} />
           </IconButton>
+          {title}
           <Box sx={{ flexGrow: 1 }} component="span" />
 
           <Connect />

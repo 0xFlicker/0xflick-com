@@ -106,5 +106,8 @@ export async function requestApproval(
     roleIds: [...user.roleIds, roleId],
   });
   setToken(newToken);
-  return true;
+  return {
+    approved: true,
+    token: newToken,
+  };
 }

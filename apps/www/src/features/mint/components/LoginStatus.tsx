@@ -23,7 +23,7 @@ export const LoginStatus: FC = () => {
     if (isCurrentlyLoading) {
       return <CircularProgress size={24} />;
     }
-    if (isAnonymous) {
+    if (!isAuthenticated) {
       return <CancelIcon />;
     }
     return <CheckCircleIcon />;

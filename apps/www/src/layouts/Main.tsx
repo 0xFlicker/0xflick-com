@@ -7,7 +7,7 @@ import {
   MouseEventHandler,
   ReactNode,
 } from "react";
-import { Box, Toolbar } from "@mui/material";
+import { Box, Toolbar, Typography } from "@mui/material";
 import { AppBar } from "features/appbar/components/appBar";
 import { useAppDispatch } from "app/store";
 import { actions as appbarActions } from "features/appbar/redux";
@@ -16,8 +16,9 @@ export const Main: FC<
   PropsWithChildren<{
     onFlick?: MouseEventHandler;
     menu: ReactNode;
+    title?: ReactNode;
   }>
-> = ({ children, menu, onFlick }) => {
+> = ({ children, menu, title, onFlick }) => {
   const targetRef = useRef<HTMLDivElement>(null);
   const toolbarRef = useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
@@ -47,7 +48,7 @@ export const Main: FC<
 
   return (
     <>
-      <AppBar onFlick={onFlick} menu={menu} />
+      <AppBar onFlick={onFlick} menu={menu} title={title} />
       <Box
         ref={targetRef}
         component="main"

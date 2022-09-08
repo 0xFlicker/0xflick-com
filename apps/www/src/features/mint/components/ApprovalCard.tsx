@@ -15,7 +15,7 @@ import { Connect, useWeb3 } from "features/web3";
 
 import { useLazyRequestPresaleApprovalQuery } from "../api";
 import { useAuth } from "features/auth/hooks";
-import { useIsFollowingQuery } from "features/twitter/api";
+import { useLazyIsFollowingQuery } from "features/twitter/api";
 import { LoginWithTwitterButton } from "features/twitter/components/LoginWithTwitterButton";
 import { Follow } from "features/faucet/components/Follow";
 import { FollowStatus } from "features/twitter/components/FollowStatus";
@@ -23,6 +23,7 @@ import { LoginStatus } from "./LoginStatus";
 import { ConnectedStatus } from "./ConnectedStatus";
 import { decodeJwtToken } from "@0xflick/models";
 import { actions as authActions } from "features/auth/redux";
+import { useRequestPresaleApprovalMutation } from "../hooks";
 
 export enum ApprovalCloseReason {
   SUCCESS = "success",
@@ -30,7 +31,9 @@ export enum ApprovalCloseReason {
   CANCELLED = "cancelled",
 }
 
-interface IProps {}
+interface IProps {
+  affiliate?: string;
+}
 
 enum EApprovalModalStep {
   INITIAL = "initial",
@@ -41,20 +44,28 @@ enum EApprovalModalStep {
   SUCCESS = "success",
 }
 
-export const ApprovalCard: FC<IProps> = () => {
+export const ApprovalCard: FC<IProps> = ({ affiliate }) => {
   const { t } = useLocale(["common"]);
   const { signIn, isAuthenticated, isAnonymous, setSavedToken } = useAuth();
   const { provider, selectedAddress } = useWeb3();
   const dispatch = useAppDispatch();
   const [step, setStep] = useState(EApprovalModalStep.INITIAL);
   const [fetchPresaleApproval, presaleApprovalQuery] =
-    useLazyRequestPresaleApprovalQuery();
+    useRequestPresaleApprovalMutation();
 
-  const { isError, isFetching, isLoading, isSuccess, data } =
-    useIsFollowingQuery();
+  const [
+    fetchIsFollowing,
+    { isError, isFetching, isLoading, isSuccess, data },
+  ] = useLazyIsFollowingQuery();
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchIsFollowing();
+    }
+  }, [fetchIsFollowing, isAuthenticated]);
   const needsTwitterAuth =
     isLoading || (isSuccess && data && "needsLogin" in data && data.needsLogin);
   const isFollowed =
+    isAuthenticated &&
     isSuccess &&
     data &&
     !needsTwitterAuth &&
@@ -65,25 +76,23 @@ export const ApprovalCard: FC<IProps> = () => {
 
   // When approval is granted, updated new token
   useEffect(() => {
-    if (presaleApprovalQuery.isSuccess && presaleApprovalQuery.data.approved) {
-      const authUser = decodeJwtToken(presaleApprovalQuery.data.token);
+    if (
+      presaleApprovalQuery.data &&
+      presaleApprovalQuery.data.requestPresaleApproval.approved
+    ) {
+      const token = presaleApprovalQuery.data.requestPresaleApproval.token;
+      const authUser = decodeJwtToken(token);
       if (authUser.address === selectedAddress) {
-        setSavedToken(presaleApprovalQuery.data.token);
+        setSavedToken(token);
         dispatch(
           authActions.userSignInSuccess({
-            token: presaleApprovalQuery.data.token,
+            token,
             roles: authUser.roleIds,
           })
         );
       }
     }
-  }, [
-    presaleApprovalQuery.isSuccess,
-    presaleApprovalQuery.data,
-    selectedAddress,
-    dispatch,
-    setSavedToken,
-  ]);
+  }, [presaleApprovalQuery.data, selectedAddress, dispatch, setSavedToken]);
 
   // Go back to go, do not collect $200
   useEffect(() => {
@@ -132,8 +141,13 @@ export const ApprovalCard: FC<IProps> = () => {
   ]);
 
   const onRequestApproval = useCallback(
-    () => fetchPresaleApproval(),
-    [fetchPresaleApproval]
+    () =>
+      fetchPresaleApproval({
+        variables: {
+          affiliate,
+        },
+      }),
+    [fetchPresaleApproval, affiliate]
   );
 
   let description = "";
@@ -153,11 +167,7 @@ export const ApprovalCard: FC<IProps> = () => {
     description = t("approve_success_description");
   }
   return (
-    <Card
-      sx={{
-        my: 4,
-      }}
-    >
+    <Card>
       <CardHeader
         id="approve-presale-title"
         title={t("approve_presale_title")}

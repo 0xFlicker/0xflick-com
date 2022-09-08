@@ -22,10 +22,11 @@ if (!deployment) {
 }
 const secretsJson = jsonFromSecret(`${deployment}/deploy-secrets.json`);
 const jwtJson = jsonFromSecret(`${deployment}/jwt-secret.json`);
+const twitterJson = jsonFromSecret(`${deployment}/twitter-secrets.json`);
 
 const app = new cdk.App();
 
-const chainId = "11155111";
+const chainId = "1";
 
 new AssetStack(app, "Assets", {});
 new DynamoDB(app, "DynamoDB", {
@@ -38,7 +39,7 @@ const { api: graphqlApi } = new GraphqlStack(app, "Graphql", {
   chainId,
   ensRpcUrl: secretsJson.chains["1"].rpc,
   web3RpcUrl: secretsJson.chains["1"].rpc,
-  nftRootCollection: secretsJson.chains["11155111"].nftRootCollection,
+  nftRootCollection: secretsJson.chains["1"].nftRootCollection,
   nftCollectionsOfInterest: JSON.stringify(
     secretsJson.chains["1"].nftCollectionsOfInterest
   ),
@@ -49,6 +50,12 @@ const { api: graphqlApi } = new GraphqlStack(app, "Graphql", {
   jwtPublicKey: jwtJson.publicKey,
   jwtClaimIssuer: jwtJson.issuer,
   rootDomain: deployment,
+  twitterAppKey: twitterJson.TWITTER_APP_KEY,
+  twitterAppSecret: twitterJson.TWITTER_APP_SECRET,
+  twitterOauthClientId: twitterJson.NEXT_PUBLIC_TWITTER_OAUTH_CLIENT_ID,
+  twitterOauthClientSecret: twitterJson.TWITTER_OAUTH_CLIENT_SECRET,
+  twitterFollowUserId: twitterJson.follow.userId,
+  twitterFollowUserName: twitterJson.follow.name,
 });
 
 new ImageStack(app, "Image", {
@@ -88,7 +95,7 @@ new NameflickStack(app, "NameflickBeta", {
 });
 new WwwStack(app, "www", {
   domain: deployment,
-  graphqlApiUrl: "6kjnzpunu3.execute-api.us-east-2.amazonaws.com",
+  graphqlApiUrl: "45h95rp36i.execute-api.us-east-1.amazonaws.com",
   serverlessBuildOutDir: path.resolve(__dirname, "../.layers"),
   withLogging: true,
   whiteListedHeaders: ["Authorization", "Host", "Content-Type", "Accept"],

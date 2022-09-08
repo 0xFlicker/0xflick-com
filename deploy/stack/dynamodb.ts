@@ -209,7 +209,7 @@ export class DynamoDB extends cdk.Stack {
     new ssm.StringParameter(this, "ExternalAuth_TableArn", {
       description: "The ExternalAuth table ARN",
       parameterName: `ExternalAuth_TableArn`,
-      stringValue: userNonceTable.tableArn,
+      stringValue: externalAuthTable.tableArn,
     });
     new ssm.StringParameter(this, "Nameflick_TableArn", {
       description: "The Nameflick table ARN",

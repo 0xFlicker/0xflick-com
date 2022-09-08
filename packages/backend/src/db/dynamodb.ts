@@ -6,7 +6,7 @@ let instance: DynamoDBDocumentClient;
 export function createDb(opts?: DynamoDBClientConfig) {
   const config = {
     endpoint: process.env.DYNAMODB_ENDPOINT,
-    region: process.env.DYNAMODB_REGION || "us-east-1",
+    region: process.env.DYNAMODB_REGION || "us-east-2",
     ...(process.env.MOCK_DYNAMODB_ENDPOINT && {
       endpoint: process.env.MOCK_DYNAMODB_ENDPOINT,
       sslEnabled: false,

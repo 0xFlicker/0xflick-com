@@ -56,7 +56,7 @@ export class NameflickStack extends cdk.Stack {
         RPC_URL: web3RpcUrl,
         PRIVATE_KEY: privateKey,
         SSM_PARAM_NAME: tableNamesParam.parameterName,
-        SSM_REGION: "us-east-2",
+        SSM_REGION: "us-east-1",
         ENS_REGISTRAR_ADDRESS: "0x1bdf895bB48841e5556b3324be5E6481992069E6",
       },
     });

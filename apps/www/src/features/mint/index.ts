@@ -23,6 +23,6 @@ export {
 //     api: api.reducer(state?.api, action),
 //   };
 // };
-export { MintCard as MintInfo } from "./components/MintCard";
+export { PreSaleMintCard } from "./components/PreSaleMintCard";
 export const reducer = mintReducer;
 export const apiReducer = api.reducer;

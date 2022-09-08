@@ -1,20 +1,57 @@
+import ListItemText from "@mui/material/ListItemText";
+import MenuItem from "@mui/material/MenuItem";
+import MenuList from "@mui/material/MenuList";
+import Typography from "@mui/material/Typography";
+import Container from "@mui/material/Container";
+import { DarkModeSwitch } from "features/appbar/components/DarkModeSwitch";
+import { useLocale } from "locales/hooks";
 import { FC } from "react";
-import { Box, Container } from "@mui/material";
+import { Main } from "./Main";
+import { useSavedTheme } from "features/appbar/hooks";
+import { useMint } from "features/mint/hooks";
+import { useHasAllowedAction } from "features/auth/hooks";
+import { canPreSaleMint } from "features/auth/matchers";
 import { ResolverFormDemo } from "features/resolver/components/ResolverFormDemo";
+import Box from "@mui/material/Box";
 
 export const Demo: FC = () => {
-  // Center the ResolverFormDemo in the center of the screen....
+  const { t } = useLocale(["mint", "common"]);
+  const { handleChange: handleThemeChange } = useSavedTheme();
   return (
-    <Box
-      display="flex"
-      flexDirection="column"
-      justifyContent="center"
-      alignContent="center"
-      height="100vh"
+    <Main
+      menu={
+        <>
+          <MenuList dense disablePadding>
+            <MenuItem onClick={handleThemeChange}>
+              <DarkModeSwitch />
+              <ListItemText
+                primary={
+                  <Typography textAlign="right" flexGrow={1}>
+                    {t("menu_theme", { ns: "common" })}
+                  </Typography>
+                }
+              />
+            </MenuItem>
+          </MenuList>
+        </>
+      }
+      title={
+        <Typography variant="h5" component="h1">
+          {t("demo_title")}
+        </Typography>
+      }
     >
       <Container maxWidth="sm">
-        <ResolverFormDemo />
+        <Box
+          display="flex"
+          flexDirection="column"
+          justifyContent="center"
+          alignContent="center"
+          height="100vh"
+        >
+          <ResolverFormDemo />
+        </Box>
       </Container>
-    </Box>
+    </Main>
   );
 };

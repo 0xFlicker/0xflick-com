@@ -6,14 +6,18 @@ import {
   Cancel as CancelIcon,
 } from "@mui/icons-material";
 import { useIsFollowingQuery } from "../api";
+import { useAuth } from "features/auth/hooks";
 
 export const FollowStatus: FC = () => {
   const { t } = useLocale("common");
+  const { isAuthenticated } = useAuth();
   const { isError, isFetching, isLoading, isSuccess, data } =
     useIsFollowingQuery();
-  const isFollowed = isSuccess && "following" in data && data.following;
+  const isFollowed =
+    isAuthenticated && isSuccess && "following" in data && data.following;
   const needsLogin = isSuccess && "needsLogin" in data && data.needsLogin;
-  const isNotFollowed = isSuccess && "following" in data && !data.following;
+  const isNotFollowed =
+    !isAuthenticated || (isSuccess && "following" in data && !data.following);
   const isCurrentlyLoading = isLoading || isFetching;
   return (
     <>

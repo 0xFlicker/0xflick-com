@@ -24,7 +24,7 @@ const QA: FC<{ question: ReactNode; answer: ReactNode }> = ({
 export const FAQ: FC = () => {
   return (
     <>
-      <Typography sx={{ mt: 4 }} variant="h2" component="h2" gutterBottom>
+      <Typography sx={{ mt: 4 }} variant="h3" component="h3" gutterBottom>
         Frequently Asked Questions
       </Typography>
       <Card>
@@ -63,6 +63,9 @@ export const FAQ: FC = () => {
           }
         />
       </Card>
+      <Typography sx={{ mt: 4 }}>
+        More to come here, please check back later...
+      </Typography>
     </>
   );
 };

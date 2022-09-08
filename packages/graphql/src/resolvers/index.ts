@@ -24,7 +24,10 @@ import {
   mutationResolvers as mutationResolversNameflick,
   queryResolvers as queryResolversNameflick,
 } from "./nameflick";
-import { mutationResolver as mutationResolverPresale } from "./presale";
+import {
+  typeSchema as typeSchemaPresale,
+  mutationResolver as mutationResolverPresale,
+} from "./presale";
 import { Resolvers } from "../resolvers.generated";
 import { TContext } from "../context";
 
@@ -34,6 +37,7 @@ export const typeDefs = gql`
   ${typeSchemaAuth}
   ${typeSchemaAdmin}
   ${typeSchemaNfts}
+  ${typeSchemaPresale}
 
   type Query {
     nameflickByFqdn(fqdn: ID!): Nameflick
@@ -64,7 +68,7 @@ export const typeDefs = gql`
     ): Web3LoginUser
     signOut: Boolean!
     self: Web3User
-    requestPresaleApproval(affiliate: String): Boolean!
+    requestPresaleApproval(affiliate: String): PresaleApprovalResponse!
   }
 `;
 

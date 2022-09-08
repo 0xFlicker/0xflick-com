@@ -3,7 +3,10 @@ import { graphQlAllowedActionToPermission } from "graphql/transforms/allowedActi
 import { useGetSelfPermissionsQuery } from "./getSelfPermissions.generated";
 
 export const useAllowedActions = ({ skip }: { skip?: boolean }) => {
-  const response = useGetSelfPermissionsQuery({ skip });
+  const response = useGetSelfPermissionsQuery({
+    skip,
+    // fetchPolicy: "no-cache",
+  });
 
   const allowedActions = useMemo(
     () =>

@@ -217,9 +217,12 @@ function useAuthContext() {
     }
   }, [address, dispatch, nonceData, nonceIsSuccess, tokenData, tokenIsSuccess]);
 
-  const { allowedActions } = useAllowedActions({
+  const { allowedActions, refetch: allowedActionsRefetch } = useAllowedActions({
     skip: !savedToken || !user?.roleIds || user.roleIds.length === 0,
   });
+  useEffect(() => {
+    allowedActionsRefetch();
+  }, [allowedActionsRefetch, user?.roleIds]);
 
   return {
     isAuthenticated,

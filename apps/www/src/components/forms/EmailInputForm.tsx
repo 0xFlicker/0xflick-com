@@ -10,7 +10,7 @@ export const EmailInputForm: FC<TextFieldProps> = (props) => {
       {...fieldToTextField(props)}
       margin="normal"
       fullWidth
-      helperText="Optional"
+      helperText="Optional. For illustrative purposes only."
       InputProps={{
         startAdornment: (
           <InputAdornment position="start">

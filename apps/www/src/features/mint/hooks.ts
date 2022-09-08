@@ -5,12 +5,8 @@ import { selectors as web3Selectors } from "features/web3";
 import { actions, selectors } from "./redux";
 import { FlickENS } from "@0xflick/contracts";
 import { utils } from "ethers";
-import {
-  Action,
-  AnyAction,
-  createSlice,
-  PayloadAction,
-} from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+export { useRequestPresaleApprovalMutation } from "./graphql/requestApproval.generated";
 
 async function fetchName(dispatch: AppDispatch, contract: FlickENS) {
   try {
