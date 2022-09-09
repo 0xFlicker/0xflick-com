@@ -11,6 +11,7 @@ import {
   createDb as _createDb,
   AccountProviderDao,
   AccountUserDao,
+  AffiliateDAO,
 } from "@0xflick/backend";
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 
@@ -34,6 +35,7 @@ async function createDb({
 }
 
 export interface IDbContext {
+  affiliateDao: AffiliateDAO;
   accountProviderDao: AccountProviderDao;
   accountUserDao: AccountUserDao;
   authOrchestrationDao: AuthOrchestrationDao;
@@ -55,6 +57,7 @@ export async function createDbContext({
     ssmParamName,
   });
   return {
+    affiliateDao: new AffiliateDAO(db),
     authOrchestrationDao: new AuthOrchestrationDao(db),
     accountProviderDao: new AccountProviderDao(db),
     accountUserDao: new AccountUserDao(db),

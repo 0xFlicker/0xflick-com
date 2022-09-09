@@ -1,6 +1,33 @@
 module.exports = {
   tables: [
     {
+      TableName: "Affiliates",
+      KeySchema: [{ AttributeName: "pk", KeyType: "HASH" }],
+      AttributeDefinitions: [
+        {
+          AttributeName: "pk",
+          AttributeType: "S"
+        }, {
+          AttributeName: "GSI1PK",
+          AttributeType: "S"
+        }],
+      GlobalSecondaryIndexes: [
+        {
+          IndexName: "GSI1",
+          KeySchema: [
+            {
+              AttributeName: "GSI1PK",
+              KeyType: "HASH"
+            }
+          ],
+          Projection: {
+            ProjectionType: "ALL"
+          }
+        }
+      ],
+      BillingMode: "PAY_PER_REQUEST"
+    },
+    {
       TableName: "UserNonce",
       KeySchema: [{ AttributeName: "Address", KeyType: "HASH" }],
       AttributeDefinitions: [{ AttributeName: "Address", AttributeType: "S" }],

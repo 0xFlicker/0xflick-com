@@ -7,6 +7,8 @@ generates:
         Web3User: "@0xflick/models#IUser"
         Role: "./models#TRole"
         Permission: "./models#TPermission"
+        AffiliateMutation: "./models#TAffiliates"
+        AffiliateQuery: "./models#TAffiliates"
     plugins:
       - typescript
       - typescript-resolvers

@@ -3,14 +3,13 @@ import {
   defaultAdminStrategyAll,
   EActions,
   EResource,
+  IRole,
   isActionOnResource,
-  RoleModel,
 } from "@0xflick/models";
 import { TContext } from "../../context";
 import { verifyAuthorizedUser } from "../auth/authorized";
 import { GraphQLResolveInfo } from "graphql";
-import { MutationError } from "../../errors/mutation";
-import { TPermission, TRole } from "../../models";
+import { TPermission, RoleModel } from "../../models";
 
 const canPerformBindRoleToUserAction = defaultAdminStrategyAll(
   EResource.PERMISSION,
@@ -65,7 +64,7 @@ export async function createRole(
   context: TContext,
   info: GraphQLResolveInfo,
   { name, permissions }: { name: string; permissions: TPermission[] }
-) {
+): Promise<RoleModel> {
   context.requireMutation(info);
   await verifyAuthorizedUser(context, canPerformCreateRoleAction);
   const { rolesDao, rolePermissionsDao } = context;
@@ -82,11 +81,7 @@ export async function createRole(
       });
     })
   );
-  return {
-    id,
-    name,
-    permissions,
-  };
+  return new RoleModel(rolesDao, rolePermissionsDao, id);
 }
 
 const canPerformUnlinkRoleToUserAction = defaultAdminStrategyAll(
@@ -121,20 +116,15 @@ const canPerformUListAllRoles = defaultAdminStrategyAll(
   })
 );
 
-export async function listAllRoles(context: TContext) {
+export async function listAllRoles(context: TContext): Promise<RoleModel[]> {
   await verifyAuthorizedUser(context, canPerformUListAllRoles);
   const { rolesDao, rolePermissionsDao } = context;
-  const roleModels: RoleModel[] = [];
+  const roleModels: IRole[] = [];
   for await (const role of rolesDao.listAll()) {
     roleModels.push(role);
   }
-  return await Promise.all(
-    roleModels.map(async (role) => ({
-      id: role.id,
-      name: role.name,
-      permissions: await rolePermissionsDao.getAllPermissions(role.id),
-    }))
-  );
+  const roles = await Promise.all(roleModels);
+  return roles.map((r) => new RoleModel(rolesDao, rolePermissionsDao, r.id, r));
 }
 
 const canPerformDeleteRoleAction = defaultAdminStrategyAll(

@@ -1,5 +1,4 @@
 import { gql } from "apollo-server-core";
-import { EActions, EResource, IUser } from "@0xflick/models";
 import { TContext } from "../../context";
 import { RoleError } from "../../errors/roles";
 import {
@@ -15,6 +14,7 @@ import {
   modelPermissionActionToGraphql,
   modelPermissionResourceToGraphql,
 } from "../../transforms/permissions";
+import { RoleModel } from "../../models";
 
 export const typeSchema = gql`
   enum PermissionAction {
@@ -68,20 +68,23 @@ export const resolvers: Resolvers<TContext> = {
       modelPermissionResourceToGraphql(permission.resource),
   },
   Role: {
-    delete: async ({ id: roleId }, _, context, info) => {
-      return await deleteRole(context, info, roleId);
+    id: (role) => role.id(),
+    name: (role) => role.name(),
+    userCount: (role) => role.userCount(),
+    delete: async (role, _, context, info) => {
+      return await deleteRole(context, info, await role.id());
     },
-    bindToUser: async ({ id: roleId }, { userAddress }, context, info) => {
+    bindToUser: async (role, { userAddress }, context, info) => {
       const user = await bindUserToRole(context, info, {
         userAddress,
-        roleId,
+        roleId: await role.id(),
       });
       return user;
     },
-    unbindFromUser: async ({ id: roleId }, { userAddress }, context, info) => {
+    unbindFromUser: async (role, { userAddress }, context, info) => {
       const result = await unlinkUserFromRole(context, info, {
         userAddress,
-        roleId,
+        roleId: await role.id(),
       });
       if (!result) {
         throw new RoleError(
@@ -108,11 +111,7 @@ export const queryResolvers: Resolvers<TContext>["Query"] = {
       throw new RoleError(`Role with id ${id} not found`, "ROLE_NOT_FOUND");
     }
     const permissions = await rolePermissionsDao.getAllPermissions(role.id);
-    return {
-      id: role.id,
-      name: role.name,
-      permissions,
-    };
+    return new RoleModel(rolesDao, rolePermissionsDao, role.id, role);
   },
 };
 

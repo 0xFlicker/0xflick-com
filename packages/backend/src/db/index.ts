@@ -1,3 +1,4 @@
+export * from "./affiliate";
 export * from "./auth";
 export * from "./drinker";
 export * from "./dynamodb";

@@ -1,3 +1,4 @@
+export * from "./affiliate";
 export * from "./allowedActions";
 export * from "./auth";
 export * from "./image";

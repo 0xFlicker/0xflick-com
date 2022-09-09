@@ -1,6 +1,6 @@
 import { GraphQLResolveInfo } from 'graphql';
 import { IUser } from '@0xflick/models';
-import { TRole, TPermission } from './models';
+import { TRole, TPermission, TAffiliates } from './models';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -15,6 +15,34 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
+};
+
+export type Affiliate = {
+  __typename?: 'Affiliate';
+  address: Scalars['String'];
+  deactivated?: Maybe<Scalars['Boolean']>;
+  role: Role;
+  slug: Scalars['String'];
+};
+
+export type AffiliateMutation = {
+  __typename?: 'AffiliateMutation';
+  address: Scalars['ID'];
+  deactivate: Scalars['Boolean'];
+  role: Role;
+  slugs: Array<Scalars['String']>;
+};
+
+
+export type AffiliateMutationDeactivateArgs = {
+  slug: Scalars['String'];
+};
+
+export type AffiliateQuery = {
+  __typename?: 'AffiliateQuery';
+  address: Scalars['ID'];
+  role: Role;
+  slugs: Array<Scalars['String']>;
 };
 
 export type ChainQuery = {
@@ -76,6 +104,7 @@ export type MetadataProperties = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  affiliateForAddress: AffiliateMutation;
   createOrUpdateNameflick: Nameflick;
   createRole: Role;
   deleteNameflick: Scalars['Boolean'];
@@ -86,6 +115,11 @@ export type Mutation = {
   self?: Maybe<Web3User>;
   signIn?: Maybe<Web3LoginUser>;
   signOut: Scalars['Boolean'];
+};
+
+
+export type MutationAffiliateForAddressArgs = {
+  address: Scalars['String'];
 };
 
 
@@ -259,6 +293,7 @@ export type PresaleApprovalResponse = {
 
 export type Query = {
   __typename?: 'Query';
+  affiliateForAddress: AffiliateQuery;
   chain: ChainQuery;
   nameflickByEnsHash?: Maybe<Nameflick>;
   nameflickByFqdn?: Maybe<Nameflick>;
@@ -266,6 +301,11 @@ export type Query = {
   role: Role;
   roles: Array<Role>;
   self?: Maybe<Web3User>;
+};
+
+
+export type QueryAffiliateForAddressArgs = {
+  address: Scalars['ID'];
 };
 
 
@@ -405,6 +445,9 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
+  Affiliate: ResolverTypeWrapper<Omit<Affiliate, 'role'> & { role: ResolversTypes['Role'] }>;
+  AffiliateMutation: ResolverTypeWrapper<TAffiliates>;
+  AffiliateQuery: ResolverTypeWrapper<TAffiliates>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
   ChainQuery: ResolverTypeWrapper<ChainQuery>;
   Flick: ResolverTypeWrapper<Flick>;
@@ -440,6 +483,9 @@ export type ResolversTypes = {
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
+  Affiliate: Omit<Affiliate, 'role'> & { role: ResolversParentTypes['Role'] };
+  AffiliateMutation: TAffiliates;
+  AffiliateQuery: TAffiliates;
   Boolean: Scalars['Boolean'];
   ChainQuery: ChainQuery;
   Flick: Flick;
@@ -469,6 +515,29 @@ export type ResolversParentTypes = {
   String: Scalars['String'];
   Web3LoginUser: Omit<Web3LoginUser, 'user'> & { user: ResolversParentTypes['Web3User'] };
   Web3User: IUser;
+};
+
+export type AffiliateResolvers<ContextType = any, ParentType extends ResolversParentTypes['Affiliate'] = ResolversParentTypes['Affiliate']> = {
+  address?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  deactivated?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  role?: Resolver<ResolversTypes['Role'], ParentType, ContextType>;
+  slug?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type AffiliateMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['AffiliateMutation'] = ResolversParentTypes['AffiliateMutation']> = {
+  address?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  deactivate?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<AffiliateMutationDeactivateArgs, 'slug'>>;
+  role?: Resolver<ResolversTypes['Role'], ParentType, ContextType>;
+  slugs?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type AffiliateQueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['AffiliateQuery'] = ResolversParentTypes['AffiliateQuery']> = {
+  address?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  role?: Resolver<ResolversTypes['Role'], ParentType, ContextType>;
+  slugs?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type ChainQueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['ChainQuery'] = ResolversParentTypes['ChainQuery']> = {
@@ -523,6 +592,7 @@ export type MetadataPropertiesResolvers<ContextType = any, ParentType extends Re
 };
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
+  affiliateForAddress?: Resolver<ResolversTypes['AffiliateMutation'], ParentType, ContextType, RequireFields<MutationAffiliateForAddressArgs, 'address'>>;
   createOrUpdateNameflick?: Resolver<ResolversTypes['Nameflick'], ParentType, ContextType, RequireFields<MutationCreateOrUpdateNameflickArgs, 'domain' | 'fields'>>;
   createRole?: Resolver<ResolversTypes['Role'], ParentType, ContextType, RequireFields<MutationCreateRoleArgs, 'name' | 'permissions'>>;
   deleteNameflick?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteNameflickArgs, 'domain'>>;
@@ -604,6 +674,7 @@ export type PresaleApprovalResponseResolvers<ContextType = any, ParentType exten
 };
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
+  affiliateForAddress?: Resolver<ResolversTypes['AffiliateQuery'], ParentType, ContextType, RequireFields<QueryAffiliateForAddressArgs, 'address'>>;
   chain?: Resolver<ResolversTypes['ChainQuery'], ParentType, ContextType, RequireFields<QueryChainArgs, 'id'>>;
   nameflickByEnsHash?: Resolver<Maybe<ResolversTypes['Nameflick']>, ParentType, ContextType, RequireFields<QueryNameflickByEnsHashArgs, 'ensHash'>>;
   nameflickByFqdn?: Resolver<Maybe<ResolversTypes['Nameflick']>, ParentType, ContextType, RequireFields<QueryNameflickByFqdnArgs, 'fqdn'>>;
@@ -642,6 +713,9 @@ export type Web3UserResolvers<ContextType = any, ParentType extends ResolversPar
 };
 
 export type Resolvers<ContextType = any> = {
+  Affiliate?: AffiliateResolvers<ContextType>;
+  AffiliateMutation?: AffiliateMutationResolvers<ContextType>;
+  AffiliateQuery?: AffiliateQueryResolvers<ContextType>;
   ChainQuery?: ChainQueryResolvers<ContextType>;
   Flick?: FlickResolvers<ContextType>;
   Metadata?: MetadataResolvers<ContextType>;

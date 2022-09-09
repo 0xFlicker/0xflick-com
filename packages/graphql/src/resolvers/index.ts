@@ -28,6 +28,7 @@ import {
   typeSchema as typeSchemaPresale,
   mutationResolver as mutationResolverPresale,
 } from "./presale";
+import { typeSchema as typeSchemaAffiliate } from "./affiliates";
 import { Resolvers } from "../resolvers.generated";
 import { TContext } from "../context";
 
@@ -38,6 +39,7 @@ export const typeDefs = gql`
   ${typeSchemaAdmin}
   ${typeSchemaNfts}
   ${typeSchemaPresale}
+  ${typeSchemaAffiliate}
 
   type Query {
     nameflickByFqdn(fqdn: ID!): Nameflick
@@ -47,6 +49,7 @@ export const typeDefs = gql`
     self: Web3User
     role(id: ID!): Role!
     roles: [Role!]!
+    affiliateForAddress(address: ID!): AffiliateQuery!
   }
 
   type Mutation {
@@ -69,6 +72,7 @@ export const typeDefs = gql`
     signOut: Boolean!
     self: Web3User
     requestPresaleApproval(affiliate: String): PresaleApprovalResponse!
+    affiliateForAddress(address: String!): AffiliateMutation!
   }
 `;
 
