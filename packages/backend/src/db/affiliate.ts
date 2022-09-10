@@ -1,5 +1,6 @@
 import type { IAffiliate } from "@0xflick/models";
 import {
+  BatchWriteCommand,
   DynamoDBDocumentClient,
   GetCommand,
   PutCommand,
@@ -17,7 +18,7 @@ function addressToPk(address: string): TPK {
   return asPk(`ADDRESS#${address}`);
 }
 function slugToPk(slug: string): TPK {
-  return asPk(`SLUG#${slug}`);
+  return asPk(`SLUG#${encodeURIComponent(slug)}`);
 }
 function asGsi1Pk(pk: string): GSI1PK {
   return pk as GSI1PK;
@@ -186,7 +187,7 @@ export class AffiliateDAO {
     }
   }
 
-  public async getRoleForAffiliateAtAddress(address: string) {
+  public async getRootForAffiliateAddress(address: string) {
     const result = await this.db.send(
       new GetCommand({
         TableName: AffiliateDAO.TABLE_NAME,
@@ -198,7 +199,7 @@ export class AffiliateDAO {
     if (!result.Item) {
       return null;
     }
-    return dbToAffiliate(result.Item).roleId;
+    return dbToAffiliate(result.Item);
   }
 
   public async getAllForAddress(address: string): Promise<IAffiliate[]> {
@@ -242,6 +243,41 @@ export class AffiliateDAO {
         UpdateExpression: "SET deactivated = :t",
         ExpressionAttributeValues: {
           ":t": true,
+        },
+      })
+    );
+  }
+
+  public async deleteAffiliate(address: string): Promise<void> {
+    // All entries
+    const [root, children] = await Promise.all([
+      this.getRootForAffiliateAddress(address),
+      this.getAllForAddress(address),
+    ]);
+    if (!root && children.length === 0) {
+      return;
+    }
+    await this.db.send(
+      new BatchWriteCommand({
+        RequestItems: {
+          [AffiliateDAO.TABLE_NAME]: [
+            ...(root && [
+              {
+                DeleteRequest: {
+                  Key: {
+                    pk: addressToPk(root.address),
+                  },
+                },
+              },
+            ]),
+            ...children.map((child) => ({
+              DeleteRequest: {
+                Key: {
+                  pk: slugToPk(child.slug),
+                },
+              },
+            })),
+          ],
         },
       })
     );

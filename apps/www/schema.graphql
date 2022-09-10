@@ -196,8 +196,9 @@ type AffiliateQuery {
 
 type AffiliateMutation {
   address: ID!
-  createSlug(slug: String!): AffiliateMutation!
-  deactivate(slug: String!): Boolean!
+  createSlug(slug: String): AffiliateMutation!
+  deactivate(slug: String!): AffiliateMutation!
+  delete: Boolean!
   slugs: [String!]!
   role: Role!
 }
@@ -225,5 +226,5 @@ type Mutation {
   self: Web3User
   requestPresaleApproval(affiliate: String): PresaleApprovalResponse!
   affiliateForAddress(address: String!): AffiliateMutation!
-  createAffiliate(slug: String!, address: String!): AffiliateMutation!
+  createAffiliate(address: String!): AffiliateMutation!
 }

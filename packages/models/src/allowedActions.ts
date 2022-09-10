@@ -37,7 +37,8 @@ export const isActionOnResource = (expectedAction: TAllowedAction) =>
       return (
         action.action === expectedAction.action &&
         action.resource === expectedAction.resource &&
-        action.identifier === expectedAction.identifier
+        (!expectedAction.identifier ||
+          action.identifier === expectedAction.identifier)
       );
     },
     describe(a, m) {

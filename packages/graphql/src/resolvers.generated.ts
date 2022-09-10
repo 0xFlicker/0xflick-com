@@ -29,14 +29,15 @@ export type AffiliateMutation = {
   __typename?: 'AffiliateMutation';
   address: Scalars['ID'];
   createSlug: AffiliateMutation;
-  deactivate: Scalars['Boolean'];
+  deactivate: AffiliateMutation;
+  delete: Scalars['Boolean'];
   role: Role;
   slugs: Array<Scalars['String']>;
 };
 
 
 export type AffiliateMutationCreateSlugArgs = {
-  slug: Scalars['String'];
+  slug?: InputMaybe<Scalars['String']>;
 };
 
 
@@ -132,7 +133,6 @@ export type MutationAffiliateForAddressArgs = {
 
 export type MutationCreateAffiliateArgs = {
   address: Scalars['String'];
-  slug: Scalars['String'];
 };
 
 
@@ -541,8 +541,9 @@ export type AffiliateResolvers<ContextType = any, ParentType extends ResolversPa
 
 export type AffiliateMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['AffiliateMutation'] = ResolversParentTypes['AffiliateMutation']> = {
   address?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  createSlug?: Resolver<ResolversTypes['AffiliateMutation'], ParentType, ContextType, RequireFields<AffiliateMutationCreateSlugArgs, 'slug'>>;
-  deactivate?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<AffiliateMutationDeactivateArgs, 'slug'>>;
+  createSlug?: Resolver<ResolversTypes['AffiliateMutation'], ParentType, ContextType, Partial<AffiliateMutationCreateSlugArgs>>;
+  deactivate?: Resolver<ResolversTypes['AffiliateMutation'], ParentType, ContextType, RequireFields<AffiliateMutationDeactivateArgs, 'slug'>>;
+  delete?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   role?: Resolver<ResolversTypes['Role'], ParentType, ContextType>;
   slugs?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -608,7 +609,7 @@ export type MetadataPropertiesResolvers<ContextType = any, ParentType extends Re
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   affiliateForAddress?: Resolver<ResolversTypes['AffiliateMutation'], ParentType, ContextType, RequireFields<MutationAffiliateForAddressArgs, 'address'>>;
-  createAffiliate?: Resolver<ResolversTypes['AffiliateMutation'], ParentType, ContextType, RequireFields<MutationCreateAffiliateArgs, 'address' | 'slug'>>;
+  createAffiliate?: Resolver<ResolversTypes['AffiliateMutation'], ParentType, ContextType, RequireFields<MutationCreateAffiliateArgs, 'address'>>;
   createOrUpdateNameflick?: Resolver<ResolversTypes['Nameflick'], ParentType, ContextType, RequireFields<MutationCreateOrUpdateNameflickArgs, 'domain' | 'fields'>>;
   createRole?: Resolver<ResolversTypes['Role'], ParentType, ContextType, RequireFields<MutationCreateRoleArgs, 'name' | 'permissions'>>;
   deleteNameflick?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteNameflickArgs, 'domain'>>;

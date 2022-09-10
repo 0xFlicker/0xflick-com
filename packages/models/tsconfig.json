@@ -2,10 +2,10 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "module": "NodeNext",
-    "rootDir": "./src" /* Specify the root folder within your source files. */,
-    "outDir": "./dist" /* Specify an output folder for all emitted files. */,
+    "rootDir": "./src",
+    "outDir": "./dist",
     "paths": {},
-    "composite": true /* Enable the use of the ES2015 module loader. */
+    "composite": true
   },
   "exclude": ["**/node_modules", "**/.*/", "dist"],
   "include": ["**/*.ts"]

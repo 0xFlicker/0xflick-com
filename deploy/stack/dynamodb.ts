@@ -248,7 +248,7 @@ export class DynamoDB extends cdk.Stack {
       description: "The table names",
       parameterName: `${id}_TableNames`,
       stringValue: JSON.stringify({
-        affiliateTable: affiliateTable.tableName,
+        affiliatesTable: affiliateTable.tableName,
         userNonceTable: userNonceTable.tableName,
         nameflickTable: nameflickTable.tableName,
         rolesTable: rolesTable.tableName,

@@ -4,6 +4,7 @@ import {
   isActionOnResource,
   allowAdminAll,
   allowAdminOnResource,
+  forIdentifier,
 } from "./allowedActions";
 import { and, oneOf, or } from "./matcher";
 
@@ -113,6 +114,74 @@ describe("#allowedActions", () => {
       )({
         action: EActions.DELETE,
         resource: EResource.FAUCET,
+      })
+    ).toBe(false);
+  });
+  it("#defaultAdminHandlingForResource identifiers narrow scope", () => {
+    expect(
+      forIdentifier(
+        "self",
+        defaultAdminHandlingForResource(
+          [EActions.GET, EActions.LIST],
+          EResource.FAUCET
+        )
+      )({
+        action: EActions.LIST,
+        resource: EResource.FAUCET,
+        identifier: "self",
+      })
+    ).toBe(true);
+    expect(
+      forIdentifier(
+        "self",
+        defaultAdminHandlingForResource(
+          [EActions.GET, EActions.LIST],
+          EResource.FAUCET
+        )
+      )({
+        action: EActions.GET,
+        resource: EResource.FAUCET,
+        identifier: "self",
+      })
+    ).toBe(true);
+    expect(
+      forIdentifier(
+        "self",
+        defaultAdminHandlingForResource(
+          [EActions.GET, EActions.LIST],
+          EResource.FAUCET
+        )
+      )({
+        action: EActions.GET,
+        resource: EResource.FAUCET,
+      })
+    ).toBe(false);
+  });
+  it("identity scoped permissions can not be used for unscoped requests", () => {
+    expect(
+      isActionOnResource({
+        action: EActions.GET,
+        resource: EResource.FAUCET,
+        identifier: "self",
+      })({
+        action: EActions.GET,
+        resource: EResource.FAUCET,
+      })
+    ).toBe(false);
+  });
+  it("#allowAdminOnResource", () => {
+    const allowAdminOnFaucet = allowAdminOnResource(EResource.FAUCET);
+    expect(
+      allowAdminOnFaucet({
+        action: EActions.ADMIN,
+        resource: EResource.FAUCET,
+      })
+    ).toBe(true);
+    expect(
+      allowAdminOnFaucet({
+        action: EActions.ADMIN,
+        resource: EResource.FAUCET,
+        identifier: "self",
       })
     ).toBe(false);
   });

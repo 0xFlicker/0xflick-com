@@ -48,7 +48,7 @@ export async function fetchTableNames({
     .promise();
   const tableNames = JSON.parse(result.Parameter?.Value ?? "{}");
   AffiliateDAO.TABLE_NAME =
-    tableNames.AffiliatesTable ?? AffiliateDAO.TABLE_NAME;
+    tableNames.affiliatesTable ?? AffiliateDAO.TABLE_NAME;
   UserDAO.TABLE_NAME = tableNames.userNonceTable ?? UserDAO.TABLE_NAME;
   RolesDAO.TABLE_NAME = tableNames.rolesTable ?? RolesDAO.TABLE_NAME;
   RolePermissionsDAO.TABLE_NAME =
