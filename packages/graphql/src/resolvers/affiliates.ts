@@ -193,39 +193,9 @@ export const mutationResolvers: MutationResolvers<TContext> = {
     let roleId = rootAffiliate?.roleId;
     if (!roleId) {
       roleId = uuid();
-      await rolesDao.create({
-        id: roleId,
-        name: `Affiliate ${address}`,
-      });
-      await Promise.all([
-        rolePermissionsDao.bind({
-          roleId,
-          resource: EResource.AFFILIATE,
-          action: EActions.GET,
-          identifier: address,
-        }),
-        rolePermissionsDao.bind({
-          roleId,
-          resource: EResource.AFFILIATE,
-          action: EActions.DELETE,
-          identifier: address,
-        }),
-        rolePermissionsDao.bind({
-          roleId,
-          resource: EResource.AFFILIATE,
-          action: EActions.CREATE,
-          identifier: address,
-        }),
-        userRolesDao.bind({
-          address,
-          roleId,
-          rolesDao,
-        }),
-        affiliateDao.enrollAffiliate({
-          address,
-          roleId,
-        }),
-        await createRole(context, info, {
+      const [presaleRole, affiliateRole] = await Promise.all([
+        // This is the presale role that will be applied to incoming presale users for this affiliate
+        createRole(context, info, {
           name: "presale",
           permissions: [
             {
@@ -234,6 +204,39 @@ export const mutationResolvers: MutationResolvers<TContext> = {
               identifier: address,
             },
           ],
+        }),
+        // This role grants the affiliate manage access to their own affiliate
+        createRole(context, info, {
+          name: `Manage affiliate ${address}`,
+          permissions: [
+            {
+              resource: EResource.AFFILIATE,
+              action: EActions.GET,
+              identifier: address,
+            },
+            {
+              resource: EResource.AFFILIATE,
+              action: EActions.CREATE,
+              identifier: address,
+            },
+            {
+              resource: EResource.AFFILIATE,
+              action: EActions.DELETE,
+              identifier: address,
+            },
+          ],
+        }),
+      ]);
+      roleId = await presaleRole.id();
+      await Promise.all([
+        userRolesDao.bind({
+          address,
+          roleId: await affiliateRole.id(),
+          rolesDao,
+        }),
+        affiliateDao.enrollAffiliate({
+          address,
+          roleId,
         }),
       ]);
     }

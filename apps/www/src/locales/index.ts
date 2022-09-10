@@ -18,9 +18,10 @@ export const defaultI18nConfig = (): InitOptions => ({
   },
 });
 
-export const getStaticProps: GetStaticProps<{
+export interface I18nProps {
   i18n: InitOptions;
-}> = async () => {
+}
+export const getStaticProps: GetStaticProps<I18nProps> = async () => {
   return {
     props: {
       i18n: defaultI18nConfig(),

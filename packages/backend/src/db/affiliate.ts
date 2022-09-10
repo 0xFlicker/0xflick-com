@@ -5,8 +5,15 @@ import {
   GetCommand,
   PutCommand,
   QueryCommand,
+  ScanCommand,
   UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
+import { decodeCursor, encodeCursor, paginate } from "../helpers";
+import {
+  IPaginatedResult,
+  IPaginationOptions,
+  IProjectionOptions,
+} from "../types";
 import { createLogger } from "../utils/logger";
 
 type TPK = string & { __pk: true };
@@ -23,6 +30,15 @@ function slugToPk(slug: string): TPK {
 function asGsi1Pk(pk: string): GSI1PK {
   return pk as GSI1PK;
 }
+
+export const allowedProjections = [
+  "address",
+  "roleId",
+  "slug",
+  "deactivated",
+  "pk",
+  "GSI1PK",
+];
 interface IAffiliateDB {
   pk: TPK;
   GSI1PK?: GSI1PK;
@@ -94,6 +110,12 @@ export class AffiliateAddressAlreadyExistsError extends Error {
  */
 export class AffiliateDAO {
   public static TABLE_NAME = "Affiliates";
+  public static PROJECTION_ATTRIBUTES = new Map(
+    ["pk", "GSI1PK", "roleId", "slug", "address", "deactivated"].map((a) => [
+      a,
+      true,
+    ])
+  );
   private db: DynamoDBDocumentClient;
 
   constructor(db: DynamoDBDocumentClient) {
@@ -281,5 +303,72 @@ export class AffiliateDAO {
         },
       })
     );
+  }
+
+  public async getAllAffiliates(): Promise<IAffiliate[]> {
+    const results: IAffiliate[] = [];
+    for await (const result of this.generateAllAffiliates()) {
+      results.push(result);
+    }
+    return results;
+  }
+
+  public generateAllAffiliates(options?: IPaginationOptions) {
+    return paginate(async (reqOptions) => {
+      return this.paginateAllAffiliates(reqOptions);
+    }, options);
+  }
+
+  public async paginateAllAffiliates(
+    options?: IPaginationOptions & IProjectionOptions
+  ): Promise<IPaginatedResult<IAffiliate>> {
+    const attributes = options?.attributes;
+    let projectionExpression: string | undefined;
+    if (attributes) {
+      if (
+        attributes.some((attr) => !AffiliateDAO.PROJECTION_ATTRIBUTES.has(attr))
+      ) {
+        throw new Error("Invalid attribute");
+      }
+      projectionExpression = attributes.join(", ");
+    }
+    const pagination = decodeCursor(options?.cursor);
+    const results = await this.db.send(
+      new ScanCommand({
+        TableName: AffiliateDAO.TABLE_NAME,
+        IndexName: "GSI1",
+        FilterExpression: "attribute_exists(slug)",
+        ...(projectionExpression && {
+          ProjectionExpression: projectionExpression,
+        }),
+        ...(pagination
+          ? {
+              ExclusiveStartKey: pagination.lastEvaluatedKey,
+            }
+          : {}),
+        ...(options?.limit
+          ? {
+              Limit: options.limit,
+            }
+          : {}),
+      })
+    );
+
+    const lastEvaluatedKey = results.LastEvaluatedKey;
+    const page = pagination ? pagination.page + 1 : 1;
+    const size = results.Items?.length ?? 0;
+    const count = (pagination ? pagination.count : 0) + size;
+
+    return {
+      items: (results.Items ?? []).map((item) => dbToAffiliate(item)),
+      cursor: encodeCursor({
+        page,
+        count,
+        lastEvaluatedKey,
+      }),
+      page,
+      count,
+      size,
+    };
   }
 }

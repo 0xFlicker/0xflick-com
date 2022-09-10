@@ -89,7 +89,7 @@ describe("AffiliateDAO", () => {
       address,
       roleId,
     });
-    const roleFromDb = await dao.getRoleForAffiliateAtAddress(address);
-    expect(roleFromDb).toEqual(roleId);
+    const roleFromDb = await dao.getRootForAffiliateAddress(address);
+    expect(roleFromDb.roleId).toEqual(roleId);
   });
 });

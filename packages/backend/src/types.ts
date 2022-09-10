@@ -6,6 +6,10 @@ export interface IPaginatedResult<T> {
   page: number;
 }
 
+export interface IProjectionOptions {
+  attributes?: string[];
+}
+
 export interface IPaginationOptions {
   cursor?: string;
   limit?: number;
