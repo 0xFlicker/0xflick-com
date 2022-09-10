@@ -18,6 +18,25 @@ export class DynamoDB extends cdk.Stack {
     const { ...rest } = props;
     super(scope, id, rest);
 
+    const affiliateTable = new dynamodb.Table(this, "AffiliateTable", {
+      partitionKey: {
+        name: "pk",
+        type: dynamodb.AttributeType.STRING,
+      },
+      tableClass: dynamodb.TableClass.STANDARD,
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+    });
+    affiliateTable.addGlobalSecondaryIndex({
+      indexName: "GSI1",
+      partitionKey: {
+        name: "GSI1PK",
+        type: dynamodb.AttributeType.STRING,
+      },
+    });
+    new cdk.CfnOutput(this, "AffiliateTableName", {
+      value: affiliateTable.tableName,
+    });
+
     const userNonceTable = new dynamodb.Table(this, "UserNonce", {
       partitionKey: {
         name: "Address",
@@ -181,6 +200,12 @@ export class DynamoDB extends cdk.Stack {
     new cdk.CfnOutput(this, "UrlShortenerTable", {
       value: urlShortenerTable.tableName,
     });
+
+    new ssm.StringParameter(this, "AffiliateTable_TableArn", {
+      parameterName: "AffiliateTable_TableArn",
+      description: "The ARN of the AffiliateTable table",
+      stringValue: affiliateTable.tableArn,
+    });
     new ssm.StringParameter(this, "UrlShortener_TableArn", {
       description: "The UrlShortener table ARN",
       parameterName: `UrlShortener_TableArn`,
@@ -223,6 +248,7 @@ export class DynamoDB extends cdk.Stack {
       description: "The table names",
       parameterName: `${id}_TableNames`,
       stringValue: JSON.stringify({
+        affiliateTable: affiliateTable.tableName,
         userNonceTable: userNonceTable.tableName,
         nameflickTable: nameflickTable.tableName,
         rolesTable: rolesTable.tableName,

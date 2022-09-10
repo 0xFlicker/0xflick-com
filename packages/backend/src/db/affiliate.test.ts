@@ -8,7 +8,7 @@ describe("AffiliateDAO", () => {
   const db = getDb();
   const dao = new AffiliateDAO(db);
 
-  describe.only("getAffiliate", () => {
+  describe("getAffiliate", () => {
     it("can create an affiliate", async () => {
       const affiliate = {
         address: "0x123",
@@ -22,15 +22,16 @@ describe("AffiliateDAO", () => {
         new GetCommand({
           TableName: AffiliateDAO.TABLE_NAME,
           Key: {
-            pk: affiliate.slug,
+            pk: `SLUG#${affiliate.slug}`,
           },
         })
       );
       expect(rawDbModel.Item).toEqual({
-        pk: "test",
+        pk: "SLUG#test",
         GSI1PK: "0x123",
         address: "0x123",
         roleId: "0x456",
+        slug: "test",
       });
     });
     it("can get all affiliates for an address", async () => {
@@ -79,5 +80,16 @@ describe("AffiliateDAO", () => {
     await dao.deactivateAffiliate(affiliate.slug);
     const affiliateFromDb = await dao.getAffiliate(affiliate.slug);
     expect(affiliateFromDb).toEqual({ ...affiliate, deactivated: true });
+  });
+
+  it("can enroll a new address", async () => {
+    const roleId = uuid();
+    const address = uuid();
+    await dao.enrollAffiliate({
+      address,
+      roleId,
+    });
+    const roleFromDb = await dao.getRoleForAffiliateAtAddress(address);
+    expect(roleFromDb).toEqual(roleId);
   });
 });

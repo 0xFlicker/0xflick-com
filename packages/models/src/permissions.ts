@@ -17,6 +17,7 @@ export enum EResource {
   FAUCET = "faucet",
   PERMISSION = "permission",
   ROLE = "role",
+  AFFILIATE = "affiliate",
 }
 export function isAction(possibleAction: string): possibleAction is EActions {
   return Object.values(EActions).includes(possibleAction as EActions);

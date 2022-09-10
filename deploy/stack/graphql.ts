@@ -63,6 +63,9 @@ export class GraphqlStack extends cdk.Stack {
     super(scope, id, rest);
 
     // Fetch table names from SSM Parameter Store
+    const affiliateTable = getTable(this, "AffiliateTable", {
+      globalIndexes: ["GSI1"],
+    });
     const urlShortenerTable = getTable(this, "UrlShortener");
     const userNonceTable = getTable(this, "UserNonce");
     const rolePermissionsTable = getTable(this, "RolePermissions", {
@@ -123,6 +126,7 @@ export class GraphqlStack extends cdk.Stack {
       memorySize: 512,
       environment: graphqlEnv,
     });
+    affiliateTable.grantReadWriteData(graphqlHandler);
     urlShortenerTable.grantReadWriteData(graphqlHandler);
     userNonceTable.grantReadWriteData(graphqlHandler);
     rolePermissionsTable.grantReadWriteData(graphqlHandler);

@@ -72,6 +72,8 @@ export function graphqlPermissionResourceToModel(
       return EResource.PERMISSION;
     case PermissionResource.Role:
       return EResource.ROLE;
+    case PermissionResource.Affiliate:
+      return EResource.AFFILIATE;
     default:
       throw new Error(`Unknown permission resource: ${resource}`);
   }
@@ -97,6 +99,8 @@ export function modelPermissionResourceToGraphql(
       return PermissionResource.Permission;
     case EResource.ROLE:
       return PermissionResource.Role;
+    case EResource.AFFILIATE:
+      return PermissionResource.Affiliate;
     default:
       throw new Error(`Unknown permission resource: ${resource}`);
   }

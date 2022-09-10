@@ -103,6 +103,7 @@ enum PermissionResource {
   FAUCET
   PERMISSION
   ROLE
+  AFFILIATE
 }
 
 type Permission {
@@ -180,6 +181,27 @@ type PresaleApprovalResponse {
   token: String!
 }
 
+type Affiliate {
+  address: String!
+  slug: String!
+  role: Role!
+  deactivated: Boolean
+}
+
+type AffiliateQuery {
+  address: ID!
+  slugs: [String!]!
+  role: Role!
+}
+
+type AffiliateMutation {
+  address: ID!
+  createSlug(slug: String!): AffiliateMutation!
+  deactivate(slug: String!): Boolean!
+  slugs: [String!]!
+  role: Role!
+}
+
 type Query {
   nameflickByFqdn(fqdn: ID!): Nameflick
   nameflickByEnsHash(ensHash: String!): Nameflick
@@ -188,6 +210,7 @@ type Query {
   self: Web3User
   role(id: ID!): Role!
   roles: [Role!]!
+  affiliateForAddress(address: ID!): AffiliateQuery!
 }
 
 type Mutation {
@@ -201,4 +224,6 @@ type Mutation {
   signOut: Boolean!
   self: Web3User
   requestPresaleApproval(affiliate: String): PresaleApprovalResponse!
+  affiliateForAddress(address: String!): AffiliateMutation!
+  createAffiliate(slug: String!, address: String!): AffiliateMutation!
 }

@@ -36,6 +36,7 @@ export const typeSchema = gql`
     FAUCET
     PERMISSION
     ROLE
+    AFFILIATE
   }
 
   type Permission {

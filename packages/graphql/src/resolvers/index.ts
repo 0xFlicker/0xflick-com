@@ -28,7 +28,12 @@ import {
   typeSchema as typeSchemaPresale,
   mutationResolver as mutationResolverPresale,
 } from "./presale";
-import { typeSchema as typeSchemaAffiliate } from "./affiliates";
+import {
+  typeSchema as typeSchemaAffiliate,
+  mutationResolvers as mutationResolversAffiliate,
+  queryResolvers as queryResolversAffiliate,
+  resolvers as resolversAffiliate,
+} from "./affiliates";
 import { Resolvers } from "../resolvers.generated";
 import { TContext } from "../context";
 
@@ -73,6 +78,7 @@ export const typeDefs = gql`
     self: Web3User
     requestPresaleApproval(affiliate: String): PresaleApprovalResponse!
     affiliateForAddress(address: String!): AffiliateMutation!
+    createAffiliate(address: String!): AffiliateMutation!
   }
 `;
 
@@ -82,14 +88,17 @@ export const resolvers: Resolvers<TContext> = {
     ...queryResolversChain,
     ...queryResolversAuth,
     ...queryResolversAdmin,
+    ...queryResolversAffiliate,
   },
   Mutation: {
     ...mutationResolversNameflick,
     ...mutationResolversAuth,
     ...mutationResolvesAdmin,
     ...mutationResolverPresale,
+    ...mutationResolversAffiliate,
   },
   ...resolversNfts,
   ...resolversAuth,
   ...resolversAdmin,
+  ...resolversAffiliate,
 };

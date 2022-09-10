@@ -36,7 +36,8 @@ export const isActionOnResource = (expectedAction: TAllowedAction) =>
     matcher(action) {
       return (
         action.action === expectedAction.action &&
-        action.resource === expectedAction.resource
+        action.resource === expectedAction.resource &&
+        action.identifier === expectedAction.identifier
       );
     },
     describe(a, m) {
@@ -58,7 +59,12 @@ export const allowAdminAll = createMatcher<TAllowedAction>({
 export const allowAdminOnResource = (resource: EResource) =>
   createMatcher<TAllowedAction>({
     matcher(action) {
-      return action.action === EActions.ADMIN && action.resource === resource;
+      return (
+        action.action === EActions.ADMIN &&
+        action.resource === resource &&
+        // Only allow admins on unspecified resources to be admins on unspecified resources
+        (action.identifier === undefined || action.identifier === null)
+      );
     },
     describe(a, m) {
       return `${sa(a)} ${m(a) ? "is admin on" : "is not admin on"} ${resource}`;

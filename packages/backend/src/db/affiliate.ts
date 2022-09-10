@@ -13,23 +13,38 @@ type GSI1PK = string & { __gsi1pk: true };
 function asPk(pk: string): TPK {
   return pk as TPK;
 }
+function addressToPk(address: string): TPK {
+  return asPk(`ADDRESS#${address}`);
+}
+function slugToPk(slug: string): TPK {
+  return asPk(`SLUG#${slug}`);
+}
 function asGsi1Pk(pk: string): GSI1PK {
   return pk as GSI1PK;
 }
 interface IAffiliateDB {
   pk: TPK;
-  GSI1PK: GSI1PK;
+  GSI1PK?: GSI1PK;
   roleId: string;
+  slug?: string;
   address: string;
   deactivated?: boolean;
 }
-function affiliateToDb(affiliate: IAffiliate): IAffiliateDB {
+function affiliateSlugToDb(affiliate: IAffiliate): IAffiliateDB {
   return {
-    pk: asPk(affiliate.slug),
+    pk: slugToPk(affiliate.slug),
     GSI1PK: asGsi1Pk(affiliate.address),
+    slug: affiliate.slug,
     roleId: affiliate.roleId,
     address: affiliate.address,
     ...(affiliate.deactivated && { deactivated: affiliate.deactivated }),
+  };
+}
+function enrollAffiliateToDb(affiliate: IAffiliate): IAffiliateDB {
+  return {
+    pk: addressToPk(affiliate.address),
+    roleId: affiliate.roleId,
+    address: affiliate.address,
   };
 }
 function dbToAffiliate(record: Record<string, any>): IAffiliate {
@@ -37,16 +52,21 @@ function dbToAffiliate(record: Record<string, any>): IAffiliate {
   return {
     address: db.address,
     roleId: db.roleId,
-    slug: db.pk,
+    slug: db.slug,
     ...(db.deactivated && { deactivated: db.deactivated }),
   };
 }
 
 const logger = createLogger({ name: "db/affiliate" });
 
-class AffiliateSlugAlreadyExistsError extends Error {
+export class AffiliateSlugAlreadyExistsError extends Error {
   constructor(slug: string) {
     super(`Affiliate slug already exists: ${slug}`);
+  }
+}
+export class AffiliateAddressAlreadyExistsError extends Error {
+  constructor(slug: string) {
+    super(`Affiliate address already exists: ${slug}`);
   }
 }
 /**
@@ -59,13 +79,17 @@ class AffiliateSlugAlreadyExistsError extends Error {
  *  GSI1PK: address, used for querying all affiliates for an address
  *
  * @example
- *  pk                       | GSI1PK       | address      | roleId       |
- * +-------------------------+--------------+--------------+--------------+
- * | wow-much-cool           | 0xabcdef1234 | 0xabcdef1234 | abcd-bf-wer  |
- * | average-rapid-processor | 0xabcdef1234 | 0xabcdef1234 | abcd-bf-wer  |
- * | sharp-ancient-needle    | 0xbadbeef03  | 0xbadbeef03  | abcd-bf-wer  |
- * | acrid-colossal-nail     | 0xbadbeef04  | 0xbadbeef04  | abcd-bf-wer  |
- * +-------------------------+--------------+--------------+--------------+
+ * +-------------------------+--------------+--------------+--------------------+--------------+
+ * | pk                      | GSI1PK       | roleId       | slug               | address      |
+ * +-------------------------+--------------+--------------+--------------------+--------------+
+ * | ADDRESS#0xabcdef1234    |              | abcd-bf-wer  |                    | 0xabcdef1234 |
+ * | SLUG#wow-much-cool      | 0xabcdef1234 | abcd-bf-wer  | wow-much-cool      | 0xabcdef1234 |
+ * | SLUG#avg-rapid-process  | 0xabcdef1234 | abcd-bf-wer  | avg-rapid-process  | 0xabcdef1234 |
+ * | ADDRESS#0xbadbeef03     |              | dao6-bf-f12  |                    | 0xbadbeef03  |
+ * | SLUG#hot-ancient-needle | 0xbadbeef03  | dao6-bf-f12  | hot-ancient-needle | 0xbadbeef03  |
+ * | ADDRESS#0xbadbeef04     |              | dao6-bf-f12  |                    | 0xbadbeef04  |
+ * | SLUG#acrid-big-nail     | 0xbadbeef04  | dao6-bf-f12  | acrid-big-nail     | 0xbadbeef04  |
+ * +-------------------------+--------------+--------------+--------------------+--------------+
  */
 export class AffiliateDAO {
   public static TABLE_NAME = "Affiliates";
@@ -95,7 +119,7 @@ export class AffiliateDAO {
       new GetCommand({
         TableName: AffiliateDAO.TABLE_NAME,
         Key: {
-          pk: slug,
+          pk: slugToPk(slug),
         },
       })
     );
@@ -115,7 +139,7 @@ export class AffiliateDAO {
    * Throws an error if the affiliate already exists.
    */
   public async createAffiliate(affiliate: IAffiliate): Promise<void> {
-    const db = affiliateToDb(affiliate);
+    const db = affiliateSlugToDb(affiliate);
     try {
       await this.db.send(
         new PutCommand({
@@ -136,6 +160,45 @@ export class AffiliateDAO {
       // Something else went wrong, rethrow
       throw err;
     }
+  }
+
+  public async enrollAffiliate(
+    affiliate: Omit<IAffiliate, "slug">
+  ): Promise<void> {
+    try {
+      await this.db.send(
+        new PutCommand({
+          TableName: AffiliateDAO.TABLE_NAME,
+          Item: enrollAffiliateToDb(affiliate),
+          ConditionExpression: "attribute_not_exists(pk)",
+        })
+      );
+    } catch (err) {
+      if (
+        err instanceof Error &&
+        err.name === "ConditionalCheckFailedException"
+      ) {
+        logger.warn("Duplicate entry on create", affiliate);
+        throw new AffiliateAddressAlreadyExistsError(affiliate.address);
+      }
+      // Something else went wrong, rethrow
+      throw err;
+    }
+  }
+
+  public async getRoleForAffiliateAtAddress(address: string) {
+    const result = await this.db.send(
+      new GetCommand({
+        TableName: AffiliateDAO.TABLE_NAME,
+        Key: {
+          pk: addressToPk(address),
+        },
+      })
+    );
+    if (!result.Item) {
+      return null;
+    }
+    return dbToAffiliate(result.Item).roleId;
   }
 
   public async getAllForAddress(address: string): Promise<IAffiliate[]> {
@@ -174,7 +237,7 @@ export class AffiliateDAO {
       new UpdateCommand({
         TableName: AffiliateDAO.TABLE_NAME,
         Key: {
-          pk: slug,
+          pk: slugToPk(slug),
         },
         UpdateExpression: "SET deactivated = :t",
         ExpressionAttributeValues: {

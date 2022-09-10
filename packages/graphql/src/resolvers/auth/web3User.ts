@@ -7,6 +7,7 @@ import { bindUserToRole } from "../../controllers/admin/roles";
 import { authorizedUser } from "../../controllers/auth/user";
 import { Resolvers } from "../../resolvers.generated";
 import { isTwitterFollowing } from "../../controllers/twitter/isFollowing";
+import { RoleModel } from "../../models";
 
 export const typeSchema = gql`
   type Web3User {
@@ -79,19 +80,8 @@ export const resolvers: Resolvers<TContext> = {
         userRolesDao,
         user.address
       );
-      return await Promise.all(
-        userRoles.roleIds.map(async (roleId) => {
-          const { name } = await rolesDao.get(roleId);
-          const permissions = await rolePermissionsDao.getAllPermissions(
-            roleId
-          );
-
-          return {
-            id: roleId,
-            name,
-            permissions,
-          };
-        })
+      return userRoles.roleIds.map(
+        (roleId) => new RoleModel(rolesDao, rolePermissionsDao, roleId)
       );
     },
     isTwitterFollower: async (user, _, context) => {
