@@ -1,6 +1,7 @@
 {
   "button_connect": "connect",
   "connect_disconnect": "disconnect",
+  "profile": "profile",
   "modal_connect_title": "Connect your wallet",
   "modal_connect_description": "Pick from the following web wallets",
   "modal_wrong_chain_title": "Wrong chain",

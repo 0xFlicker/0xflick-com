@@ -123,6 +123,7 @@ export type Mutation = {
   self?: Maybe<Web3User>;
   signIn?: Maybe<Web3LoginUser>;
   signOut: Scalars['Boolean'];
+  user?: Maybe<Web3User>;
 };
 
 
@@ -174,6 +175,11 @@ export type MutationSignInArgs = {
   chainId: Scalars['Int'];
   issuedAt: Scalars['String'];
   jwe: Scalars['String'];
+};
+
+
+export type MutationUserArgs = {
+  address: Scalars['ID'];
 };
 
 export type Nameflick = {
@@ -315,11 +321,12 @@ export type Query = {
   role: Role;
   roles: Array<Role>;
   self?: Maybe<Web3User>;
+  user?: Maybe<Web3User>;
 };
 
 
 export type QueryAffiliateForAddressArgs = {
-  address: Scalars['ID'];
+  address: Scalars['String'];
 };
 
 
@@ -345,6 +352,11 @@ export type QueryNameflicksByRootDomainArgs = {
 
 export type QueryRoleArgs = {
   id: Scalars['ID'];
+};
+
+
+export type QueryUserArgs = {
+  address: Scalars['ID'];
 };
 
 export type Role = {
@@ -620,6 +632,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   self?: Resolver<Maybe<ResolversTypes['Web3User']>, ParentType, ContextType>;
   signIn?: Resolver<Maybe<ResolversTypes['Web3LoginUser']>, ParentType, ContextType, RequireFields<MutationSignInArgs, 'address' | 'chainId' | 'issuedAt' | 'jwe'>>;
   signOut?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  user?: Resolver<Maybe<ResolversTypes['Web3User']>, ParentType, ContextType, RequireFields<MutationUserArgs, 'address'>>;
 };
 
 export type NameflickResolvers<ContextType = any, ParentType extends ResolversParentTypes['Nameflick'] = ResolversParentTypes['Nameflick']> = {
@@ -699,6 +712,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   role?: Resolver<ResolversTypes['Role'], ParentType, ContextType, RequireFields<QueryRoleArgs, 'id'>>;
   roles?: Resolver<Array<ResolversTypes['Role']>, ParentType, ContextType>;
   self?: Resolver<Maybe<ResolversTypes['Web3User']>, ParentType, ContextType>;
+  user?: Resolver<Maybe<ResolversTypes['Web3User']>, ParentType, ContextType, RequireFields<QueryUserArgs, 'address'>>;
 };
 
 export type RoleResolvers<ContextType = any, ParentType extends ResolversParentTypes['Role'] = ResolversParentTypes['Role']> = {

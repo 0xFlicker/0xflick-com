@@ -12,7 +12,7 @@ import { GraphQLResolveInfo } from "graphql";
 import { TPermission, RoleModel } from "../../models";
 
 const canPerformBindRoleToUserAction = defaultAdminStrategyAll(
-  EResource.PERMISSION,
+  EResource.USER_ROLE,
   isActionOnResource({
     action: EActions.CREATE,
     resource: EResource.USER_ROLE,
@@ -53,7 +53,7 @@ export async function bindUserToRole(
 }
 
 const canPerformCreateRoleAction = defaultAdminStrategyAll(
-  EResource.PERMISSION,
+  EResource.ROLE,
   isActionOnResource({
     action: EActions.CREATE,
     resource: EResource.ROLE,
@@ -63,10 +63,18 @@ const canPerformCreateRoleAction = defaultAdminStrategyAll(
 export async function createRole(
   context: TContext,
   info: GraphQLResolveInfo,
-  { name, permissions }: { name: string; permissions: TPermission[] }
+  {
+    name,
+    permissions,
+    skipAuth,
+  }: { name: string; permissions: TPermission[]; skipAuth?: boolean }
 ): Promise<RoleModel> {
   context.requireMutation(info);
-  await verifyAuthorizedUser(context, canPerformCreateRoleAction);
+
+  if (!skipAuth) {
+    await verifyAuthorizedUser(context, canPerformCreateRoleAction);
+  }
+
   const { rolesDao, rolePermissionsDao } = context;
   const id = createUuid();
   await rolesDao.create({
@@ -85,7 +93,7 @@ export async function createRole(
 }
 
 const canPerformUnlinkRoleToUserAction = defaultAdminStrategyAll(
-  EResource.PERMISSION,
+  EResource.USER_ROLE,
   isActionOnResource({
     action: EActions.DELETE,
     resource: EResource.USER_ROLE,
@@ -128,7 +136,7 @@ export async function listAllRoles(context: TContext): Promise<RoleModel[]> {
 }
 
 const canPerformDeleteRoleAction = defaultAdminStrategyAll(
-  EResource.PERMISSION,
+  EResource.ROLE,
   isActionOnResource({
     action: EActions.DELETE,
     resource: EResource.ROLE,

@@ -32,7 +32,7 @@ const rolePermissionsDao = new RolePermissionsDAO(db);
 const promiseOwner = getOwner();
 
 const canPerformAction = defaultAdminStrategyAll(
-  EResource.PERMISSION,
+  EResource.USER_ROLE,
   isActionOnResource({
     action: EActions.CREATE,
     resource: EResource.USER_ROLE,

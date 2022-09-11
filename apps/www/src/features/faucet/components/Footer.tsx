@@ -25,7 +25,7 @@ export const Footer: FC = () => {
             If you find this faucet useful, please consider donating some
             homestead ether to
             <CopyToClipboardButton
-              icon={<CopyIcon />}
+              ButtonProps={{ endIcon: <CopyIcon /> }}
               text="0xa08ea173f778e4a264d3308385E6F046E691BbA7"
             >
               0xflick.eth

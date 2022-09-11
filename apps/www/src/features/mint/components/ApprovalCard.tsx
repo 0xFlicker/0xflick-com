@@ -13,7 +13,6 @@ import { useLocale } from "locales/hooks";
 import { useAppDispatch } from "app/store";
 import { Connect, useWeb3 } from "features/web3";
 
-import { useLazyRequestPresaleApprovalQuery } from "../api";
 import { useAuth } from "features/auth/hooks";
 import { useLazyIsFollowingQuery } from "features/twitter/api";
 import { LoginWithTwitterButton } from "features/twitter/components/LoginWithTwitterButton";

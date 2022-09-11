@@ -1,0 +1,5 @@
+mutation bindUserToRole($roleId: String!, $address: String!) {
+  bindUserToRole(name: $roleName, permissions: $permissions) {
+    id
+  }
+}

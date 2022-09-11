@@ -1,13 +1,13 @@
 import { FC, ReactNode, PropsWithChildren, useCallback } from "react";
-import { Button, Snackbar } from "@mui/material";
+import { Button, ButtonProps, Snackbar } from "@mui/material";
 import { useState } from "react";
 
 export const CopyToClipboardButton: FC<
   PropsWithChildren<{
     text: string;
-    icon?: ReactNode;
+    ButtonProps?: ButtonProps;
   }>
-> = ({ children, text, icon }) => {
+> = ({ children, text, ButtonProps }) => {
   const [open, setOpen] = useState(false);
   const handleClick = useCallback(() => {
     setOpen(true);
@@ -15,7 +15,7 @@ export const CopyToClipboardButton: FC<
   }, [text]);
   return (
     <>
-      <Button variant="text" endIcon={icon} onClick={handleClick}>
+      <Button variant="text" {...ButtonProps} onClick={handleClick}>
         {children}
       </Button>
       <Snackbar

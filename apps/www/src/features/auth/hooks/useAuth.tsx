@@ -6,9 +6,14 @@ import {
   useEffect,
   useContext,
   useMemo,
+  useState,
 } from "react";
 import { selectors as authSelectors, actions as authActions } from "../redux";
-import { selectors as web3Selectors, useWeb3 } from "features/web3";
+import { useWeb3 } from "features/web3";
+import {
+  actions as web3Actions,
+  selectors as web3Selectors,
+} from "features/web3/redux";
 import { useAppDispatch, useAppSelector } from "app/store";
 import useLocalStorage from "use-local-storage";
 import { useNonce } from "./useNonce";
@@ -85,10 +90,13 @@ function useAuthContext() {
     tokenData?.signIn.token
   );
   const dispatch = useAppDispatch();
-
   const signIn = useCallback(() => {
-    dispatch(authActions.userRequestsSignIn());
-  }, [dispatch]);
+    if (!isWeb3Connected) {
+      dispatch(web3Actions.openWalletSelectModal());
+    } else {
+      dispatch(authActions.userRequestsSignIn());
+    }
+  }, [dispatch, isWeb3Connected]);
 
   const signOut = useCallback(() => {
     clearToken();
@@ -252,12 +260,44 @@ export const Provider: FC<PropsWithChildren<{}>> = ({ children }) => {
   );
 };
 
-export function useAuth() {
+export function useAuth({
+  noAutoSignIn,
+}: {
+  noAutoSignIn?: boolean;
+} = {}) {
+  const [autoLoginUntil, setAutoLoginUntil] = useState(0);
+  const isAnonymous = useAppSelector(authSelectors.isAnonymous);
+  const isWeb3Connected = useAppSelector(web3Selectors.isConnected);
+
   const ctx = useContext(AuthProvider);
   if (ctx === null) {
     throw new Error("No context defined");
   }
-  return ctx;
+
+  const { signIn: originalSignIn, isAuthenticated } = ctx;
+  const dispatch = useAppDispatch();
+  useEffect(() => {
+    if (noAutoSignIn || autoLoginUntil < Date.now()) {
+      return;
+    }
+    if (isWeb3Connected && isAnonymous) {
+      dispatch(authActions.userRequestsSignIn());
+    }
+  }, [isWeb3Connected, isAnonymous, dispatch, noAutoSignIn, autoLoginUntil]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      setAutoLoginUntil(0);
+    }
+  }, [isAuthenticated]);
+  const signIn = useCallback(() => {
+    setAutoLoginUntil(Date.now() + 1000 * 60);
+    originalSignIn();
+  }, [originalSignIn]);
+  return {
+    ...ctx,
+    signIn,
+  };
 }
 
 export function useHasAllowedAction(

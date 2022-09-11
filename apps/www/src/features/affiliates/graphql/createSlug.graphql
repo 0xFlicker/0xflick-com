@@ -1,0 +1,7 @@
+mutation createSlug($address: String!) {
+  affiliateForAddress(address: $address) {
+    createSlug {
+      slugs
+    }
+  }
+}

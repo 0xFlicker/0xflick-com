@@ -1,0 +1,7 @@
+mutation deactivateSlug($address: String!, $slug: String!) {
+  affiliateForAddress(address: $address) {
+    deactivate(slug: $slug) {
+      slugs
+    }
+  }
+}

@@ -54,7 +54,7 @@ export default async function handler(
       }
       // Check if user has the required roles
       const canPerformAction = defaultAdminStrategyAll(
-        EResource.PERMISSION,
+        EResource.USER_ROLE,
         isActionOnResource({
           action: EActions.CREATE,
           resource: EResource.USER_ROLE,

@@ -12,6 +12,41 @@ export type Scalars = {
   Float: number;
 };
 
+export type Affiliate = {
+  __typename?: 'Affiliate';
+  address: Scalars['String'];
+  deactivated?: Maybe<Scalars['Boolean']>;
+  role: Role;
+  slug: Scalars['String'];
+};
+
+export type AffiliateMutation = {
+  __typename?: 'AffiliateMutation';
+  address: Scalars['ID'];
+  createSlug: AffiliateMutation;
+  deactivate: AffiliateMutation;
+  delete: Scalars['Boolean'];
+  role: Role;
+  slugs: Array<Scalars['String']>;
+};
+
+
+export type AffiliateMutationCreateSlugArgs = {
+  slug?: InputMaybe<Scalars['String']>;
+};
+
+
+export type AffiliateMutationDeactivateArgs = {
+  slug: Scalars['String'];
+};
+
+export type AffiliateQuery = {
+  __typename?: 'AffiliateQuery';
+  address: Scalars['ID'];
+  role: Role;
+  slugs: Array<Scalars['String']>;
+};
+
 export type ChainQuery = {
   __typename?: 'ChainQuery';
   chainId: Scalars['String'];
@@ -71,6 +106,8 @@ export type MetadataProperties = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  affiliateForAddress: AffiliateMutation;
+  createAffiliate: AffiliateMutation;
   createOrUpdateNameflick: Nameflick;
   createRole: Role;
   deleteNameflick: Scalars['Boolean'];
@@ -81,6 +118,16 @@ export type Mutation = {
   self?: Maybe<Web3User>;
   signIn?: Maybe<Web3LoginUser>;
   signOut: Scalars['Boolean'];
+};
+
+
+export type MutationAffiliateForAddressArgs = {
+  address: Scalars['String'];
+};
+
+
+export type MutationCreateAffiliateArgs = {
+  address: Scalars['String'];
 };
 
 
@@ -237,6 +284,7 @@ export type PermissionInput = {
 
 export enum PermissionResource {
   Admin = 'ADMIN',
+  Affiliate = 'AFFILIATE',
   All = 'ALL',
   Faucet = 'FAUCET',
   Permission = 'PERMISSION',
@@ -254,6 +302,7 @@ export type PresaleApprovalResponse = {
 
 export type Query = {
   __typename?: 'Query';
+  affiliateForAddress: AffiliateQuery;
   chain: ChainQuery;
   nameflickByEnsHash?: Maybe<Nameflick>;
   nameflickByFqdn?: Maybe<Nameflick>;
@@ -261,6 +310,11 @@ export type Query = {
   role: Role;
   roles: Array<Role>;
   self?: Maybe<Web3User>;
+};
+
+
+export type QueryAffiliateForAddressArgs = {
+  address: Scalars['String'];
 };
 
 

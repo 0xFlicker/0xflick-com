@@ -1,4 +1,4 @@
-import { Button, Typography } from "@mui/material";
+import { Button, ButtonProps, Typography } from "@mui/material";
 import { useAppDispatch, useAppSelector } from "app/store";
 import { CheckCircle as CheckCircleIcon } from "@mui/icons-material";
 import { FC, useCallback, useState, MouseEvent } from "react";
@@ -11,7 +11,9 @@ import { WrongChainModal } from "./WrongChainModal";
 import { ConnectedDropDownModal } from "./ConnectedDropDownModal";
 import { useAuth } from "features/auth/hooks";
 
-const Connect: FC = () => {
+const Connect: FC<{
+  size?: ButtonProps["size"];
+}> = ({ size }) => {
   const { t } = useLocale("common");
   const dispatch = useAppDispatch();
   const { isAuthenticated, signIn, signOut } = useAuth();
@@ -71,6 +73,7 @@ const Connect: FC = () => {
         <Button
           startIcon={isAuthenticated ? <CheckCircleIcon /> : null}
           variant="outlined"
+          size={size}
           sx={{
             m: "0.5rem",
           }}

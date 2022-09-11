@@ -1,17 +1,19 @@
 import { FC } from "react";
-import {
-  Backdrop,
-  Box,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Menu,
-  MenuItem,
-  MenuList,
-  Typography,
-} from "@mui/material";
-import { Logout as LogoutIcon, Login as LoginIcon } from "@mui/icons-material";
+import Backdrop from "@mui/material/Backdrop";
+import Box from "@mui/material/Box";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import MenuList from "@mui/material/MenuList";
+import Typography from "@mui/material/Typography";
+import LoginIcon from "@mui/icons-material/Login";
+import LogoutIcon from "@mui/icons-material/Logout";
+import ProfileIcon from "@mui/icons-material/AccountCircle";
 import { useLocale } from "locales/hooks";
+import { WrappedLink } from "components/WrappedLink";
+import { ListItem } from "@mui/material";
 
 interface IProps {
   anchorEl: Element;
@@ -54,50 +56,56 @@ export const ConnectedDropDownModal: FC<IProps> = ({
       <Box sx={{ width: 320 }}>
         <MenuList disablePadding>
           {isLoggedIn ? (
-            <MenuItem>
-              <ListItemButton onClick={handleLogout}>
-                <ListItemIcon>
-                  <LogoutIcon />
-                </ListItemIcon>
-                <ListItemText
-                  primary={
-                    <Typography textAlign="right">
-                      {t("auth_button_logout")}
-                    </Typography>
-                  }
-                />
-              </ListItemButton>
+            <MenuItem onClick={handleLogout}>
+              <ListItemIcon>
+                <LogoutIcon />
+              </ListItemIcon>
+              <ListItemText
+                primary={
+                  <Typography textAlign="right">
+                    {t("auth_button_logout")}
+                  </Typography>
+                }
+              />
             </MenuItem>
           ) : (
-            <MenuItem>
-              <ListItemButton onClick={handleLogin}>
-                <ListItemIcon>
-                  <LoginIcon />
-                </ListItemIcon>
-                <ListItemText
-                  primary={
-                    <Typography textAlign="right">
-                      {t("auth_button_login")}
-                    </Typography>
-                  }
-                />
-              </ListItemButton>
+            <MenuItem onClick={handleLogin}>
+              <ListItemIcon>
+                <LoginIcon />
+              </ListItemIcon>
+              <ListItemText
+                primary={
+                  <Typography textAlign="right">
+                    {t("auth_button_login")}
+                  </Typography>
+                }
+              />
             </MenuItem>
           )}
           {!isLoggedIn && (
-            <MenuItem>
-              <ListItemButton onClick={handleDisconnect}>
-                <ListItemIcon>
-                  <LogoutIcon />
-                </ListItemIcon>
-                <ListItemText
-                  primary={
-                    <Typography textAlign="right">
-                      {t("connect_disconnect")}
-                    </Typography>
-                  }
-                />
-              </ListItemButton>
+            <MenuItem onClick={handleDisconnect}>
+              <ListItemIcon>
+                <LogoutIcon />
+              </ListItemIcon>
+              <ListItemText
+                primary={
+                  <Typography textAlign="right">
+                    {t("connect_disconnect")}
+                  </Typography>
+                }
+              />
+            </MenuItem>
+          )}
+          {isLoggedIn && (
+            <MenuItem component={WrappedLink} href="/profile">
+              <ListItemIcon>
+                <ProfileIcon />
+              </ListItemIcon>
+              <ListItemText
+                primary={
+                  <Typography textAlign="right">{t("profile")}</Typography>
+                }
+              />
             </MenuItem>
           )}
         </MenuList>

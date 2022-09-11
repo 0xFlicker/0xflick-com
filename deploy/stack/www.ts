@@ -52,7 +52,6 @@ export class WwwStack extends cdk.Stack {
       ...rest
     } = props;
     super(scope, id, rest);
-
     // Read some configs
     // const apiBuildManifest = readApiBuildManifest(serverlessBuildOutDir);
     const routesManifest = readRoutesManifest(serverlessBuildOutDir);
@@ -119,6 +118,10 @@ export class WwwStack extends cdk.Stack {
     const externalAuthTable = getTable(this, "ExternalAuth", {
       globalIndexes: ["GSI1"],
     });
+    const affiliateTable = getTable(this, "AffiliateTable", {
+      globalIndexes: ["GSI1"],
+    });
+
     const tableNamesParam = getTableNameParam(this, "WWW_DynamoDB_TableNames");
 
     const generativeAssetBucket = new s3.Bucket(this, "GenerativeAsset", {
@@ -185,6 +188,7 @@ export class WwwStack extends cdk.Stack {
     publicAssetsBucket.grantReadWrite(defaultHandler);
     regenerationQueue?.grantSendMessages(defaultHandler);
     regenerationFunction?.grantInvoke(defaultHandler);
+    affiliateTable.grantReadData(defaultHandler);
 
     let imageHandler: lambda.Function | undefined = undefined;
     if (imagesManifest) {

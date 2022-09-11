@@ -6,7 +6,7 @@ import { ThemeProvider } from "@mui/material/styles";
 import { Provider } from "react-redux";
 import { Provider as ApolloProvider } from "graphql/Provider";
 import { Provider as LocaleProvider } from "locales/hooks";
-
+import { Provider as AffiliateProvider } from "features/affiliates/hooks/useManageAffiliates";
 import { store, useAppSelector } from "app/store";
 import { selectors as appbarSelectors } from "features/appbar/redux";
 import { InitOptions } from "i18next";
@@ -21,7 +21,9 @@ export const StateAvailableContent: FC<PropsWithChildren<{}>> = ({
     <ApolloProvider>
       <ThemeProvider theme={isDarkMode ? dark : light}>
         <Web3Provider>
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProvider>
+            <AffiliateProvider>{children}</AffiliateProvider>
+          </AuthProvider>
         </Web3Provider>
       </ThemeProvider>
     </ApolloProvider>

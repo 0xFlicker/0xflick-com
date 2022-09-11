@@ -52,9 +52,10 @@ export const typeDefs = gql`
     nameflicksByRootDomain(rootDomain: String!): [Nameflick!]!
     chain(id: ID!): ChainQuery!
     self: Web3User
+    user(address: ID!): Web3User
     role(id: ID!): Role!
     roles: [Role!]!
-    affiliateForAddress(address: ID!): AffiliateQuery!
+    affiliateForAddress(address: String!): AffiliateQuery!
   }
 
   type Mutation {
@@ -76,6 +77,7 @@ export const typeDefs = gql`
     ): Web3LoginUser
     signOut: Boolean!
     self: Web3User
+    user(address: ID!): Web3User
     requestPresaleApproval(affiliate: String): PresaleApprovalResponse!
     affiliateForAddress(address: String!): AffiliateMutation!
     createAffiliate(address: String!): AffiliateMutation!

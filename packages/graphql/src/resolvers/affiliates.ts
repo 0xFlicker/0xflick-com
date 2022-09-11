@@ -28,7 +28,10 @@ import {
   verifyAuthorizedUser,
 } from "../controllers/auth/authorized";
 import { AffiliatesError } from "../errors/affiliates";
-import { AffiliateSlugAlreadyExistsError } from "@0xflick/backend";
+import {
+  AffiliateSlugAlreadyExistsError,
+  createJwtToken,
+} from "@0xflick/backend";
 import { authorizedUser } from "../controllers/auth/user";
 import { createRole } from "../controllers/admin/roles";
 
@@ -60,7 +63,7 @@ export const typeSchema = gql`
 
 const canDoOnOwnAffiliate = (action: EActions, identifier?: string) =>
   defaultAdminStrategyAll(
-    EResource.PERMISSION,
+    EResource.AFFILIATE,
     isActionOnResource({
       action,
       resource: EResource.AFFILIATE,
@@ -150,7 +153,7 @@ export const queryResolvers: QueryResolvers<TContext> = {
 
 const canCreateAffiliate = (address?: string) =>
   defaultAdminStrategyAll(
-    EResource.PERMISSION,
+    EResource.AFFILIATE,
     forIdentifier(
       address,
       isActionOnResource({
@@ -175,6 +178,9 @@ export const mutationResolvers: MutationResolvers<TContext> = {
   createAffiliate: async (_, { address }, context, info) => {
     const user = await authorizedUser(context);
     let canCreate = false;
+    console.log(
+      `Creating affiliate for ${address} and user address: ${user.address}`
+    );
     // if it is the logged in user then we can create an affiliate for them
     if (user.address === address) {
       canCreate = true;
@@ -184,8 +190,7 @@ export const mutationResolvers: MutationResolvers<TContext> = {
     if (!canCreate) {
       throw new AuthError("Forbidden", "NOT_AUTHORIZED");
     }
-    const { affiliateDao, rolesDao, rolePermissionsDao, userRolesDao } =
-      context;
+    const { affiliateDao, rolesDao, setToken, userRolesDao } = context;
     // Check if affiliate exists
     const rootAffiliate = await affiliateDao.getRootForAffiliateAddress(
       address
@@ -204,6 +209,7 @@ export const mutationResolvers: MutationResolvers<TContext> = {
               identifier: address,
             },
           ],
+          skipAuth: true,
         }),
         // This role grants the affiliate manage access to their own affiliate
         createRole(context, info, {
@@ -225,6 +231,7 @@ export const mutationResolvers: MutationResolvers<TContext> = {
               identifier: address,
             },
           ],
+          skipAuth: true,
         }),
       ]);
       roleId = await presaleRole.id();
@@ -239,6 +246,14 @@ export const mutationResolvers: MutationResolvers<TContext> = {
           roleId,
         }),
       ]);
+
+      // Create a new token
+      const token = await createJwtToken({
+        address,
+        nonce: user.nonce,
+        roleIds: user.roleIds.concat([roleId]),
+      });
+      setToken(token);
     }
     return new AffiliateModel(address, affiliateDao, roleId);
   },

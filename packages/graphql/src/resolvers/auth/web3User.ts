@@ -1,6 +1,12 @@
 import { gql } from "apollo-server-core";
 import { IFieldResolver } from "@graphql-tools/utils";
-import { IUser } from "@0xflick/models";
+import {
+  isActionOnResource,
+  defaultAdminStrategyAll,
+  EActions,
+  EResource,
+  IUser,
+} from "@0xflick/models";
 
 import { TContext } from "../../context";
 import { bindUserToRole } from "../../controllers/admin/roles";
@@ -8,6 +14,7 @@ import { authorizedUser } from "../../controllers/auth/user";
 import { Resolvers } from "../../resolvers.generated";
 import { isTwitterFollowing } from "../../controllers/twitter/isFollowing";
 import { RoleModel } from "../../models";
+import { verifyAuthorizedUser } from "../../controllers/auth/authorized";
 
 export const typeSchema = gql`
   type Web3User {
@@ -35,12 +42,31 @@ const selfResolver: IFieldResolver<
   return await authorizedUser(context);
 };
 
+const canReadUser = defaultAdminStrategyAll(
+  EResource.USER,
+  isActionOnResource({
+    action: EActions.GET,
+    resource: EResource.USER,
+  })
+);
 export const queryResolvers: Resolvers<TContext>["Query"] = {
   self: selfResolver,
+  user: async (_, { address }, context) => {
+    await verifyAuthorizedUser(context, canReadUser);
+    const { userDao } = context;
+    const user = await userDao.getUser(address);
+    return user;
+  },
 };
 
 export const mutationResolvers: Resolvers<TContext>["Mutation"] = {
   self: selfResolver,
+  user: async (_, { address }, context) => {
+    await verifyAuthorizedUser(context, canReadUser);
+    const { userDao } = context;
+    const user = await userDao.getUser(address);
+    return user;
+  },
 };
 
 const roleBindToUserResolver: IFieldResolver<

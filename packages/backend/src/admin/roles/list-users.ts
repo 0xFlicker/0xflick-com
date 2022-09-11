@@ -24,7 +24,7 @@ const userRolesDao = new UserRolesDAO(db);
 const rolePermissionsDao = new RolePermissionsDAO(db);
 
 const canPerformAction = defaultAdminStrategyAll(
-  EResource.PERMISSION,
+  EResource.USER_ROLE,
   isActionOnResource({
     action: EActions.LIST,
     resource: EResource.USER_ROLE,

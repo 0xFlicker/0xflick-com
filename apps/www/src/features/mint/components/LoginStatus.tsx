@@ -6,11 +6,11 @@ import {
   Cancel as CancelIcon,
 } from "@mui/icons-material";
 import { useAuth } from "features/auth/hooks";
+import { StatusField } from "components/StatusField";
 
 export const LoginStatus: FC = () => {
   const { t } = useLocale("common");
   const {
-    isAnonymous,
     isAuthenticated,
     isUserWaiting,
     isUserSigningMessage,
@@ -19,19 +19,12 @@ export const LoginStatus: FC = () => {
   const isCurrentlyLoading =
     isUserWaiting || isUserRequestingSignIn || isUserSigningMessage;
   // Must have something to show.....
-  const leftHandContent = (() => {
-    if (isCurrentlyLoading) {
-      return <CircularProgress size={24} />;
-    }
-    if (!isAuthenticated) {
-      return <CancelIcon />;
-    }
-    return <CheckCircleIcon />;
-  })();
   return (
-    <Box display="flex" flexDirection="row">
-      {leftHandContent}
-      <Typography marginLeft={1}>{t("approve_auth_logged_in")}</Typography>
-    </Box>
+    <StatusField
+      currentlyLoading={isCurrentlyLoading}
+      checked={isAuthenticated}
+    >
+      {t("approve_auth_logged_in")}
+    </StatusField>
   );
 };
