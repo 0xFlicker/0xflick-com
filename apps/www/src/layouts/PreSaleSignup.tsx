@@ -15,6 +15,7 @@ import { canPreSaleMint } from "features/auth/matchers";
 import { ApprovalCard } from "features/mint/components/ApprovalCard";
 import { PreSaleMintCard } from "features/mint";
 import { TokenDescription } from "../features/mint/components/TokenDescription";
+import { PresaleWhatNextCard } from "features/mint/components/PresaleWhatNextCard";
 
 export const PreSaleSignup: FC<{ affiliate?: string }> = ({ affiliate }) => {
   const { t } = useLocale(["mint", "common"]);
@@ -62,6 +63,11 @@ export const PreSaleSignup: FC<{ affiliate?: string }> = ({ affiliate }) => {
               <ApprovalCard affiliate={affiliate} />
             )}
           </Grid2>
+          {canPreSale && (
+            <Grid2 xs={12} lg={6}>
+              <PresaleWhatNextCard />
+            </Grid2>
+          )}
         </Grid2>
       </Container>
     </Main>

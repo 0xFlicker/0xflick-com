@@ -19,7 +19,7 @@ export const getStaticProps: GetStaticProps<TProps> = async (context) => {
   // check if slug is valid
   await promiseTableNames;
   const affiliate = await affiliateDao.getAffiliate(slug);
-  console.log("affiliate", affiliate);
+
   if (!affiliate) {
     console.log("redirecting to presale signup");
     return {

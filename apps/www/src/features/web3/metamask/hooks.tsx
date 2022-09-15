@@ -1,5 +1,5 @@
 import { useAppDispatch, useAppSelector } from "app/store";
-import { providers, BigNumber, utils } from "ethers";
+import { providers, BigNumber, utils, BigNumberish } from "ethers";
 import {
   createContext,
   FC,
@@ -29,7 +29,7 @@ export function useMetamaskProvider(): IContext {
   const myChainId = useAppSelector(configSelectors.chainId);
 
   const initNetwork = useCallback(
-    (networkId: any) => {
+    (networkId: BigNumberish) => {
       const chainIdNum = BigNumber.from(networkId).toNumber();
       setDetectedChainId(chainIdNum);
       if (chainIdNum !== myChainId) {
@@ -64,23 +64,32 @@ export function useMetamaskProvider(): IContext {
   }, [detectedChainId, chainId, walletType, status, dispatch]);
 
   useEffect(() => {
-    if (window.ethereum?.isConnected()) {
-      window.ethereum
-        .request<string[]>({
-          method: "eth_accounts",
-        })
-        .then((accounts) => {
-          if (accounts && accounts.length > 0) {
-            dispatch(web3Actions.connectMetamask());
-            dispatch(web3Actions.connected());
-            dispatch(
-              web3Actions.setAccounts(accounts.filter((a) => !!a) as string[])
-            );
-          } else {
-            dispatch(web3Actions.idle());
-          }
-        });
+    let dlqInit: undefined | ReturnType<typeof setTimeout> = undefined;
+    async function handleEthereum() {
+      try {
+        clearTimeout(dlqInit);
+        if (window.ethereum.selectedAddress) {
+          web3Actions.setAccounts([window.ethereum.selectedAddress]);
+          dispatch(web3Actions.connected());
+        }
+      } catch (err) {
+        console.error("Failed to connect to metamask", err);
+        dispatch(web3Actions.error(fromError(err)));
+        dispatch(web3Actions.idle());
+      }
     }
+    if (window.ethereum?.isConnected()) {
+      handleEthereum();
+    } else {
+      window.addEventListener("ethereum#initialized", handleEthereum, {
+        once: true,
+      });
+      dlqInit = setTimeout(handleEthereum, 3000);
+    }
+    return () => {
+      clearTimeout(dlqInit);
+      window.removeEventListener("ethereum#initialized", handleEthereum);
+    };
   }, [dispatch]);
   useEffect(() => {
     if (!window.ethereum || !window.ethereum.chainId) {

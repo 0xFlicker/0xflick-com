@@ -188,6 +188,7 @@ export class WwwStack extends cdk.Stack {
     publicAssetsBucket.grantReadWrite(defaultHandler);
     regenerationQueue?.grantSendMessages(defaultHandler);
     regenerationFunction?.grantInvoke(defaultHandler);
+    tableNamesParam.grantRead(defaultHandler);
     affiliateTable.grantReadData(defaultHandler);
 
     let imageHandler: lambda.Function | undefined = undefined;
