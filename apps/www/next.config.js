@@ -1,5 +1,5 @@
 const path = require("path");
-const withTM = require('next-transpile-modules')(['@0xflick/backend', '@0xflick/models', '@0xflick/graphql', '@0xflick/contracts', '@0xflick/assets']);
+const withTM = require('next-transpile-modules')(['@wagmi/core', 'wagmi', '@0xflick/backend', '@0xflick/models', '@0xflick/graphql', '@0xflick/contracts', '@0xflick/assets']);
 const { spawnSync } = require("child_process");
 
 
@@ -26,6 +26,9 @@ const INFURA_IPFS_AUTH = `Basic ${Buffer.from(
   `${secretsJson.infraIpfsProjectId}:${secretsJson.infraIpfsSecret}`
 ).toString("base64")}`
 
+if (!process.env.SUPPORTED_CHAINS) {
+  process.env.SUPPORTED_CHAINS = JSON.stringify(secretsJson.supportedChains);
+}
 
 if (!process.env.IPFS_API_URL) {
   process.env.IPFS_API_URL = secretsJson.ipfsApiUrl;
@@ -41,6 +44,14 @@ if (!process.env.IPFS_API_SECRET) {
   process.env.IPFS_API_SECRET = secretsJson.infraIpfsSecret;
 }
 const IPFS_API_SECRET = process.env.IPFS_API_SECRET;
+
+if (!process.env.INFURA_KEY) {
+  process.env.INFURA_KEY = secretsJson.infuraKey;
+}
+
+if (!process.env.ALCHEMY_KEY) {
+  process.env.ALCHEMY_KEY = secretsJson.alchemyKey;
+}
 
 if (!process.env.WEB3_RPC) {
   throw new Error('WEB3_RPC is not defined')
@@ -80,7 +91,9 @@ const nextConfig = withTM({
     NEXT_PUBLIC_JWT_CLAIM_ISSUER: jwtJson.issuer,
     NEXT_PUBLIC_AXOLOTL_BASE_IMAGES: process.env.NEXT_PUBLIC_AXOLOTL_BASE_IMAGES,
     NEXT_PUBLIC_DEFAULT_CHAIN_ID: process.env.NEXT_PUBLIC_DEFAULT_CHAIN_ID || "1",
-    NEXT_PUBLIC_DEFAULT_CHAIN_NAME: process.env.NEXT_PUBLIC_DEFAULT_CHAIN_NAME || "mainnet",
+    NEXT_PUBLIC_SUPPORTED_CHAINS: process.env.SUPPORTED_CHAINS,
+    NEXT_PUBLIC_INFURA_KEY: process.env.INFURA_KEY,
+    NEXT_PUBLIC_ALCHEMY_KEY: process.env.ALCHEMY_KEY,
     FLICK_ENS_DOMAIN: process.env.FLICK_ENS_DOMAIN,
     NEXT_PUBLIC_JWT_PUBLIC_KEY: jwtJson.publicKey,
     NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME ?? "https://0xflick.com",

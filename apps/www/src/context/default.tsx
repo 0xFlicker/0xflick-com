@@ -13,6 +13,15 @@ import { InitOptions } from "i18next";
 import dark from "themes/dark";
 import light from "themes/light";
 
+export const StateWithWebContent: FC<PropsWithChildren<{}>> = ({
+  children,
+}) => {
+  return (
+    <AuthProvider>
+      <AffiliateProvider>{children}</AffiliateProvider>
+    </AuthProvider>
+  );
+};
 export const StateAvailableContent: FC<PropsWithChildren<{}>> = ({
   children,
 }) => {
@@ -21,9 +30,7 @@ export const StateAvailableContent: FC<PropsWithChildren<{}>> = ({
     <ApolloProvider>
       <ThemeProvider theme={isDarkMode ? dark : light}>
         <Web3Provider>
-          <AuthProvider>
-            <AffiliateProvider>{children}</AffiliateProvider>
-          </AuthProvider>
+          <StateWithWebContent>{children}</StateWithWebContent>
         </Web3Provider>
       </ThemeProvider>
     </ApolloProvider>

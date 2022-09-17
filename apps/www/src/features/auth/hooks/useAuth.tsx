@@ -27,6 +27,7 @@ import {
 import { useSignIn } from "./useSignIn";
 import { useSignOut } from "./useSignOut";
 import { useAllowedActions } from "./useAllowedActions";
+import { useSigner } from "wagmi";
 
 export function useSavedToken(token?: string) {
   const [savedToken, setSavedToken] = useLocalStorage("token", "", {
@@ -66,9 +67,12 @@ function useAuthContext() {
     authSelectors.isUserRequestingSignIn
   );
   const isUserSigningOut = useAppSelector(authSelectors.isUserSigningOut);
-  const { provider } = useWeb3();
+
+  const { currentChain, activeConnector } = useWeb3();
+  // const { data: signer } = useSigner({});
   const [requestSignOut] = useSignOut();
 
+  const chainId = currentChain?.id;
   const [
     fetchNonce,
     { data: nonceData, loading: nonceIsLoading, reset: nonceReset },
@@ -143,14 +147,15 @@ function useAuthContext() {
       isUserSigningMessage &&
       nonceIsSuccess &&
       nonceData &&
-      provider &&
-      address
+      activeConnector &&
+      address &&
+      chainId
     ) {
       const now = Date.now();
       const message = authMessage({
         address,
         nonce: nonceData.nonceForAddress.nonce.toString(),
-        chainId: provider.network.chainId,
+        chainId,
         domain: process.env.NEXT_PUBLIC_APP_NAME,
         expirationTime:
           now + Number(process.env.SIWE_EXPIRATION_TIME_SECONDS) * 1000,
@@ -158,43 +163,44 @@ function useAuthContext() {
         uri: process.env.NEXT_PUBLIC_JWT_CLAIM_ISSUER ?? "",
         version: "1",
       });
-      const signer = provider.getSigner();
-      signer.signMessage(message).then(
-        (signature) => {
-          dispatch(authActions.userMessageSigned(signature));
-          createJweRequest(signature, nonceData.nonceForAddress.nonce)
-            .then((jwe) => {
-              return fetchToken({
-                variables: {
-                  address,
-                  jwe,
-                  chainId: provider.network.chainId,
-                  issuedAt: now.toString(),
-                },
+      activeConnector.getSigner({ chainId }).then((signer) => {
+        signer.signMessage(message).then(
+          (signature: string) => {
+            dispatch(authActions.userMessageSigned(signature));
+            createJweRequest(signature, nonceData.nonceForAddress.nonce)
+              .then((jwe) => {
+                return fetchToken({
+                  variables: {
+                    address,
+                    jwe,
+                    chainId,
+                    issuedAt: now.toString(),
+                  },
+                });
+              })
+              .catch((err) => {
+                console.error(err);
+                dispatch(authActions.userSignOut());
               });
-            })
-            .catch((err) => {
-              console.error(err);
-              dispatch(authActions.userSignOut());
-            });
-        },
-        (err) => {
-          console.error(err);
-          // FIXME: figure out rejection vs error vs wallet type
-          dispatch(authActions.userSignatureError());
-        }
-      );
-      // .finally(() => dispatch(authActions.us));
+          },
+          (err) => {
+            console.error(err);
+            // FIXME: figure out rejection vs error vs wallet type
+            dispatch(authActions.userSignatureError());
+          }
+        );
+      });
     }
   }, [
     dispatch,
     isUserSigningMessage,
     nonceData,
     nonceIsSuccess,
-    provider,
+    activeConnector,
     address,
     fetchToken,
     savedToken,
+    chainId,
   ]);
 
   useEffect(() => {

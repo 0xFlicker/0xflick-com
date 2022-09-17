@@ -9,6 +9,7 @@ interface IProps {
   handleClose: () => void;
   handleMetamask: () => void;
   handleWalletConnect: () => void;
+  handleCoinbaseConnect: () => void;
 }
 
 export const WalletModal: FC<IProps> = ({
@@ -16,6 +17,7 @@ export const WalletModal: FC<IProps> = ({
   handleClose,
   handleMetamask,
   handleWalletConnect,
+  handleCoinbaseConnect,
 }) => {
   const { t } = useLocale("common");
   return (
@@ -88,6 +90,22 @@ export const WalletModal: FC<IProps> = ({
                 }
               >
                 {t("button_walletconnect")}
+              </Button>
+            </Grid>
+            <Grid item style={{ marginTop: "1rem" }}>
+              <Button
+                onClick={handleCoinbaseConnect}
+                variant="outlined"
+                startIcon={
+                  <Image
+                    alt=""
+                    src="/wallets/coinbase_wallet.png"
+                    width={25}
+                    height={25}
+                  />
+                }
+              >
+                {t("button_coinbase_wallet")}
               </Button>
             </Grid>
           </Grid>

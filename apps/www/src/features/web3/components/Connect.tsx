@@ -3,13 +3,16 @@ import { useAppDispatch, useAppSelector } from "app/store";
 import { CheckCircle as CheckCircleIcon } from "@mui/icons-material";
 import { FC, useCallback, useState, MouseEvent } from "react";
 import { useLocale } from "locales/hooks";
-import { actions as authActions } from "features/auth";
-import { actions as web3Actions, selectors as web3Selectors } from "../redux";
-import { selectors as configSelectors } from "features/config";
+import {
+  actions as web3Actions,
+  selectors as web3Selectors,
+  WalletType,
+} from "../redux";
 import { WalletModal } from "./WalletModal";
 import { WrongChainModal } from "./WrongChainModal";
 import { ConnectedDropDownModal } from "./ConnectedDropDownModal";
 import { useAuth } from "features/auth/hooks";
+import { defaultChain } from "utils/config";
 
 const Connect: FC<{
   size?: ButtonProps["size"];
@@ -35,11 +38,13 @@ const Connect: FC<{
   const handleMenu = useCallback((event: MouseEvent) => {
     setMenuAnchorEl(event.currentTarget);
   }, []);
-  const chainName = useAppSelector(configSelectors.chainName);
+  // const { chain } = useWeb3();
+  // const chainName = chain?.name;
   const isOpen = useAppSelector(web3Selectors.isWalletSelectModalOpen);
   const isWrongNetwork = useAppSelector(web3Selectors.isWrongNetwork);
   const selectedAddress = useAppSelector(web3Selectors.address);
-
+  const currentChainId = useAppSelector(web3Selectors.currentChainId);
+  const currentChainName = defaultChain.get().name;
   const handleLogin = useCallback(() => {
     setMenuAnchorEl(null);
     signIn();
@@ -53,11 +58,15 @@ const Connect: FC<{
     dispatch(web3Actions.closeWalletSelectModal());
   }, [dispatch]);
   const handleMetamask = useCallback(() => {
-    dispatch(web3Actions.connectMetamask());
+    dispatch(web3Actions.walletPending(WalletType.METAMASK));
     dispatch(web3Actions.closeWalletSelectModal());
   }, [dispatch]);
   const handleWalletConnect = useCallback(() => {
-    dispatch(web3Actions.connectWalletConnect());
+    dispatch(web3Actions.walletPending(WalletType.WALLET_CONNECT));
+    dispatch(web3Actions.closeWalletSelectModal());
+  }, [dispatch]);
+  const handleCoinbaseConnect = useCallback(() => {
+    dispatch(web3Actions.walletPending(WalletType.COINBASE_WALLET));
     dispatch(web3Actions.closeWalletSelectModal());
   }, [dispatch]);
   const handleChangeNetworkAbort = useCallback(() => {
@@ -104,9 +113,10 @@ const Connect: FC<{
         handleClose={handleModalClose}
         handleMetamask={handleMetamask}
         handleWalletConnect={handleWalletConnect}
+        handleCoinbaseConnect={handleCoinbaseConnect}
       />
       <WrongChainModal
-        chainName={chainName}
+        chainName={currentChainName}
         open={isWrongNetwork}
         handleClose={handleChangeNetworkAbort}
         handleChangeNetwork={handleSwitchNetwork}

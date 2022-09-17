@@ -1,10 +1,13 @@
 import { createSelector, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { utils } from "ethers";
+import { defaultChain } from "utils/config";
 
 export enum WalletType {
   NONE = "NONE",
   METAMASK = "METAMASK",
   WALLET_CONNECT = "WALLET_CONNECT",
+  COINBASE_WALLET = "COINBASE_WALLET",
+  INJECTED = "INJECTED",
 }
 
 export enum WalletStatus {
@@ -17,13 +20,17 @@ export enum WalletStatus {
   WRONG_NETWORK = "WRONG_NETWORK",
   SWITCH_CHAIN = "SWITCH_CHAIN",
   ERROR = "ERROR",
+  RESET = "RESET",
 }
 
 export interface IState {
   walletType: WalletType;
+  pendingWalletType?: WalletType;
   status: WalletStatus;
   isWalletSelectModalOpen: boolean;
   accounts: string[];
+  currentChainId: number;
+  pendingChainId?: number;
   error?: {
     message: string;
     name: string;
@@ -36,6 +43,7 @@ const initialState: IState = {
   status: WalletStatus.UNKNOWN,
   isWalletSelectModalOpen: false,
   accounts: [],
+  currentChainId: defaultChain.get().id,
 };
 
 const slice = createSlice({
@@ -44,7 +52,8 @@ const slice = createSlice({
   reducers: {
     reset(state) {
       state.walletType = WalletType.NONE;
-      state.status = WalletStatus.UNKNOWN;
+      state.pendingWalletType = undefined;
+      state.status = WalletStatus.RESET;
       state.isWalletSelectModalOpen = false;
       state.error = undefined;
       state.accounts = [];
@@ -55,13 +64,16 @@ const slice = createSlice({
     closeWalletSelectModal(state) {
       state.isWalletSelectModalOpen = false;
     },
-    connectMetamask(state) {
-      state.walletType = WalletType.METAMASK;
-      state.status = WalletStatus.INIT;
+    walletPending(state, action: PayloadAction<WalletType>) {
+      if (state.walletType !== action.payload) {
+        state.pendingWalletType = action.payload;
+        state.status = WalletStatus.INIT;
+      }
     },
-    connectWalletConnect(state) {
-      state.walletType = WalletType.WALLET_CONNECT;
-      state.status = WalletStatus.INIT;
+    walletConnected(state, action: PayloadAction<WalletType>) {
+      state.walletType = action.payload;
+      state.pendingWalletType = undefined;
+      state.status = WalletStatus.CONNECTED;
     },
     idle(state) {
       state.status = WalletStatus.IDLE;
@@ -71,6 +83,7 @@ const slice = createSlice({
     },
     connected(state) {
       state.status = WalletStatus.CONNECTED;
+      state.pendingWalletType = undefined;
     },
     signedIn(state) {
       state.status = WalletStatus.SIGNED_IN;
@@ -102,6 +115,13 @@ const slice = createSlice({
     setAccounts(state, action: PayloadAction<string[]>) {
       state.accounts = action.payload.map(utils.getAddress);
     },
+    switchToChain(state, action: PayloadAction<number>) {
+      state.pendingChainId = action.payload;
+    },
+    setChainId(state, action: PayloadAction<number>) {
+      state.currentChainId = action.payload;
+      state.pendingChainId = undefined;
+    },
   },
 });
 
@@ -113,6 +133,10 @@ const selectIsWalletSelectModalOpen = createSelector(
 const selectWalletType = createSelector(
   selectRoot,
   (state) => state.walletType
+);
+const selectPendingWalletType = createSelector(
+  selectRoot,
+  (state) => state.pendingWalletType
 );
 const selectWalletStatus = createSelector(selectRoot, (state) => state.status);
 const selectIsWrongNetwork = createSelector(
@@ -129,14 +153,25 @@ const selectAddress = createSelector(
     state.accounts &&
     (state.accounts.length > 0 ? state.accounts[0] : undefined)
 );
+const selectCurrentChainId = createSelector(
+  selectRoot,
+  (state) => state.currentChainId
+);
+const selectPendingChainId = createSelector(
+  selectRoot,
+  (state) => state.pendingChainId
+);
 
 export const selectors = {
   isWalletSelectModalOpen: selectIsWalletSelectModalOpen,
   isWrongNetwork: selectIsWrongNetwork,
   isConnected: selectIsConnected,
   type: selectWalletType,
+  pendingType: selectPendingWalletType,
   status: selectWalletStatus,
   address: selectAddress,
+  currentChainId: selectCurrentChainId,
+  pendingChainId: selectPendingChainId,
 };
 
 export const { actions, reducer } = slice;
