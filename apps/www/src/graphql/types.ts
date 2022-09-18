@@ -118,6 +118,7 @@ export type Mutation = {
   self?: Maybe<Web3User>;
   signIn?: Maybe<Web3LoginUser>;
   signOut: Scalars['Boolean'];
+  user?: Maybe<Web3User>;
 };
 
 
@@ -169,6 +170,11 @@ export type MutationSignInArgs = {
   chainId: Scalars['Int'];
   issuedAt: Scalars['String'];
   jwe: Scalars['String'];
+};
+
+
+export type MutationUserArgs = {
+  address: Scalars['ID'];
 };
 
 export type Nameflick = {
@@ -310,6 +316,7 @@ export type Query = {
   role: Role;
   roles: Array<Role>;
   self?: Maybe<Web3User>;
+  user?: Maybe<Web3User>;
 };
 
 
@@ -340,6 +347,11 @@ export type QueryNameflicksByRootDomainArgs = {
 
 export type QueryRoleArgs = {
   id: Scalars['ID'];
+};
+
+
+export type QueryUserArgs = {
+  address: Scalars['ID'];
 };
 
 export type Role = {

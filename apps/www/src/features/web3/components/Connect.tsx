@@ -16,11 +16,14 @@ import { ConnectedDropDownModal } from "./ConnectedDropDownModal";
 import { useAuth } from "features/auth/hooks";
 import { defaultChain } from "utils/config";
 import CircularProgress from "@mui/material/CircularProgress";
+import Box from "@mui/material/Box";
 
 const Connect: FC<{
   size?: ButtonProps["size"];
 }> = ({ size }) => {
   const { t } = useLocale("common");
+  // Used to lazy render the ENS name, to avoid hydration mismatch
+  const [settleEnsName, setSettledEnsName] = useState<string | null>(null);
   const dispatch = useAppDispatch();
   const {
     isAuthenticated,
@@ -99,22 +102,35 @@ const Connect: FC<{
             }}
             onClick={handleMenu}
           >
-            <Typography
-              component="span"
-              sx={{
-                fontSize: "0.8rem",
-                fontWeight: "bold",
-                textTransform: "none",
-                textOverflow: "ellipsis",
-                overflow: "hidden",
-                whiteSpace: "nowrap",
-                px: "1rem",
-                py: "0.5rem",
-                maxWidth: "12rem",
-              }}
-            >
-              {ensName ? ensName : selectedAddress}
-            </Typography>
+            {ensNameIsLoading ? (
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  width: "12rem",
+                }}
+              >
+                <CircularProgress size={30} />
+              </Box>
+            ) : (
+              <Typography
+                component="span"
+                sx={{
+                  fontSize: "0.8rem",
+                  fontWeight: "bold",
+                  textTransform: "none",
+                  textOverflow: "ellipsis",
+                  overflow: "hidden",
+                  whiteSpace: "nowrap",
+                  px: "1rem",
+                  py: "0.5rem",
+                  maxWidth: "12rem",
+                }}
+              >
+                {ensName ? ensName : selectedAddress}
+              </Typography>
+            )}
           </Button>
         </Tooltip>
       ) : (

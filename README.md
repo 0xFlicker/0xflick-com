@@ -1,8 +1,8 @@
 # 0xflick.com
 
-Files for https://0xflick.com
+Files for https://nameflick.com
 
-Sharing as an example of making dynamic web3 websites with a backend.
+Nameflick is an ENS utility app that extends the default ENS resolver when a new one that offers fast and cheap updates, community support and other features.
 
 Work in progress
 

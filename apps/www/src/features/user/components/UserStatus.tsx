@@ -196,6 +196,7 @@ const UserStatusAffiliates: FC<{}> = () => {
     deactivateSlug,
     enroll,
     isAffiliate,
+    count,
     slugs,
   } = useManageAffiliates();
   const [open, setOpen] = useState(false);
@@ -231,21 +232,24 @@ const UserStatusAffiliates: FC<{}> = () => {
     }
   }, [enroll, selectedAddress]);
 
-  const onClick = useCallback((slug: string) => {
-    const link = `${window.origin}/presale-signup/${slug}`;
-    window.navigator.clipboard.writeText(link);
-    setSnackbarMessage(
-      <WrappedLink href={`/presale-signup/${slug}`}>
-        <Typography variant="body1" component="p">
-          {t("user_affiliate_copy-n-paste", {
-            link,
-            interpolation: { escapeValue: false },
-          })}
-        </Typography>
-      </WrappedLink>
-    );
-    setOpen(true);
-  }, []);
+  const onClick = useCallback(
+    (slug: string) => {
+      const link = `${window.origin}/presale-signup/${slug}`;
+      window.navigator.clipboard.writeText(link);
+      setSnackbarMessage(
+        <WrappedLink href={`/presale-signup/${slug}`}>
+          <Typography variant="body1" component="p">
+            {t("user_affiliate_copy-n-paste", {
+              link,
+              interpolation: { escapeValue: false },
+            })}
+          </Typography>
+        </WrappedLink>
+      );
+      setOpen(true);
+    },
+    [t]
+  );
   return (
     <>
       <Card
@@ -261,6 +265,12 @@ const UserStatusAffiliates: FC<{}> = () => {
         <CardContent>
           <Typography variant="body1" component="p" gutterBottom>
             {t("user_affiliates_panel_description")}
+          </Typography>
+          <Typography variant="body1" component="p">
+            {t("user_affiliates_panel_count", {
+              addressCount: count,
+              count: count,
+            })}
           </Typography>
         </CardContent>
         <CardContent>

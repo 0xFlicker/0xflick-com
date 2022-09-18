@@ -1,5 +1,8 @@
 query slugs($address: String!) {
   affiliateForAddress(address: $address) {
     slugs
+    role {
+      userCount
+    }
   }
 }

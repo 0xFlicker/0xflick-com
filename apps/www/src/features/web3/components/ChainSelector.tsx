@@ -105,7 +105,7 @@ export const ChainSelector: FC = () => {
     },
     [onMenuClose, switchNetwork]
   );
-  return chains.length > 0 ? (
+  return (
     <>
       <IconButton onClick={handleMenu} size="small">
         <Image src={chain.chainImageUrl} alt="" width={40} height={40} />
@@ -128,5 +128,5 @@ export const ChainSelector: FC = () => {
         currentChain={chain}
       />
     </>
-  ) : null;
+  );
 };

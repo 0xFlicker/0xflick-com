@@ -6,8 +6,12 @@ import {
 } from "./slugs.generated";
 
 const EMPTY_SLUGS: string[] = [];
-const transform = (data: SlugsQuery): AffiliateQuery["slugs"] =>
+const transformSlugs = (data: SlugsQuery): AffiliateQuery["slugs"] =>
   data?.affiliateForAddress?.slugs ?? EMPTY_SLUGS;
+const transformCount = (
+  data: SlugsQuery
+): AffiliateQuery["role"]["userCount"] =>
+  data?.affiliateForAddress?.role?.userCount ?? 0;
 
 export function useSlugs({
   address,
@@ -20,20 +24,24 @@ export function useSlugs({
     variables: { address },
     skip,
   });
-  const slugs = transform(data);
+  const slugs = transformSlugs(data);
+  const count = transformCount(data);
   return {
     slugs,
     data,
+    count,
     ...rest,
   };
 }
 
 export function useLazySlugs() {
   const [fetch, { data, ...rest }] = useSlugsLazyQuery();
-  const slugs = transform(data);
+  const slugs = transformSlugs(data);
+  const count = transformCount(data);
   return {
     fetch,
     slugs,
+    count,
     data,
     ...rest,
   };

@@ -7,69 +7,72 @@ import {
   PropsWithChildren,
   useContext,
   useEffect,
+  useState,
 } from "react";
 import { useCreateSlug } from "../graphql/useCreateSlug";
 import { useDeactivateSlug } from "../graphql/useDeactivateSlug";
 import { useEnroll } from "../graphql/useEnroll";
 import { useSlugs } from "../graphql/useSlugs";
-import {
-  selectors as affiliateSelectors,
-  actions as affiliateActions,
-} from "../redux";
 
 const EMPTY_SLUGS: string[] = [];
 function useAffiliateContext() {
   const { isAuthenticated, signIn, signOut } = useAuth();
   const { selectedAddress } = useWeb3();
-  const dispatch = useAppDispatch();
-  const appIsAffiliate = useAppSelector(affiliateSelectors.isAffiliate);
-  const appSlugs = useAppSelector(affiliateSelectors.slugs);
+  const [appSlugs, setAffiliateSlugs] = useState(EMPTY_SLUGS);
+  const [appIsAffiliate, setAppIsAffiliate] = useState(false);
+
   const { createSlug, slugs: createdSlugs } = useCreateSlug();
   const { deactivateSlug, slugs: deactivatedSlugs } = useDeactivateSlug();
   const { enroll, roleName: createdRoleName } = useEnroll();
-  const { slugs: fetchedSlugs, error: slugsError } = useSlugs({
+  const {
+    slugs: fetchedSlugs,
+    error: slugsError,
+    count: fetchedCount,
+  } = useSlugs({
     address: selectedAddress,
     skip: !isAuthenticated,
   });
 
   const slugs = isAuthenticated ? appSlugs : EMPTY_SLUGS;
   const isAffiliate = isAuthenticated ? appIsAffiliate : false;
+  const count = isAuthenticated ? fetchedCount : 0;
 
   useEffect(() => {
     if (createdSlugs) {
-      dispatch(affiliateActions.setAffiliateSlugs(createdSlugs));
-      dispatch(affiliateActions.setIsAffiliate(true));
+      setAffiliateSlugs(createdSlugs);
+      setAppIsAffiliate(true);
     }
-  }, [createdSlugs, dispatch]);
+  }, [createdSlugs]);
 
   useEffect(() => {
     if (deactivatedSlugs) {
-      dispatch(affiliateActions.setAffiliateSlugs(deactivatedSlugs));
-      dispatch(affiliateActions.setIsAffiliate(true));
+      setAffiliateSlugs(deactivatedSlugs);
+      setAppIsAffiliate(true);
     }
-  }, [deactivatedSlugs, dispatch]);
+  }, [deactivatedSlugs]);
 
   useEffect(() => {
     if (fetchedSlugs && !slugsError) {
-      dispatch(affiliateActions.setAffiliateSlugs(fetchedSlugs));
-      dispatch(affiliateActions.setIsAffiliate(true));
+      setAffiliateSlugs(fetchedSlugs);
+      setAppIsAffiliate(true);
     } else {
-      dispatch(affiliateActions.setAffiliateSlugs([]));
-      dispatch(affiliateActions.setIsAffiliate(false));
+      setAffiliateSlugs([]);
+      setAppIsAffiliate(false);
     }
-  }, [dispatch, fetchedSlugs, slugsError]);
+  }, [fetchedSlugs, slugsError]);
 
   useEffect(() => {
     if (createdRoleName) {
-      dispatch(affiliateActions.setAffiliateSlugs([]));
-      dispatch(affiliateActions.setIsAffiliate(true));
+      setAffiliateSlugs([]);
+      setAppIsAffiliate(true);
       signOut();
       signIn();
     }
-  }, [createdRoleName, dispatch, signIn, signOut]);
+  }, [createdRoleName, signIn, signOut]);
 
   return {
     slugs,
+    count,
     isAffiliate,
     createSlug,
     deactivateSlug,

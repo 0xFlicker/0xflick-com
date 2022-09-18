@@ -63,7 +63,7 @@ function useAuthContext() {
     address,
   });
   const { data: ensAvatar, isLoading: ensAvatarIsLoading } = useEnsAvatar({
-    address,
+    addressOrName: address,
   });
 
   const isUserSigningMessage = useAppSelector(

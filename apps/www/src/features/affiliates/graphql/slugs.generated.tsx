@@ -8,13 +8,16 @@ export type SlugsQueryVariables = Types.Exact<{
 }>;
 
 
-export type SlugsQuery = { __typename?: 'Query', affiliateForAddress: { __typename?: 'AffiliateQuery', slugs: Array<string> } };
+export type SlugsQuery = { __typename?: 'Query', affiliateForAddress: { __typename?: 'AffiliateQuery', slugs: Array<string>, role: { __typename?: 'Role', userCount: number } } };
 
 
 export const SlugsDocument = gql`
     query slugs($address: String!) {
   affiliateForAddress(address: $address) {
     slugs
+    role {
+      userCount
+    }
   }
 }
     `;
