@@ -7,8 +7,14 @@
     "nameflick",
     "Offchain",
     "Prefetch",
+    "qrcode",
+    "reduxjs",
+    "Resizer",
+    "Signup",
     "SIWE",
-    "swie"
+    "swie",
+    "wagmi",
+    "walletconnect"
   ],
   "sops.keys.aws.profile": "0xflick-portfolio-admin",
   "sops.defaults.awsProfile": "0xflick-portfolio-admin"

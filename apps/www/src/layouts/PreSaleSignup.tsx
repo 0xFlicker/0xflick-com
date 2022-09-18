@@ -15,9 +15,10 @@ import { PreSaleMintCard } from "features/mint";
 import { TokenDescription } from "../features/mint/components/TokenDescription";
 import { PresaleWhatNextCard } from "features/mint/components/PresaleWhatNextCard";
 import { SiteMenu } from "features/appbar/components/SiteMenu";
+import { useLocale } from "locales/hooks";
 
 export const PreSaleSignup: FC<{ affiliate?: string }> = ({ affiliate }) => {
-  const { t } = useLocale(["mint", "common"]);
+  const { t } = useLocale(["common"]);
   const canPreSale = useHasAllowedAction(canPreSaleMint);
   useMint();
   const { handleChange: handleThemeChange } = useSavedTheme();
@@ -41,7 +42,7 @@ export const PreSaleSignup: FC<{ affiliate?: string }> = ({ affiliate }) => {
       }
       title={
         <Typography variant="h5" component="h1">
-          {t("presale_signup_title", { ns: "common" })}
+          {t("title_presale_signup", { ns: "common" })}
         </Typography>
       }
     >

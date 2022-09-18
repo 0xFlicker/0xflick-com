@@ -146,7 +146,7 @@ export function useWeb3Context() {
 
   const result = {
     currentChain: chain,
-    provider,
+    provider: provider?.provider,
     selectedAddress: address,
     connect,
     activeConnector,
