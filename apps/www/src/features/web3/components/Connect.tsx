@@ -1,6 +1,8 @@
-import { Button, ButtonProps, Typography } from "@mui/material";
+import Tooltip from "@mui/material/Tooltip";
+import Typography from "@mui/material/Typography";
+import Button, { ButtonProps } from "@mui/material/Button";
 import { useAppDispatch, useAppSelector } from "app/store";
-import { CheckCircle as CheckCircleIcon } from "@mui/icons-material";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { FC, useCallback, useState, MouseEvent } from "react";
 import { useLocale } from "locales/hooks";
 import {
@@ -13,13 +15,21 @@ import { WrongChainModal } from "./WrongChainModal";
 import { ConnectedDropDownModal } from "./ConnectedDropDownModal";
 import { useAuth } from "features/auth/hooks";
 import { defaultChain } from "utils/config";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const Connect: FC<{
   size?: ButtonProps["size"];
 }> = ({ size }) => {
   const { t } = useLocale("common");
   const dispatch = useAppDispatch();
-  const { isAuthenticated, signIn, signOut } = useAuth();
+  const {
+    isAuthenticated,
+    signIn,
+    signOut,
+    ensAvatar,
+    ensName,
+    ensNameIsLoading,
+  } = useAuth();
   const [menuAnchorEl, setMenuAnchorEl] = useState<Element | null>(null);
 
   const onClick = useCallback(() => {
@@ -79,32 +89,34 @@ const Connect: FC<{
   return (
     <>
       {selectedAddress ? (
-        <Button
-          startIcon={isAuthenticated ? <CheckCircleIcon /> : null}
-          variant="outlined"
-          size={size}
-          sx={{
-            m: "0.5rem",
-          }}
-          onClick={handleMenu}
-        >
-          <Typography
-            component="span"
+        <Tooltip title={ensName ? ensName : selectedAddress}>
+          <Button
+            startIcon={isAuthenticated ? <CheckCircleIcon /> : null}
+            variant="outlined"
+            size={size}
             sx={{
-              fontSize: "0.8rem",
-              fontWeight: "bold",
-              textTransform: "none",
-              textOverflow: "ellipsis",
-              overflow: "hidden",
-              whiteSpace: "nowrap",
-              px: "1rem",
-              py: "0.5rem",
-              maxWidth: "12rem",
+              m: "0.5rem",
             }}
+            onClick={handleMenu}
           >
-            {selectedAddress}
-          </Typography>
-        </Button>
+            <Typography
+              component="span"
+              sx={{
+                fontSize: "0.8rem",
+                fontWeight: "bold",
+                textTransform: "none",
+                textOverflow: "ellipsis",
+                overflow: "hidden",
+                whiteSpace: "nowrap",
+                px: "1rem",
+                py: "0.5rem",
+                maxWidth: "12rem",
+              }}
+            >
+              {ensName ? ensName : selectedAddress}
+            </Typography>
+          </Button>
+        </Tooltip>
       ) : (
         <Button onClick={onClick}>{t("button_connect")}</Button>
       )}

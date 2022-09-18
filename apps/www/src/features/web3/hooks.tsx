@@ -5,7 +5,6 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useState,
 } from "react";
 import { AppDispatch, useAppDispatch, useAppSelector } from "app/store";
 import { useAccount, useConnect, Chain, allChains, Connector } from "wagmi";
@@ -20,12 +19,8 @@ import {
   isInjectedConnector,
   isMetamaskConnector,
   isWalletConnector,
-  metamaskConnector,
   TAppConnectors,
-  walletConnectConnector,
 } from "./wagmi";
-import { supportedChains } from "utils/config";
-import { providers } from "ethers";
 
 export type TChain = Chain & {
   chainImageUrl: string;
@@ -68,7 +63,6 @@ function createOnConnectionChanged(
 export function useWeb3Context() {
   const dispatch = useAppDispatch();
   const chainId = useAppSelector(web3Selectors.currentChainId);
-  const walletType = useAppSelector(web3Selectors.type);
   const walletPendingType = useAppSelector(web3Selectors.pendingType);
   const walletStatus = useAppSelector(web3Selectors.status);
   const chain = useMemo<TChain | null>(() => {
