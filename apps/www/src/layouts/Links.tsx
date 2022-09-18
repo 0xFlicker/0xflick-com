@@ -4,7 +4,6 @@ import ListItemText from "@mui/material/ListItemText";
 import MenuItem from "@mui/material/MenuItem";
 import MenuList from "@mui/material/MenuList";
 import Typography from "@mui/material/Typography";
-import { DarkModeSwitch } from "features/appbar/components/DarkModeSwitch";
 import { useLocale } from "locales/hooks";
 import { FC } from "react";
 import { Main } from "./Main";
@@ -12,6 +11,7 @@ import { useSavedTheme } from "features/appbar/hooks";
 import { useAppSelector } from "app/store";
 import { selectors as appBarSelectors } from "features/appbar/redux";
 import { LinkCollection } from "components/LinkCollection";
+import { SiteMenu } from "features/appbar/components/SiteMenu";
 
 const defaultCardMediaProps = {
   component: "img",
@@ -41,22 +41,13 @@ export const Links: FC = () => {
       menu={
         <>
           <MenuList dense disablePadding>
-            <MenuItem onClick={handleThemeChange}>
-              <DarkModeSwitch />
-              <ListItemText
-                primary={
-                  <Typography textAlign="right" flexGrow={1}>
-                    {t("menu_theme", { ns: "common" })}
-                  </Typography>
-                }
-              />
-            </MenuItem>
+            <SiteMenu isLinks />
           </MenuList>
         </>
       }
       title={
         <Typography variant="h5" component="h1">
-          {t("links_title")}
+          {t("title_links")}
         </Typography>
       }
     >

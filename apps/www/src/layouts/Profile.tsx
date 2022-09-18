@@ -1,36 +1,28 @@
-import ListItemText from "@mui/material/ListItemText";
-import MenuItem from "@mui/material/MenuItem";
 import MenuList from "@mui/material/MenuList";
 import Typography from "@mui/material/Typography";
-import { DarkModeSwitch } from "features/appbar/components/DarkModeSwitch";
-import { useLocale } from "locales/hooks";
 import { FC } from "react";
 import { Main } from "./Main";
-import { useSavedTheme } from "features/appbar/hooks";
+import { useLocale } from "locales/hooks";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import { UserStatus } from "features/user/components/UserStatus";
+import { SiteMenu } from "features/appbar/components/SiteMenu";
 
 export const ProfileLayout: FC = () => {
-  const { t } = useLocale(["user", "common"]);
-  const { handleChange: handleThemeChange } = useSavedTheme();
+  const { t } = useLocale(["common"]);
   return (
     <Main
       menu={
         <>
           <MenuList dense disablePadding>
-            <MenuItem onClick={handleThemeChange}>
-              <DarkModeSwitch />
-              <ListItemText
-                primary={
-                  <Typography textAlign="right" flexGrow={1}>
-                    {t("menu_theme", { ns: "common" })}
-                  </Typography>
-                }
-              />
-            </MenuItem>
+            <SiteMenu />
           </MenuList>
         </>
+      }
+      title={
+        <Typography variant="h5" component="h1">
+          {t("title_profile")}
+        </Typography>
       }
     >
       <Container

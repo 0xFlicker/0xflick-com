@@ -67,7 +67,6 @@ export async function fetchTableNames({
 
 export function getAuthorizationToken(req: NextApiRequest): string | undefined {
   // First check cookie
-  console.log(`Checking cookie... ${req.headers.cookie}`);
   const session = deserializeSessionCookie(req.headers.cookie);
   if (session) {
     return session;

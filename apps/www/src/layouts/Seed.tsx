@@ -5,8 +5,6 @@ import {
   MenuList,
   Typography,
 } from "@mui/material";
-import { useAppSelector } from "app/store";
-import { DarkModeSwitch } from "features/appbar/components/DarkModeSwitch";
 import { FancyModeSwitch } from "features/appbar/components/FancyModeSwitch";
 import { randomUint8ArrayOfLength } from "features/axolotlValley/hooks/useOffscreenCanvas";
 import { PleaseAxolotl } from "features/home/components/PleaseAxolotl";
@@ -19,6 +17,7 @@ import { useRouter } from "next/router";
 import { utils } from "ethers";
 import { useSavedTheme, useFancyMode } from "features/appbar/hooks";
 import { CopyToClipboardMenuItem } from "components/CopyToClipboardMenuItem";
+import { SiteMenu } from "features/appbar/components/SiteMenu";
 
 export const Seed: FC<{ seed?: Uint8Array }> = ({ seed }) => {
   const { t } = useLocale("common");
@@ -47,10 +46,7 @@ export const Seed: FC<{ seed?: Uint8Array }> = ({ seed }) => {
               </Typography>
             </CopyToClipboardMenuItem>
             <Divider />
-            <MenuItem onClick={handleThemeChange}>
-              <ListItemText primary={t("menu_theme")} />
-              <DarkModeSwitch />
-            </MenuItem>
+            <SiteMenu />
             <MenuItem onClick={handleFancyChange}>
               <ListItemText primary={t("menu_fancy")} />
               <FancyModeSwitch />

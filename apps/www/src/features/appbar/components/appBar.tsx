@@ -18,6 +18,7 @@ import NextImage from "next/image";
 import { ETheme } from "../hooks";
 import { Connect } from "features/web3";
 import { HomeMenu } from "./HomeMenu";
+import { ChainSelector } from "features/web3/components/ChainSelector";
 
 export const AppBar: FC<{
   onFlick?: MouseEventHandler;
@@ -46,7 +47,7 @@ export const AppBar: FC<{
           </IconButton>
           {title}
           <Box sx={{ flexGrow: 1 }} component="span" />
-
+          <ChainSelector />
           <Connect />
         </Toolbar>
       </MuiAppBar>

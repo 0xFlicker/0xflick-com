@@ -1,17 +1,14 @@
 import { FC } from "react";
 import { FormControlLabel, FormGroup, Switch } from "@mui/material";
 
-import { useSavedTheme } from "../hooks";
-
-export const DarkModeSwitch: FC = () => {
-  const { isDarkMode, handleChange } = useSavedTheme();
-
+export const DarkModeSwitch: FC<{
+  isDarkMode: boolean;
+}> = ({ isDarkMode }) => {
   return (
-    <FormGroup>
-      <FormControlLabel
-        control={<Switch checked={isDarkMode} onChange={handleChange} />}
-        label={isDarkMode ? "Dark" : "Light"}
-      />
-    </FormGroup>
+    <FormControlLabel
+      onClick={(event) => event.preventDefault()}
+      control={<Switch checked={isDarkMode} />}
+      label={isDarkMode ? "Dark" : "Light"}
+    />
   );
 };

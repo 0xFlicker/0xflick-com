@@ -1,12 +1,14 @@
-import { ListItemText, MenuItem, MenuList } from "@mui/material";
-import { DarkModeSwitch } from "features/appbar/components/DarkModeSwitch";
+import { FC, useCallback, useState } from "react";
+import ListItemText from "@mui/material/ListItemText";
+import MenuItem from "@mui/material/MenuItem";
+import MenuList from "@mui/material/MenuList";
 import { FancyModeSwitch } from "features/appbar/components/FancyModeSwitch";
-import { useSavedTheme, useFancyMode } from "features/appbar/hooks";
+import { SiteMenu } from "features/appbar/components/SiteMenu";
+import { useFancyMode } from "features/appbar/hooks";
 import { Preview } from "features/axolotlValley/components/Preview";
 import { randomUint8ArrayOfLength } from "features/axolotlValley/hooks/useOffscreenCanvas";
 import { PleaseAxolotl } from "features/home/components/PleaseAxolotl";
 import { useLocale } from "locales/hooks";
-import { FC, useCallback, useState } from "react";
 import { Main } from "./Main";
 
 export const AxolotlValley: FC = () => {
@@ -16,7 +18,6 @@ export const AxolotlValley: FC = () => {
     setSeed(randomUint8ArrayOfLength(32));
   }, []);
 
-  const { handleChange: handleThemeChange } = useSavedTheme();
   const { isFancyMode, handleChange: handleFancyChange } = useFancyMode();
 
   return (
@@ -24,12 +25,7 @@ export const AxolotlValley: FC = () => {
       onFlick={onFlick}
       menu={
         <>
-          <MenuList dense disablePadding>
-            <MenuItem onClick={handleThemeChange}>
-              <ListItemText primary={t("menu_theme")} />
-              <DarkModeSwitch />
-            </MenuItem>
-          </MenuList>
+          <SiteMenu />
           <MenuList dense disablePadding>
             <MenuItem onClick={handleFancyChange}>
               <ListItemText primary={t("menu_fancy")} />

@@ -4,8 +4,6 @@ import ListItemText from "@mui/material/ListItemText";
 import MenuItem from "@mui/material/MenuItem";
 import MenuList from "@mui/material/MenuList";
 import Typography from "@mui/material/Typography";
-import { DarkModeSwitch } from "features/appbar/components/DarkModeSwitch";
-import { useLocale } from "locales/hooks";
 import { FC } from "react";
 import { Main } from "./Main";
 import { useSavedTheme } from "features/appbar/hooks";
@@ -16,6 +14,7 @@ import { ApprovalCard } from "features/mint/components/ApprovalCard";
 import { PreSaleMintCard } from "features/mint";
 import { TokenDescription } from "../features/mint/components/TokenDescription";
 import { PresaleWhatNextCard } from "features/mint/components/PresaleWhatNextCard";
+import { SiteMenu } from "features/appbar/components/SiteMenu";
 
 export const PreSaleSignup: FC<{ affiliate?: string }> = ({ affiliate }) => {
   const { t } = useLocale(["mint", "common"]);
@@ -28,7 +27,7 @@ export const PreSaleSignup: FC<{ affiliate?: string }> = ({ affiliate }) => {
         <>
           <MenuList dense disablePadding>
             <MenuItem onClick={handleThemeChange}>
-              <DarkModeSwitch />
+              <SiteMenu />
               <ListItemText
                 primary={
                   <Typography textAlign="right" flexGrow={1}>

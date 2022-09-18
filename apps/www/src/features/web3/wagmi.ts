@@ -1,6 +1,7 @@
 import { createClient, configureChains } from "wagmi";
 import { infuraProvider } from "wagmi/providers/infura";
 import { alchemyProvider } from "wagmi/providers/alchemy";
+import { publicProvider } from "wagmi/providers/public";
 import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import { CoinbaseWalletConnector } from "wagmi/connectors/coinbaseWallet";
 import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
@@ -15,6 +16,7 @@ export const appProviders = [
   alchemyProvider({
     apiKey: alchemyKey.get(),
   }),
+  publicProvider(),
 ];
 
 export const appChains = lazySingleton(() => {

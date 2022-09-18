@@ -21,6 +21,9 @@
   "menu_mint": "mint",
   "menu_faucet": "faucet",
   "menu_admin": "admin",
+  "menu_demo": "demo",
+  "menu_faq": "faq",
+  "menu_links": "links",
   "auth_card_title": "Authentication",
   "auth_logged_in": "logged in",
   "auth_logged_out": "logged out",
@@ -43,8 +46,9 @@
   "approve_auth_logged_in": "establish ownership of address",
   "copied_to_clipboard": "copied to clipboard",
   "menu_navigator_share": "share this",
-  "links_title": "links",
-  "demo_title": "demo",
-  "faq_title": "faq",
+  "title_links": "links",
+  "title_demo": "demo",
+  "title_faq": "faq",
+  "title_profile": "profile",
   "presale_signup_title": "signup"
 }

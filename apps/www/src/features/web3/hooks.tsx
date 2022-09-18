@@ -30,9 +30,9 @@ import { providers } from "ethers";
 export type TChain = Chain & {
   chainImageUrl: string;
 };
-function decorateChainImageUrl(chain: Chain): TChain {
+export function decorateChainImageUrl(chain: Chain): TChain {
   let chainImageUrl = "/chains/unknown.png";
-  switch (chain.id) {
+  switch (chain?.id) {
     case 1:
       chainImageUrl = "/chains/homestead.png";
       break;
