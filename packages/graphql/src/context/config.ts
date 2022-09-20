@@ -17,6 +17,11 @@ const twitterFollowUserId = process.env.TWITTER_FOLLOW_USER_ID || "";
 const twitterFollowName =
   process.env.NEXT_PUBLIC_TWITTER_FOLLOW_NAME || "@UNKNOWN";
 
+// TODO: support multiple guilds
+const discordTestChannelId = process.env.DISCORD_TESTING_CHANNEL_ID || "";
+const discordMessageTopicArn = process.env.DISCORD_MESSAGE_TOPIC_ARN || "";
+const snsRegion = process.env.SNS_REGION || "us-east-1";
+
 export function createConfig(providedConfig: Partial<IDeployConfig>) {
   const config = {
     chains: providedConfig.chains,
@@ -32,6 +37,13 @@ export function createConfig(providedConfig: Partial<IDeployConfig>) {
       domain: appName,
       version: "1",
       uri: TokenModel.JWT_CLAIM_ISSUER,
+    },
+    discord: {
+      testChannelId: discordTestChannelId,
+      messageTopicArn: discordMessageTopicArn,
+    },
+    sns: {
+      region: snsRegion,
     },
   };
 

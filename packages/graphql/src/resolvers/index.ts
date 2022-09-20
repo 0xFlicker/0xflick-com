@@ -36,6 +36,13 @@ import {
 } from "./affiliates";
 import { Resolvers } from "../resolvers.generated";
 import { TContext } from "../context";
+import { sendDiscordMessage } from "@0xflick/backend/src/discord/send";
+import { APIEmbedField } from "discord-api-types/v10";
+import { createLogger } from "@0xflick/backend";
+
+const logger = createLogger({
+  name: "graphql",
+});
 
 export const typeDefs = gql`
   ${typeSchemaNameflick}

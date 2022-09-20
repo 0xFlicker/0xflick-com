@@ -2,6 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "module": "NodeNext",
+    "target": "ES2020",
     "composite": true /* Enable the use of the ES2015 module loader. */,
     "rootDir": "./src" /* Specify the root folder within your source files. */,
     "outDir": "dist" /* Specify an output folder for all emitted files. */,

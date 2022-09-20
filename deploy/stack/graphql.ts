@@ -11,7 +11,8 @@ import {
   HttpApi,
   HttpMethod,
 } from "@aws-cdk/aws-apigatewayv2-alpha";
-import { getTable, getTableNameParam } from "./utils/tables.js";
+import { getSnsTopic, getTable, getTableNameParam } from "./utils/tables.js";
+import { env } from "process";
 
 export interface ApiProps extends cdk.StackProps {
   readonly ensRpcUrl: string;
@@ -32,6 +33,8 @@ export interface ApiProps extends cdk.StackProps {
   readonly twitterAppSecret: string;
   readonly twitterFollowUserId: string;
   readonly twitterFollowUserName: string;
+  readonly REPLACE__discordTestChannelId: string;
+  readonly snsRegion: string;
 }
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -58,6 +61,8 @@ export class GraphqlStack extends cdk.Stack {
       twitterAppSecret,
       twitterFollowUserId,
       twitterFollowUserName,
+      REPLACE__discordTestChannelId,
+      snsRegion,
       ...rest
     } = props;
     super(scope, id, rest);
@@ -89,6 +94,9 @@ export class GraphqlStack extends cdk.Stack {
       this,
       "Graphql_DynamoDB_TableNames"
     );
+
+    const discordMessageTopic = getSnsTopic(this, "DiscordMessage");
+
     const graphqlEnv = {
       LOG_LEVEL: "debug",
       ENS_RPC_URL: ensRpcUrl,
@@ -116,6 +124,9 @@ export class GraphqlStack extends cdk.Stack {
       TWITTER_APP_SECRET: twitterAppSecret,
       TWITTER_FOLLOW_USER_ID: twitterFollowUserId,
       NEXT_PUBLIC_TWITTER_FOLLOW_NAME: twitterFollowUserName,
+      DISCORD_TESTING_CHANNEL_ID: REPLACE__discordTestChannelId,
+      DISCORD_MESSAGE_TOPIC_ARN: discordMessageTopic.topicArn,
+      SNS_REGION: snsRegion,
     };
 
     const graphqlHandler = new lambda.Function(this, "Graphql", {

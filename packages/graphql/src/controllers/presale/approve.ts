@@ -7,11 +7,15 @@ import {
   not,
   UserWithRolesModel,
 } from "@0xflick/models";
-import { createJwtToken, createLogger } from "@0xflick/backend";
+import { sendDiscordMessage } from "@0xflick/backend/src/discord/send";
+import { createJwtToken, createLogger, defaultChainId } from "@0xflick/backend";
 import { TContext } from "../../context";
 import { verifyAuthorizedUser } from "../auth/authorized";
 import { PresaleError } from "../../errors/presale";
 import { isTwitterFollowing } from "../twitter/isFollowing";
+import { providers } from "ethers";
+import { SNS } from "@aws-sdk/client-sns";
+import { APIEmbedField } from "discord-api-types/v10";
 
 const logger = createLogger({
   name: "graphql/resolvers/presale/approve",
@@ -25,6 +29,59 @@ const canPerformAction = allOf(
     })
   )
 );
+
+async function notifyDiscord({
+  address,
+  affiliate,
+  channelId,
+  provider,
+  discordMessageTopicArn,
+  sns,
+}: {
+  affiliate: string;
+  channelId: string;
+  address: string;
+  provider: providers.Provider;
+  discordMessageTopicArn: string;
+  sns: SNS;
+}) {
+  const [ensName, affiliateEnsName] = await Promise.all([
+    provider.resolveName(address),
+    affiliate ? provider.resolveName(affiliate) : Promise.resolve(null),
+  ]);
+  const displayName = ensName ? `${ensName} (${address})` : address;
+  const affiliateName = affiliateEnsName
+    ? `${affiliateEnsName} (${affiliate})`
+    : affiliate;
+  const content = ":tada:";
+  const fields: APIEmbedField[] = [];
+  if (affiliate) {
+    fields.push({
+      name: "affiliate",
+      value: affiliateName,
+    });
+  }
+  fields.push({
+    name: "new address",
+    value: displayName,
+  });
+
+  await sendDiscordMessage({
+    channelId,
+    message: {
+      content,
+      embeds: [
+        {
+          title: "Presale Approved",
+          description: "A user has been approved for presale",
+          fields,
+        },
+      ],
+    },
+    topicArn: discordMessageTopicArn,
+    sns,
+  });
+}
 
 export async function requestApproval(
   context: TContext,
@@ -50,7 +107,16 @@ export async function requestApproval(
   if (!isFollowing) {
     throw new PresaleError(`User is not following `, "NOT_TWITTER_FOLLOWING");
   }
-  const { rolesDao, rolePermissionsDao, userRolesDao, setToken } = context;
+  const {
+    sns,
+    rolesDao,
+    rolePermissionsDao,
+    userRolesDao,
+    setToken,
+    config: {
+      discord: { testChannelId, messageTopicArn },
+    },
+  } = context;
   const availableRoles = await rolesDao.getRoleByName("presale");
   if (!availableRoles || !availableRoles.length) {
     logger.warn(`No presale roles found`);
@@ -100,6 +166,16 @@ export async function requestApproval(
     roleId,
     rolesDao,
   });
+
+  await notifyDiscord({
+    affiliate,
+    channelId: testChannelId,
+    address: user.address,
+    provider: context.providerForChain(Number(defaultChainId())),
+    discordMessageTopicArn: messageTopicArn,
+    sns,
+  });
+
   const newToken = await createJwtToken({
     address: user.address,
     nonce: user.nonce,

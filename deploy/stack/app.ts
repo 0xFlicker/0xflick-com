@@ -11,6 +11,7 @@ import { AssetStack } from "./assets.js";
 import { GraphqlStack } from "./graphql.js";
 import { DynamoDB } from "./dynamodb.js";
 import { NameflickStack } from "./nameflick.js";
+import { DiscordStack } from "./discord.js";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -23,11 +24,23 @@ if (!deployment) {
 const secretsJson = jsonFromSecret(`${deployment}/deploy-secrets.json`);
 const jwtJson = jsonFromSecret(`${deployment}/jwt-secret.json`);
 const twitterJson = jsonFromSecret(`${deployment}/twitter-secrets.json`);
+const discordJson = jsonFromSecret(`${deployment}/discord-secrets.json`);
 
 const app = new cdk.App();
 
 const chainId = "1";
 
+new DiscordStack(app, "Discord", {
+  discordBotToken: discordJson["discord-bot-token"],
+  discordAppId: discordJson["discord-app-id"],
+  discordDomain: discordJson["discord-domain"],
+  discordTestingGuildId: discordJson["discord-testing-guild-id"],
+  discordPublicKey: discordJson["discord-public-key"],
+  env: {
+    account: process.env.CDK_DEFAULT_ACCOUNT,
+    region: process.env.CDK_DEFAULT_REGION,
+  },
+});
 new AssetStack(app, "Assets", {});
 new DynamoDB(app, "DynamoDB", {
   env: {
@@ -56,6 +69,8 @@ const { api: graphqlApi } = new GraphqlStack(app, "Graphql", {
   twitterOauthClientSecret: twitterJson.TWITTER_OAUTH_CLIENT_SECRET,
   twitterFollowUserId: twitterJson.follow.userId,
   twitterFollowUserName: twitterJson.follow.name,
+  REPLACE__discordTestChannelId: discordJson["discord-testing-guild-id"],
+  snsRegion: process.env.CDK_DEFAULT_REGION || "us-east-1",
 });
 
 new ImageStack(app, "Image", {

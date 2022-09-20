@@ -1,7 +1,7 @@
 import bunyan, { LoggerOptions, LogLevel } from "bunyan";
 
 function toLogLevel(level: string): LogLevel {
-  switch (level) {
+  switch (level.toLowerCase()) {
     case "trace":
       return "trace";
     case "debug":

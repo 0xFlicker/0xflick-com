@@ -34,6 +34,8 @@ import {
 } from "@0xflick/backend";
 import { authorizedUser } from "../controllers/auth/user";
 import { createRole } from "../controllers/admin/roles";
+import { sendDiscordMessage } from "@0xflick/backend/src/discord/send";
+import { APIEmbedField } from "discord-api-types/v10";
 
 export const typeSchema = gql`
   type Affiliate {
@@ -70,6 +72,57 @@ const canDoOnOwnAffiliate = (action: EActions, identifier?: string) =>
       identifier,
     })
   );
+
+async function notifyDiscord({
+  context,
+  affiliate,
+}: {
+  context: TContext;
+  affiliate: string;
+}) {
+  const {
+    config: {
+      discord: {
+        testChannelId: channelId,
+        messageTopicArn: discordMessageTopicArn,
+      },
+    },
+    sns,
+    providerForChain,
+  } = context;
+  const provider = providerForChain(1);
+
+  const [affiliateEnsName] = await Promise.all([
+    affiliate ? provider.resolveName(affiliate) : Promise.resolve(null),
+  ]);
+  const affiliateName = affiliateEnsName
+    ? `${affiliateEnsName} (${affiliate})`
+    : affiliate;
+  const content = ":tada:";
+  const fields: APIEmbedField[] = [];
+  if (affiliate) {
+    fields.push({
+      name: "affiliate",
+      value: affiliateName,
+    });
+  }
+
+  await sendDiscordMessage({
+    channelId,
+    message: {
+      content,
+      embeds: [
+        {
+          title: "Presale Approved",
+          description: "A user has been approved for presale",
+          fields,
+        },
+      ],
+    },
+    topicArn: discordMessageTopicArn,
+    sns,
+  });
+}
 
 const commonAffiliateResolvers:
   | AffiliateQueryResolvers<TContext>
@@ -234,25 +287,32 @@ export const mutationResolvers: MutationResolvers<TContext> = {
           skipAuth: true,
         }),
       ]);
-      roleId = await presaleRole.id();
-      await Promise.all([
+      let affiliateRoleId: string;
+      [roleId, affiliateRoleId] = await Promise.all([
+        presaleRole.id(),
+        affiliateRole.id(),
+      ]);
+      const [token] = await Promise.all([
+        createJwtToken({
+          address,
+          nonce: user.nonce,
+          roleIds: user.roleIds.concat([affiliateRoleId]),
+        }),
         userRolesDao.bind({
           address,
-          roleId: await affiliateRole.id(),
+          roleId,
           rolesDao,
         }),
         affiliateDao.enrollAffiliate({
           address,
           roleId,
         }),
+        notifyDiscord({
+          affiliate: address,
+          context,
+        }),
       ]);
 
-      // Create a new token
-      const token = await createJwtToken({
-        address,
-        nonce: user.nonce,
-        roleIds: user.roleIds.concat([roleId]),
-      });
       setToken(token);
     }
     return new AffiliateModel(address, affiliateDao, roleId);

@@ -2,6 +2,30 @@ import { Construct } from "constructs";
 import * as cr from "aws-cdk-lib/custom-resources";
 import * as ssm from "aws-cdk-lib/aws-ssm";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
+import * as sns from "aws-cdk-lib/aws-sns";
+
+export const getSnsTopic = (ctx: Construct, topicName: string) => {
+  const topicArnParam = new cr.AwsCustomResource(ctx, `${topicName}ArnParam`, {
+    onUpdate: {
+      // will also be called for a CREATE event
+      service: "SSM",
+      action: "getParameter",
+      parameters: {
+        Name: `${topicName}_TopicArn`,
+        WithDecryption: true,
+      },
+      region: "us-east-2",
+      physicalResourceId: cr.PhysicalResourceId.of(Date.now().toString()), // Update physical id to always fetch the latest version
+    },
+    policy: cr.AwsCustomResourcePolicy.fromSdkCalls({
+      resources: cr.AwsCustomResourcePolicy.ANY_RESOURCE,
+    }),
+  });
+
+  const topicArn = topicArnParam.getResponseField("Parameter.Value");
+  const topic = sns.Topic.fromTopicArn(ctx, topicName, topicArn);
+  return topic;
+};
 
 export const getTable = (
   ctx: Construct,
