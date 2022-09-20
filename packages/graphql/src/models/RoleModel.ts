@@ -37,8 +37,7 @@ export class RoleModel {
   }
 
   async id() {
-    await this.prime();
-    return this.role.id;
+    return this.roleId;
   }
 
   async name() {

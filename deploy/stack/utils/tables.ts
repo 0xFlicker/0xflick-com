@@ -4,7 +4,11 @@ import * as ssm from "aws-cdk-lib/aws-ssm";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as sns from "aws-cdk-lib/aws-sns";
 
-export const getSnsTopic = (ctx: Construct, topicName: string) => {
+export const getSnsTopic = (
+  ctx: Construct,
+  topicName: string,
+  region: string
+) => {
   const topicArnParam = new cr.AwsCustomResource(ctx, `${topicName}ArnParam`, {
     onUpdate: {
       // will also be called for a CREATE event
@@ -14,7 +18,7 @@ export const getSnsTopic = (ctx: Construct, topicName: string) => {
         Name: `${topicName}_TopicArn`,
         WithDecryption: true,
       },
-      region: "us-east-2",
+      region,
       physicalResourceId: cr.PhysicalResourceId.of(Date.now().toString()), // Update physical id to always fetch the latest version
     },
     policy: cr.AwsCustomResourcePolicy.fromSdkCalls({

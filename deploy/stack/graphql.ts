@@ -18,6 +18,7 @@ export interface ApiProps extends cdk.StackProps {
   readonly ensRpcUrl: string;
   readonly web3RpcUrl: string;
   readonly chainId: string;
+  readonly chainConfig: string;
   readonly nftRootCollection: string;
   readonly nftCollectionsOfInterest: string;
   readonly ipfsApiUrl: string;
@@ -46,6 +47,7 @@ export class GraphqlStack extends cdk.Stack {
       ensRpcUrl,
       web3RpcUrl,
       chainId,
+      chainConfig,
       nftCollectionsOfInterest,
       ipfsApiProject,
       ipfsApiSecret,
@@ -95,11 +97,16 @@ export class GraphqlStack extends cdk.Stack {
       "Graphql_DynamoDB_TableNames"
     );
 
-    const discordMessageTopic = getSnsTopic(this, "DiscordMessage");
+    const discordMessageTopic = getSnsTopic(
+      this,
+      "DiscordMessage",
+      "us-east-1"
+    );
 
     const graphqlEnv = {
       LOG_LEVEL: "debug",
       ENS_RPC_URL: ensRpcUrl,
+      CHAIN_CONFIG: chainConfig,
       NFT_COLLECTIONS_OF_INTEREST: nftCollectionsOfInterest,
       NFT_CONTRACT_ADDRESS: nftRootCollection,
       WEB3_RPC_URL: web3RpcUrl,
@@ -147,6 +154,7 @@ export class GraphqlStack extends cdk.Stack {
     extAuthTable.grantReadWriteData(graphqlHandler);
 
     tableNamesParam.grantRead(graphqlHandler);
+    discordMessageTopic.grantPublish(graphqlHandler);
 
     const httpApi = new HttpApi(this, "http-api-example", {
       description: "This service serves graphql.",

@@ -13,7 +13,7 @@ import { TContext } from "../../context";
 import { verifyAuthorizedUser } from "../auth/authorized";
 import { PresaleError } from "../../errors/presale";
 import { isTwitterFollowing } from "../twitter/isFollowing";
-import { providers } from "ethers";
+import { providers, utils } from "ethers";
 import { SNS } from "@aws-sdk/client-sns";
 import { APIEmbedField } from "discord-api-types/v10";
 
@@ -49,8 +49,10 @@ async function notifyDiscord({
     provider.resolveName(address),
     affiliate ? provider.resolveName(affiliate) : Promise.resolve(null),
   ]);
-  const displayName = ensName ? `${ensName} (${address})` : address;
-  const affiliateName = affiliateEnsName
+  const displayName = !utils.isAddress(ensName)
+    ? `${ensName} (${address})`
+    : address;
+  const affiliateName = !utils.isAddress(affiliateEnsName)
     ? `${affiliateEnsName} (${affiliate})`
     : affiliate;
   const content = ":tada:";

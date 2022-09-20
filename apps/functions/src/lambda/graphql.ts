@@ -54,7 +54,23 @@ const server = new ApolloServer({
     };
   },
   introspection: true,
-  plugins: [ApolloServerPluginLandingPageGraphQLPlayground()],
+  plugins: [
+    ApolloServerPluginLandingPageGraphQLPlayground(),
+    {
+      async requestDidStart(requestContext) {
+        return {
+          async didEncounterErrors() {
+            requestContext.errors.forEach((error, i) => {
+              logger.warn(
+                error,
+                `Error number ${i} generated for request ${requestContext.request.operationName}`
+              );
+            });
+          },
+        };
+      },
+    },
+  ],
 });
 
 export const handler = server.createHandler();

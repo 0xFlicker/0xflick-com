@@ -56,6 +56,7 @@ const { api: graphqlApi } = new GraphqlStack(app, "Graphql", {
   nftCollectionsOfInterest: JSON.stringify(
     secretsJson.chains["1"].nftCollectionsOfInterest
   ),
+  chainConfig: JSON.stringify(secretsJson.chains),
   ipfsApiUrl: secretsJson.infraIpfsUrl,
   ipfsApiProject: secretsJson.infraIpfsProjectId,
   ipfsApiSecret: secretsJson.infraIpfsSecret,
@@ -70,7 +71,7 @@ const { api: graphqlApi } = new GraphqlStack(app, "Graphql", {
   twitterFollowUserId: twitterJson.follow.userId,
   twitterFollowUserName: twitterJson.follow.name,
   REPLACE__discordTestChannelId: discordJson["discord-testing-guild-id"],
-  snsRegion: process.env.CDK_DEFAULT_REGION || "us-east-1",
+  snsRegion: "us-east-1",
 });
 
 new ImageStack(app, "Image", {
