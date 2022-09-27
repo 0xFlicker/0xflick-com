@@ -1,6 +1,6 @@
 # Introduction
 
-The SoA contracts
+The nameflick contracts
 
 # Prerequisites
 

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.8.9 <0.9.0;
+pragma solidity ^0.8.16;
 /*
 
   _  _                               __     _       _              _     
@@ -7,20 +7,14 @@ pragma solidity >=0.8.9 <0.9.0;
  | .` |  / _` |  | '  \   / -_)    |  _|   | |     | |    / _|    | / /  
  |_|\_|  \__,_|  |_|_|_|  \___|   _|_|_   _|_|_   _|_|_   \__|_   |_\_\  
 _|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""| 
-"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-' 
-                       ___    _  _     ___                                                   
-                      | __|  | \| |   / __|                                                  
-                      | _|   | .` |   \__ \                                                  
-                      |___|  |_|\_|   |___/                                                  
-                    _|"""""|_|"""""|_|"""""|                                                 
-                    "`-0-0-'"`-0-0-'"`-0-0-'                                                 
+"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'                                                 
 */
 
 import "@divergencetech/ethier/contracts/crypto/SignatureChecker.sol";
 import "@divergencetech/ethier/contracts/crypto/SignerManager.sol";
 import "@divergencetech/ethier/contracts/erc721/BaseTokenURI.sol";
-import "@divergencetech/ethier/contracts/erc721/ERC721ACommon.sol";
-import "@divergencetech/ethier/contracts/erc721/ERC721Redeemer.sol";
+import "erc721a/contracts/ERC721A.sol";
+import "erc721a/contracts/extensions/ERC721AQueryable.sol";
 import "@divergencetech/ethier/contracts/sales/FixedPriceSeller.sol";
 import "@divergencetech/ethier/contracts/utils/Monotonic.sol";
 import "@openzeppelin/contracts/finance/PaymentSplitter.sol";
@@ -30,9 +24,12 @@ import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/interfaces/IERC165.sol";
-import "erc721a/contracts/extensions/IERC721AQueryable.sol";
+import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
+import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
+import "./INameflickNFT.sol";
 import "./ITokenURIGenerator.sol";
 import "./IExtendedResolver.sol";
+import "hardhat/console.sol";
 
 interface IExtendedResolverWithProof {
   function resolve(bytes memory name, bytes memory data)
@@ -47,61 +44,82 @@ interface IExtendedResolverWithProof {
 }
 
 contract FlickENS is
-  ERC721ACommon,
   BaseTokenURI,
   SignerManager,
   ERC2981,
-  AccessControlEnumerable,
   PaymentSplitter,
-  IERC721AQueryable
+  ERC721AQueryable,
+  VRFConsumerBaseV2,
+  INameflickNFT
 {
   using EnumerableSet for EnumerableSet.AddressSet;
-  using ERC721Redeemer for ERC721Redeemer.Claims;
-  using Monotonic for Monotonic.Increaser;
   using SignatureChecker for EnumerableSet.AddressSet;
 
   // FlickENS provides additional functionality to ENS NFTs. This stores the contractAddres of ENS
   address public ensTokenAddress;
   // Proxy to another resolver, to allow it to be swapped out
   IExtendedResolverWithProof public resolverProxy;
+
   // Mapping of FlickENS tokens to ENS tokens
   mapping(uint256 => uint256) public flickToEns;
 
   //sale settings
-  uint256 public cost = 0.05 ether;
+  uint256 public cost = 0;
   uint256 public maxSupply = 2000;
   uint256 public maxMint = 10;
   uint256 public preSaleMaxMintPerAccount = 10;
   bool public presaleActive = false;
   bool public publicSaleActive = false;
 
-  // mint count tracker
-  mapping(address => Monotonic.Increaser) private presaleMinted;
+  /*
+   * Chainlink VRF randomness batch reveal
+   * -------------------------------------
+   *
+   * The following variables are used to implement a batch reveal of Chainlink VRF
+   * randomness to see the dna of the NFTs. When minting, the packed extraData of
+   * ERC721A is used to store an index into the top of revealEntropy which will always
+   * be zero. When randomness is requested, the request ID is used to map to the
+   * index in revealEntropy of the request. When the request is fulfilled, the
+   * entropy is stored in revealEntropy and a new zero entry is added to the top.
+   *
+   * Requesting a dna for a token that has not yet been revealed will revert with
+   * a NotRevealed error. If the extraData contains an index that has been revealed,
+   * then the dna will be a hash of the tokenId and the entropy.
+   */
+  // Array of past chainlin entropy responses and a 0 on top for a pending response
+  uint256[] public revealEntropy;
+  // Open requests for entropy map to an index of revealEntropy
+  mapping(uint256 => uint256) private entropyRequests;
+  // Chainlink V2 coordinator, used to request randomness
+  VRFCoordinatorV2Interface COORDINATOR;
+  // Chainlink subscriptionId of a channel that will be used to request randomness
+  uint64 vrfSubscriptionId;
+  // Chainlink VRF key hash used to select gas channel
+  bytes32 vrfKeyHash;
 
-  /**
-    @notice Role of administrative users allowed to expel a Token from staking.
-    @dev See expelFromStaking().
-     */
-  bytes32 public constant EXPULSION_ROLE = keccak256("EXPULSION_ROLE");
+  uint32 vrfCallbackGasLimit = 100000;
+  uint16 vrfRequestConfirmations = 3;
 
   constructor(
     string memory name,
     string memory symbol,
     string memory baseURI,
-    uint256 price,
     address signer,
     address[] memory payments,
     uint256[] memory shares,
-    address payable royaltyReceiver
+    address payable royaltyReceiver,
+    address _vrfCoordinator
   )
-    ERC721ACommon(name, symbol)
+    ERC721A(name, symbol)
     BaseTokenURI(baseURI)
     PaymentSplitter(payments, shares)
+    VRFConsumerBaseV2(_vrfCoordinator)
   {
-    cost = price;
     _setDefaultRoyalty(royaltyReceiver, 500);
-    _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     signers.add(signer);
+    // The tip of revealEntropy is a zero block, which is used to indicate that the reveal seed is not yet set
+    revealEntropy.push(0);
+    COORDINATOR = VRFCoordinatorV2Interface(_vrfCoordinator);
   }
 
   /**
@@ -150,15 +168,14 @@ contract FlickENS is
     );
     require(presaleActive, "disabled");
     require(mintAmount > 0, "mint <= 0");
-    require(mintAmount <= maxMint, "mint >= maxmint");
+    require(mintAmount <= preSaleMaxMintPerAccount, "mint >= maxmint");
     require(
-      (presaleMinted[to].current() + mintAmount) <= preSaleMaxMintPerAccount,
+      (presaleMintedByAddress(to) + mintAmount) <= preSaleMaxMintPerAccount,
       "too many mints"
     );
     require(totalSupply() + mintAmount <= maxSupply, "Over supply");
-    require(cost * mintAmount == msg.value, "Wrong amount");
     _safeMint(to, mintAmount);
-    presaleMinted[to].add(mintAmount);
+    incrementPresaleCountAuxForAddress(to, mintAmount);
   }
 
   /**
@@ -167,9 +184,11 @@ contract FlickENS is
   function mint(address to, uint8 mintAmount) external payable {
     require(publicSaleActive, "disabled");
     require(mintAmount > 0, "mint <= 0");
-    require(mintAmount <= maxMint, "mint >= maxmint");
+    require(
+      _numberMinted(msg.sender) + mintAmount <= maxMint,
+      "mint >= maxmint"
+    );
     require(totalSupply() + mintAmount <= maxSupply, "Over supply");
-    require(cost * mintAmount == msg.value, "Wrong amount");
     _safeMint(to, mintAmount);
   }
 
@@ -243,12 +262,15 @@ contract FlickENS is
   /**
    * @notice Returns the number of minted tokens per presale address
    */
-  function presaleMintedByAddress(address _address)
-    public
-    view
-    returns (uint256)
+  function presaleMintedByAddress(address to) public view returns (uint16) {
+    return uint16(_getAux(to) & _OWNER_AUX_PRESALE_COMPLEMENT);
+  }
+
+  function incrementPresaleCountAuxForAddress(address to, uint16 mintAmount)
+    internal
   {
-    return presaleMinted[_address].current();
+    // Since the count is the last 8 bits, we can just add the mint amount to the aux
+    _setAux(to, _getAux(to) + mintAmount);
   }
 
   /**
@@ -278,162 +300,6 @@ contract FlickENS is
     returns (bytes memory)
   {
     return abi.encodePacked(to, nonce);
-  }
-
-  /**
-    @dev tokenId to staking start time (0 = not staking).
-     */
-  mapping(uint256 => uint256) private stakingStarted;
-
-  /**
-    @dev Cumulative per-token staking, excluding the current period.
-     */
-  mapping(uint256 => uint256) private stakingTotal;
-
-  /**
-    @notice Returns the length of time, in seconds, that the Token has
-    nested.
-    @dev Staking is tied to a specific Token, not to the owner, so it doesn't
-    reset upon sale.
-    @return staking Whether the Token is currently staking. MAY be true with
-    zero current staking if in the same block as staking began.
-    @return current Zero if not currently staking, otherwise the length of time
-    since the most recent staking began.
-    @return total Total period of time for which the Token has nested across
-    its life, including the current period.
-     */
-  function stakingPeriod(uint256 tokenId)
-    external
-    view
-    returns (
-      bool staking,
-      uint256 current,
-      uint256 total
-    )
-  {
-    uint256 start = stakingStarted[tokenId];
-    if (start != 0) {
-      staking = true;
-      current = block.timestamp - start;
-    }
-    total = current + stakingTotal[tokenId];
-  }
-
-  /**
-    @dev MUST only be modified by safeTransferWhileStaking(); if set to 2 then
-    the _beforeTokenTransfer() block while staking is disabled.
-     */
-  uint256 private stakingTransfer = 1;
-
-  /**
-    @notice Transfer a token between addresses while the Token is minting,
-    thus not resetting the staking period.
-     */
-  function safeTransferWhileStaking(
-    address from,
-    address to,
-    uint256 tokenId
-  ) external {
-    require(ownerOf(tokenId) == _msgSender(), "Only owner");
-    stakingTransfer = 2;
-    safeTransferFrom(from, to, tokenId);
-    stakingTransfer = 1;
-  }
-
-  /**
-    @dev Block transfers while staking.
-     */
-  function _beforeTokenTransfers(
-    address from,
-    address to,
-    uint256 startTokenId,
-    uint256 quantity
-  ) internal override {
-    uint256 tokenId = startTokenId;
-    for (uint256 end = tokenId + quantity; tokenId < end; ++tokenId) {
-      require(stakingStarted[tokenId] == 0 || stakingTransfer == 2, "Seeking");
-      stakingTotal[tokenId] = 0;
-    }
-    super._beforeTokenTransfers(from, to, startTokenId, quantity);
-  }
-
-  /**
-    @dev Emitted when begining staking.
-     */
-  event Staking(uint256 indexed tokenId);
-
-  /**
-    @dev Emitted when stops staking; either through standard means or
-    by expulsion.
-     */
-  event Unstaking(uint256 indexed tokenId);
-
-  /**
-    @dev Emitted when expelled from staking.
-     */
-  event Expelled(uint256 indexed tokenId);
-
-  /**
-    @notice Whether staking is currently allowed.
-    @dev If false then staking is blocked, but unstaking is always allowed.
-     */
-  bool public stakingOpen = false;
-
-  /**
-    @notice Toggles the `stakingOpen` flag.
-     */
-  function setStakingOpen(bool open) external onlyOwner {
-    stakingOpen = open;
-  }
-
-  /**
-    @notice Changes the Token's staking status.
-    */
-  function toggleStaking(uint256 tokenId)
-    internal
-    onlyApprovedOrOwner(tokenId)
-  {
-    uint256 start = stakingStarted[tokenId];
-    if (start == 0) {
-      require(stakingOpen, "SOA: staking closed");
-      stakingStarted[tokenId] = block.timestamp;
-      emit Staking(tokenId);
-    } else {
-      stakingTotal[tokenId] += block.timestamp - start;
-      stakingStarted[tokenId] = 0;
-      emit Unstaking(tokenId);
-      (tokenId);
-    }
-  }
-
-  /**
-    @notice Changes the staking statuses
-    @dev Changes the staking.
-     */
-  function toggleStaking(uint256[] calldata tokenIds) external {
-    uint256 n = tokenIds.length;
-    for (uint256 i = 0; i < n; ++i) {
-      toggleStaking(tokenIds[i]);
-    }
-  }
-
-  /**
-    @notice Admin-only ability to expel a Token from the nest.
-    @dev As most sales listings use off-chain signatures it's impossible to
-    detect someone who has nested and then deliberately undercuts the floor
-    price in the knowledge that the sale can't proceed. This function allows for
-    monitoring of such practices and expulsion if abuse is detected, allowing
-    the undercutting token to be sold on the open market. Since OpenSea uses
-    isApprovedForAll() in its pre-listing checks, we can't block by that means
-    because staking would then be all-or-nothing for all of a particular owner's
-    Tokens.
-     */
-  function expelFromStaking(uint256 tokenId) external onlyRole(EXPULSION_ROLE) {
-    require(stakingStarted[tokenId] != 0, "SOA: not nested");
-    stakingTotal[tokenId] += block.timestamp - stakingStarted[tokenId];
-    stakingStarted[tokenId] = 0;
-    emit Unstaking(tokenId);
-    emit Expelled(tokenId);
   }
 
   /**
@@ -470,7 +336,7 @@ contract FlickENS is
   function tokenURI(uint256 tokenId)
     public
     view
-    override(ERC721A, IERC721Metadata)
+    override(ERC721A, IERC721A)
     returns (string memory)
   {
     if (address(renderingContract) != address(0)) {
@@ -492,182 +358,12 @@ contract FlickENS is
   function supportsInterface(bytes4 interfaceId)
     public
     view
-    override(ERC721ACommon, ERC2981, AccessControlEnumerable, IERC165)
+    override(ERC721A, IERC721A, ERC2981)
     returns (bool)
   {
     return
       interfaceId == type(IExtendedResolver).interfaceId ||
       super.supportsInterface(interfaceId);
-  }
-
-  /**
-   * @dev Returns the `TokenOwnership` struct at `tokenId` without reverting.
-   *
-   * If the `tokenId` is out of bounds:
-   *   - `addr` = `address(0)`
-   *   - `startTimestamp` = `0`
-   *   - `burned` = `false`
-   *
-   * If the `tokenId` is burned:
-   *   - `addr` = `<Address of owner before token was burned>`
-   *   - `startTimestamp` = `<Timestamp when token was burned>`
-   *   - `burned = `true`
-   *
-   * Otherwise:
-   *   - `addr` = `<Address of owner>`
-   *   - `startTimestamp` = `<Timestamp of start of ownership>`
-   *   - `burned = `false`
-   */
-  function explicitOwnershipOf(uint256 tokenId)
-    public
-    view
-    override
-    returns (TokenOwnership memory)
-  {
-    TokenOwnership memory ownership;
-    if (tokenId < _startTokenId() || tokenId >= _currentIndex) {
-      return ownership;
-    }
-    ownership = _ownerships[tokenId];
-    if (ownership.burned) {
-      return ownership;
-    }
-    return _ownershipOf(tokenId);
-  }
-
-  /**
-   * @dev Returns an array of `TokenOwnership` structs at `tokenIds` in order.
-   * See {ERC721AQueryable-explicitOwnershipOf}
-   */
-  function explicitOwnershipsOf(uint256[] memory tokenIds)
-    external
-    view
-    override
-    returns (TokenOwnership[] memory)
-  {
-    unchecked {
-      uint256 tokenIdsLength = tokenIds.length;
-      TokenOwnership[] memory ownerships = new TokenOwnership[](tokenIdsLength);
-      for (uint256 i; i != tokenIdsLength; ++i) {
-        ownerships[i] = explicitOwnershipOf(tokenIds[i]);
-      }
-      return ownerships;
-    }
-  }
-
-  /**
-   * @dev Returns an array of token IDs owned by `owner`,
-   * in the range [`start`, `stop`)
-   * (i.e. `start <= tokenId < stop`).
-   *
-   * This function allows for tokens to be queried if the collection
-   * grows too big for a single call of {ERC721AQueryable-tokensOfOwner}.
-   *
-   * Requirements:
-   *
-   * - `start` < `stop`
-   */
-  function tokensOfOwnerIn(
-    address owner,
-    uint256 start,
-    uint256 stop
-  ) external view override returns (uint256[] memory) {
-    unchecked {
-      if (start >= stop) revert InvalidQueryRange();
-      uint256 tokenIdsIdx;
-      uint256 stopLimit = _currentIndex;
-      // Set `start = max(start, _startTokenId())`.
-      if (start < _startTokenId()) {
-        start = _startTokenId();
-      }
-      // Set `stop = min(stop, _currentIndex)`.
-      if (stop > stopLimit) {
-        stop = stopLimit;
-      }
-      uint256 tokenIdsMaxLength = balanceOf(owner);
-      // Set `tokenIdsMaxLength = min(balanceOf(owner), stop - start)`,
-      // to cater for cases where `balanceOf(owner)` is too big.
-      if (start < stop) {
-        uint256 rangeLength = stop - start;
-        if (rangeLength < tokenIdsMaxLength) {
-          tokenIdsMaxLength = rangeLength;
-        }
-      } else {
-        tokenIdsMaxLength = 0;
-      }
-      uint256[] memory tokenIds = new uint256[](tokenIdsMaxLength);
-      if (tokenIdsMaxLength == 0) {
-        return tokenIds;
-      }
-      // We need to call `explicitOwnershipOf(start)`,
-      // because the slot at `start` may not be initialized.
-      TokenOwnership memory ownership = explicitOwnershipOf(start);
-      address currOwnershipAddr;
-      // If the starting slot exists (i.e. not burned), initialize `currOwnershipAddr`.
-      // `ownership.address` will not be zero, as `start` is clamped to the valid token ID range.
-      if (!ownership.burned) {
-        currOwnershipAddr = ownership.addr;
-      }
-      for (
-        uint256 i = start;
-        i != stop && tokenIdsIdx != tokenIdsMaxLength;
-        ++i
-      ) {
-        ownership = _ownerships[i];
-        if (ownership.burned) {
-          continue;
-        }
-        if (ownership.addr != address(0)) {
-          currOwnershipAddr = ownership.addr;
-        }
-        if (currOwnershipAddr == owner) {
-          tokenIds[tokenIdsIdx++] = i;
-        }
-      }
-      // Downsize the array to fit.
-      assembly {
-        mstore(tokenIds, tokenIdsIdx)
-      }
-      return tokenIds;
-    }
-  }
-
-  /**
-   * @dev Returns an array of token IDs owned by `owner`.
-   *
-   * This function scans the ownership mapping and is O(totalSupply) in complexity.
-   * It is meant to be called off-chain.
-   *
-   * See {ERC721AQueryable-tokensOfOwnerIn} for splitting the scan into
-   * multiple smaller scans if the collection is large enough to cause
-   * an out-of-gas error (10K pfp collections should be fine).
-   */
-  function tokensOfOwner(address owner)
-    external
-    view
-    override
-    returns (uint256[] memory)
-  {
-    unchecked {
-      uint256 tokenIdsIdx;
-      address currOwnershipAddr;
-      uint256 tokenIdsLength = balanceOf(owner);
-      uint256[] memory tokenIds = new uint256[](tokenIdsLength);
-      TokenOwnership memory ownership;
-      for (uint256 i = _startTokenId(); tokenIdsIdx != tokenIdsLength; ++i) {
-        ownership = _ownerships[i];
-        if (ownership.burned) {
-          continue;
-        }
-        if (ownership.addr != address(0)) {
-          currOwnershipAddr = ownership.addr;
-        }
-        if (currOwnershipAddr == owner) {
-          tokenIds[tokenIdsIdx++] = i;
-        }
-      }
-      return tokenIds;
-    }
   }
 
   /**
@@ -697,5 +393,78 @@ contract FlickENS is
 
   function setOffchainResolver(address _resolverProxy) public onlyOwner {
     resolverProxy = IExtendedResolverWithProof(_resolverProxy);
+  }
+
+  function dna(uint256 tokenId) public view returns (uint256) {
+    uint24 seedIndex = _ownershipOf(tokenId).extraData;
+    // Should not happen....remove??
+    require(seedIndex < revealEntropy.length, "dna index out of bounds");
+    uint256 entropy = revealEntropy[seedIndex];
+    if (entropy == 0) {
+      revert NotRevealed();
+    }
+    return uint256(keccak256(abi.encodePacked(tokenId, entropy)));
+  }
+
+  function configureChainlink(uint64 _vrfSubscriptionId, bytes32 _vrfKeyHash)
+    external
+    onlyOwner
+  {
+    vrfSubscriptionId = _vrfSubscriptionId;
+    vrfKeyHash = _vrfKeyHash;
+  }
+
+  function requestRandomWords() external onlyOwner {
+    // Will revert if subscription is not set and funded.
+    entropyRequests[
+      COORDINATOR.requestRandomWords(
+        vrfKeyHash,
+        vrfSubscriptionId,
+        vrfRequestConfirmations,
+        vrfCallbackGasLimit,
+        1
+      )
+    ] = revealEntropy.length - 1;
+  }
+
+  function fulfillRandomWords(uint256 requestId, uint256[] memory randomWords)
+    internal
+    override
+  {
+    uint256 revealIndex = entropyRequests[requestId];
+    require(revealIndex == 0, "Already revealed");
+    delete entropyRequests[requestId];
+    revealEntropy[revealIndex] = randomWords[0];
+    revealEntropy.push(0);
+    emit Reveal(totalSupply(), randomWords[0]);
+  }
+
+  function ownerRevealEntropy(uint24 seedIndex, uint256 entropy)
+    public
+    onlyOwner
+  {
+    require(revealEntropy[seedIndex] == 0, "Already revealed");
+    revealEntropy[seedIndex] = entropy;
+    emit AdminReveal(totalSupply(), entropy);
+  }
+
+  /**
+   * @dev "ExtraData" used from ERC721A to store capabilities of the token.
+   */
+  function _extraData(
+    address from,
+    address, /* to */
+    uint24 previousExtraData
+  ) internal view override returns (uint24) {
+    if (from != address(0)) {
+      // When minted, set extraData to the index of the next revealSeed
+      return uint24(revealEntropy.length);
+    }
+    // All other cases, including burn, return the previous extraData.
+    return previousExtraData;
+  }
+
+  function _startTokenId() internal pure override returns (uint256) {
+    return 1;
   }
 }

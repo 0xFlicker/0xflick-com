@@ -12,11 +12,11 @@ describe("Metadata test", function () {
 
   it("can update baseUri", async () => {
     const { mintContract, user } = await userMint(accounts);
-    expect(await mintContract.tokenURI(0)).to.equal("http://example.com/0");
+    expect(await mintContract.tokenURI(1)).to.equal("http://example.com/1");
     await mintContract.setBaseTokenURI("http://example.com/updated/");
     // Check if owner can set
-    expect(await mintContract.tokenURI(0)).to.equal(
-      "http://example.com/updated/0"
+    expect(await mintContract.tokenURI(1)).to.equal(
+      "http://example.com/updated/1"
     );
     // Check that user cannot set
     const userMintContract = FlickENS__factory.connect(
@@ -33,8 +33,8 @@ describe("Metadata test", function () {
     const rendererFactory = new ExampleTokenUri__factory(owner);
     const rendererContract = await rendererFactory.deploy();
     await mintContract.setRenderingContract(rendererContract.address);
-    expect(await mintContract.tokenURI(0)).to.equal(
-      "https://example.com/token/0"
+    expect(await mintContract.tokenURI(1)).to.equal(
+      "https://example.com/token/1"
     );
   });
 

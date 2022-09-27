@@ -4,23 +4,27 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import {
   ENSRegistry__factory,
   FlickENS__factory,
-  OffchainResolver__factory,
+  VRFCoordinatorV2Mock__factory,
+  NameflickENSResolver__factory,
 } from "../typechain";
-import { utils, providers } from "ethers";
+import { utils, providers, constants } from "ethers";
 
 export async function userMint(accounts: SignerWithAddress[]) {
   const [owner, signer, beneficiary, user] = accounts;
-  const mintAmount = utils.parseEther("1");
   const mintFactory = new FlickENS__factory(owner);
+  const mockCoordinator = await new VRFCoordinatorV2Mock__factory(owner).deploy(
+    0,
+    0
+  );
   const mintContract = await mintFactory.deploy(
     "TestCoin",
     "TC",
     "http://example.com/",
-    mintAmount,
     signer.address,
     [beneficiary.address],
     [1],
-    beneficiary.address
+    beneficiary.address,
+    mockCoordinator.address
   );
   await mintContract.setPresaleActive(true);
   const nonceBytes = ethers.utils.hexZeroPad(utils.hexlify(0), 32);
@@ -40,12 +44,23 @@ export async function userMint(accounts: SignerWithAddress[]) {
     user
   );
   // Call mint function with the same values as the signature and the signature
-  await userMintContract.presaleMint(user.address, nonceBytes, 1, signature, {
-    value: mintAmount,
-  });
+  await userMintContract.presaleMint(user.address, nonceBytes, 1, signature);
+
+  // Subscribe to the coordinator
+  const createSubscriptionTx = await mockCoordinator.createSubscription();
+  const transactionReceipt = await createSubscriptionTx.wait();
+  const subscriptionId = mockCoordinator.interface.parseLog({
+    topics: transactionReceipt.logs[0].topics,
+    data: transactionReceipt.logs[0].data,
+  }).args[0];
+  await mintContract.configureChainlink(
+    subscriptionId,
+    "0xd89b2bf150e3b9e13446986e571fb9cab24b13cea0a43ea20a6049a85cc807cc"
+  );
   return {
+    subscriptionId,
+    mockCoordinator,
     mintContract,
-    mintAmount,
     owner,
     user,
   };
@@ -57,15 +72,19 @@ export async function ensResolver(accounts: SignerWithAddress[]) {
 
   const { mintContract } = await userMint(accounts);
   const ensRegistryFactory = new ENSRegistry__factory(deployer);
+
   const registry = await ensRegistryFactory.deploy();
-  const OffchainResolverFactory = new OffchainResolver__factory(deployer);
-  const offchainResolver = await OffchainResolverFactory.deploy(
+  const nameflickResolverFactory = new NameflickENSResolver__factory(deployer);
+  const nameflickResolver = await nameflickResolverFactory.deploy(
+    registry.address,
+    // constants.AddressZero,
     mintContract.address,
-    "https://example.com/",
+    mintContract.address,
+    ["https://example.com/"],
     [signer.address]
   );
 
-  await mintContract.setOffchainResolver(offchainResolver.address);
+  await mintContract.setOffchainResolver(nameflickResolver.address);
   await registry.setSubnodeOwner(
     "0x0000000000000000000000000000000000000000000000000000000000000000",
     utils.id("eth"),
@@ -81,13 +100,13 @@ export async function ensResolver(accounts: SignerWithAddress[]) {
   );
   await registry.setResolver(
     utils.namehash("example.eth"),
-    offchainResolver.address
+    mintContract.address
   );
 
   return {
     mintContract,
     registry,
-    offchainResolver,
+    nameflickResolver,
     owner: deployer,
     signer,
   };

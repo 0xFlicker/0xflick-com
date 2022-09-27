@@ -2,15 +2,44 @@ import { ethers, waffle } from "hardhat";
 import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import {
-  FlickENS__factory,
-  ExampleTokenUri__factory,
-  ENSRegistry__factory,
   OffchainResolver__factory,
+  IResolverService__factory,
+  PublicResolver__factory,
 } from "../typechain";
-import { ensResolver, userMint } from "./utils";
-import { BigNumber, utils, providers } from "ethers";
+import { ensResolver } from "./utils";
+import { BigNumber, utils } from "ethers";
+import { hexDataLength, hexDataSlice } from "@ethersproject/bytes";
+import { decodeDnsName } from "@0xflick/models";
 
-const { Resolver } = providers;
+const resolveInterface = IResolverService__factory.createInterface();
+const resolveFn = resolveInterface.getFunction("resolve");
+const resolveSigHash = resolveInterface.getSighash("resolve");
+const pubResolverInterface = PublicResolver__factory.createInterface();
+const addrFn = pubResolverInterface.getFunction("addr(bytes32)");
+const addrSigHash = pubResolverInterface.getSighash(addrFn.format("sighash"));
+
+function _parseString(result: string, start: number): null | string {
+  try {
+    return utils.toUtf8String(_parseBytes(result, start));
+  } catch (error) {}
+  return null;
+}
+
+function _parseBytes(result: string, start: number): null | string {
+  if (result === "0x") {
+    return null;
+  }
+
+  const offset = BigNumber.from(
+    hexDataSlice(result, start, start + 32)
+  ).toNumber();
+  const length = BigNumber.from(
+    hexDataSlice(result, offset, offset + 32)
+  ).toNumber();
+
+  return hexDataSlice(result, offset + 32, offset + 32 + length);
+}
+
 function numPad(value: number): Uint8Array {
   const result = utils.arrayify(value);
   if (result.length > 32) {
@@ -69,31 +98,72 @@ describe("ENS test", function () {
 
   it("forwards to offchain", async () => {
     const { provider } = waffle;
-    const { mintContract, registry, offchainResolver, owner } =
+    const { mintContract, registry, nameflickResolver, owner } =
       await ensResolver(accounts);
     const resolverAddress = await registry.resolver(
       utils.namehash("example.eth")
     );
-    expect(resolverAddress).to.equal(offchainResolver.address);
+    expect(resolverAddress).to.equal(mintContract.address);
 
-    const data = utils.hexConcat([
-      "0x3b3b57de",
-      utils.namehash("example.eth"),
-      "0x",
-    ]);
     const tx = {
-      to: resolverAddress,
+      to: mintContract.address,
       // selector("resolve(bytes,bytes)")
       data: utils.hexConcat([
-        "0x9061b923",
-        encodeBytes([utils.dnsEncode("example.eth"), data]),
+        resolveSigHash, // "0x9061b923"
+        encodeBytes([
+          utils.dnsEncode("example.eth"),
+          utils.hexConcat([addrSigHash, utils.namehash("example.eth"), "0x"]),
+        ]),
       ]),
     };
 
     const result = await provider.call(tx);
-    // More testing should be done... parse this result
-    expect(result).to.equal(
-      "0x556f18300000000000000000000000005fbdb2315678afecb367f032d93f642f64180aa300000000000000000000000000000000000000000000000000000000000000a00000000000000000000000000000000000000000000000000000000000000120f4d4d2f800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000024000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000001468747470733a2f2f6578616d706c652e636f6d2f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000e49061b92300000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000d076578616d706c6503657468000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000243b3b57de3d5d2e21162745e4df4f56471fd7f651f441adaaca25deb70e4738c6f63d1224000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000e49061b92300000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000d076578616d706c6503657468000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000243b3b57de3d5d2e21162745e4df4f56471fd7f651f441adaaca25deb70e4738c6f63d12240000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+    const offchainInterface = OffchainResolver__factory.createInterface();
+    expect(result.substring(0, 10)).to.equal(
+      offchainInterface.getSighash(
+        offchainInterface.getError("OffchainLookup").format("sighash")
+      )
+    );
+    expect(hexDataLength(result) % 32).to.equal(4);
+    const data = hexDataSlice(result, 4);
+    const sender = hexDataSlice(data, 0, 32);
+    expect(BigNumber.from(sender).eq(mintContract.address)).to.be.true;
+    const urls: Array<string> = [];
+    const urlsOffset = BigNumber.from(hexDataSlice(data, 32, 64)).toNumber();
+    const urlsLength = BigNumber.from(
+      hexDataSlice(data, urlsOffset, urlsOffset + 32)
+    ).toNumber();
+    const urlsData = hexDataSlice(data, urlsOffset + 32);
+    for (let u = 0; u < urlsLength; u++) {
+      const url = _parseString(urlsData, u * 32);
+      expect(url).to.be.not.null;
+      urls.push(url);
+    }
+    expect(urls).to.deep.equal(["https://example.com/"]);
+
+    const calldata = _parseBytes(data, 64);
+    const callbackSelector = hexDataSlice(data, 96, 100);
+    const extraData = _parseBytes(data, 128);
+    const resolvWithProofSigHash = mintContract.interface.getSighash(
+      "resolveWithProof(bytes,bytes)"
+    );
+
+    const offchainSelector = calldata.slice(0, 10).toLowerCase();
+    const [offchainEncodedName, offchainData] = utils.defaultAbiCoder.decode(
+      resolveFn.inputs,
+      "0x" + calldata.slice(10)
+    );
+    expect(callbackSelector).to.equal(resolvWithProofSigHash);
+    expect(offchainSelector).to.equal(resolveSigHash);
+    expect(
+      decodeDnsName(Buffer.from(offchainEncodedName.slice(2), "hex"))
+    ).to.equal("example.eth");
+  });
+
+  it("check string", async () => {
+    const { nameflickResolver } = await ensResolver(accounts);
+    expect(await nameflickResolver.stringToUint("12345")).to.equal(
+      BigNumber.from("12345")
     );
   });
 });

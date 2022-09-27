@@ -1,8 +1,8 @@
 import { ethers } from "hardhat";
 import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { NFT__factory } from "../typechain";
-import { BigNumber, utils } from "ethers";
+import { FlickENS__factory, VRFCoordinatorV2Mock__factory } from "../typechain";
+import { utils } from "ethers";
 
 describe("Minting test", function () {
   let accounts: SignerWithAddress[];
@@ -12,17 +12,19 @@ describe("Minting test", function () {
 
   it("presale must be active", async () => {
     const [owner, signer, beneficiary, user] = accounts;
-    const mintAmount = utils.parseEther("1");
-    const mintFactory = new NFT__factory(owner);
+    const mintFactory = new FlickENS__factory(owner);
+    const mockCoordinator = await new VRFCoordinatorV2Mock__factory(
+      owner
+    ).deploy(0, 0);
     const mintContract = await mintFactory.deploy(
       "TestCoin",
       "TC",
       "foo",
-      mintAmount,
       signer.address,
       [beneficiary.address],
       [1],
-      beneficiary.address
+      beneficiary.address,
+      mockCoordinator.address
     );
     // Call mint function with the same values as the signature and the signature
     await expect(
@@ -47,17 +49,19 @@ describe("Minting test", function () {
 
   it("can presale mint", async () => {
     const [owner, signer, beneficiary, user] = accounts;
-    const mintAmount = utils.parseEther("1");
-    const mintFactory = new NFT__factory(owner);
+    const mintFactory = new FlickENS__factory(owner);
+    const mockCoordinator = await new VRFCoordinatorV2Mock__factory(
+      owner
+    ).deploy(0, 0);
     const mintContract = await mintFactory.deploy(
       "TestCoin",
       "TC",
       "foo",
-      mintAmount,
       signer.address,
       [beneficiary.address],
       [1],
-      beneficiary.address
+      beneficiary.address,
+      mockCoordinator.address
     );
     await mintContract.setPresaleActive(true);
     const nonceBytes = ethers.utils.hexZeroPad(utils.hexlify(0), 32);
@@ -74,9 +78,7 @@ describe("Minting test", function () {
     );
 
     // Call mint function with the same values as the signature and the signature
-    await mintContract.presaleMint(user.address, nonceBytes, 1, signature, {
-      value: mintAmount,
-    });
+    await mintContract.presaleMint(user.address, nonceBytes, 1, signature);
 
     // Check that the balance is correct
     expect(await mintContract.balanceOf(user.address)).to.eq(1);
@@ -84,17 +86,19 @@ describe("Minting test", function () {
 
   it("presale single mint gas cost", async () => {
     const [owner, signer, beneficiary, user] = accounts;
-    const mintAmount = utils.parseEther("1");
-    const mintFactory = new NFT__factory(owner);
+    const mintFactory = new FlickENS__factory(owner);
+    const mockCoordinator = await new VRFCoordinatorV2Mock__factory(
+      owner
+    ).deploy(0, 0);
     const mintContract = await mintFactory.deploy(
       "TestCoin",
       "TC",
       "foo",
-      mintAmount,
       signer.address,
       [beneficiary.address],
       [1],
-      beneficiary.address
+      beneficiary.address,
+      mockCoordinator.address
     );
     await mintContract.setPresaleActive(true);
     // Call mint function with the same values as the signature and the signature
@@ -109,10 +113,7 @@ describe("Minting test", function () {
             [user.address, ethers.utils.hexZeroPad(utils.hexlify(0), 32)]
           )
         )
-      ),
-      {
-        value: mintAmount,
-      }
+      )
     );
     const receipt1 = await transaction1.wait();
     expect(receipt1.gasUsed).to.be.lt(200_000);
@@ -120,17 +121,19 @@ describe("Minting test", function () {
 
   it("presale multiple mint gas cost", async () => {
     const [owner, signer, beneficiary, user] = accounts;
-    const mintAmount = utils.parseEther("1");
-    const mintFactory = new NFT__factory(owner);
+    const mintFactory = new FlickENS__factory(owner);
+    const mockCoordinator = await new VRFCoordinatorV2Mock__factory(
+      owner
+    ).deploy(0, 0);
     const mintContract = await mintFactory.deploy(
       "TestCoin",
       "TC",
       "foo",
-      mintAmount,
       signer.address,
       [beneficiary.address],
       [1],
-      beneficiary.address
+      beneficiary.address,
+      mockCoordinator.address
     );
     await mintContract.setPresaleActive(true);
     // Call mint function with the same values as the signature and the signature
@@ -156,17 +159,19 @@ describe("Minting test", function () {
 
   it("cant presale mint more than allowed", async () => {
     const [owner, signer, beneficiary, user] = accounts;
-    const mintAmount = utils.parseEther("1");
-    const mintFactory = new NFT__factory(owner);
+    const mintFactory = new FlickENS__factory(owner);
+    const mockCoordinator = await new VRFCoordinatorV2Mock__factory(
+      owner
+    ).deploy(0, 0);
     const mintContract = await mintFactory.deploy(
       "TestCoin",
       "TC",
       "foo",
-      mintAmount,
       signer.address,
       [beneficiary.address],
       [1],
-      beneficiary.address
+      beneficiary.address,
+      mockCoordinator.address
     );
     await mintContract.setPresaleActive(true);
     const nonceBytes = ethers.utils.hexZeroPad(utils.hexlify(0), 32);
@@ -187,7 +192,7 @@ describe("Minting test", function () {
       mintContract.presaleMint(user.address, nonceBytes, 20, signature, {
         value: utils.parseEther("20"),
       })
-    ).revertedWith("too many mints");
+    ).revertedWith("mint >= maxmint");
     // no mints should have happened
     expect(await mintContract.balanceOf(user.address)).to.eq(0);
 
@@ -201,7 +206,7 @@ describe("Minting test", function () {
     await mintContract.presaleMint(
       user.address,
       ethers.utils.hexZeroPad(utils.hexlify(1), 32),
-      2,
+      8,
       await signer.signMessage(
         utils.arrayify(
           ethers.utils.solidityPack(
@@ -211,10 +216,10 @@ describe("Minting test", function () {
         )
       ),
       {
-        value: utils.parseEther("2"),
+        value: utils.parseEther("8"),
       }
     );
-    expect(await mintContract.balanceOf(user.address)).to.eq(4);
+    expect(await mintContract.balanceOf(user.address)).to.eq(10);
 
     // bad mint
     await expect(
@@ -233,61 +238,56 @@ describe("Minting test", function () {
         {
           value: utils.parseEther("2"),
         }
-      )
+      ),
+      "user has minted too many"
     ).revertedWith("too many mints");
-    expect(await mintContract.balanceOf(user.address)).to.eq(4);
+    expect(await mintContract.balanceOf(user.address)).to.eq(10);
   });
 
   it("mint must be active", async () => {
     const [owner, signer, beneficiary, user] = accounts;
-    const mintAmount = utils.parseEther("1");
-    const mintFactory = new NFT__factory(owner);
+    const mintFactory = new FlickENS__factory(owner);
+    const mockCoordinator = await new VRFCoordinatorV2Mock__factory(
+      owner
+    ).deploy(0, 0);
     const mintContract = await mintFactory.deploy(
       "TestCoin",
       "TC",
       "foo",
-      mintAmount,
       signer.address,
       [beneficiary.address],
       [1],
-      beneficiary.address
+      beneficiary.address,
+      mockCoordinator.address
     );
     // Call mint function with the same values as the signature and the signature
-    await expect(
-      mintContract.mint(user.address, 1, {
-        value: mintAmount,
-      })
-    ).revertedWith("disabled");
+    await expect(mintContract.mint(user.address, 1)).revertedWith("disabled");
 
     // presale being active not good enough
     await mintContract.setPresaleActive(true);
-    await expect(
-      mintContract.mint(user.address, 1, {
-        value: mintAmount,
-      })
-    ).revertedWith("disabled");
+    await expect(mintContract.mint(user.address, 1)).revertedWith("disabled");
   });
 
   it("can mint", async () => {
     const [owner, signer, beneficiary, user] = accounts;
-    const mintAmount = utils.parseEther("1");
-    const mintFactory = new NFT__factory(owner);
+    const mintFactory = new FlickENS__factory(owner);
+    const mockCoordinator = await new VRFCoordinatorV2Mock__factory(
+      owner
+    ).deploy(0, 0);
     const mintContract = await mintFactory.deploy(
       "TestCoin",
       "TC",
       "foo",
-      mintAmount,
       signer.address,
       [beneficiary.address],
       [1],
-      beneficiary.address
+      beneficiary.address,
+      mockCoordinator.address
     );
     await mintContract.setMintActive(true);
 
     // Call mint function with the same values as the signature and the signature
-    await mintContract.mint(user.address, 1, {
-      value: mintAmount,
-    });
+    await mintContract.mint(user.address, 1);
 
     // Check that the balance is correct
     expect(await mintContract.balanceOf(user.address)).to.eq(1);
@@ -295,24 +295,24 @@ describe("Minting test", function () {
 
   it("gas costs for single mint", async () => {
     const [owner, signer, beneficiary, user] = accounts;
-    const mintAmount = utils.parseEther("1");
-    const mintFactory = new NFT__factory(owner);
+    const mintFactory = new FlickENS__factory(owner);
+    const mockCoordinator = await new VRFCoordinatorV2Mock__factory(
+      owner
+    ).deploy(0, 0);
     const mintContract = await mintFactory.deploy(
       "TestCoin",
       "TC",
       "foo",
-      mintAmount,
       signer.address,
       [beneficiary.address],
       [1],
-      beneficiary.address
+      beneficiary.address,
+      mockCoordinator.address
     );
     await mintContract.setMintActive(true);
 
     // Call mint function with the same values as the signature and the signature
-    const transaction = await mintContract.mint(user.address, 1, {
-      value: mintAmount,
-    });
+    const transaction = await mintContract.mint(user.address, 1);
 
     const receipt = await transaction.wait();
     expect(receipt.gasUsed).to.be.lt(140_000);
@@ -320,17 +320,19 @@ describe("Minting test", function () {
 
   it("gas costs for multiple mint", async () => {
     const [owner, signer, beneficiary, user] = accounts;
-    const mintAmount = utils.parseEther("1");
-    const mintFactory = new NFT__factory(owner);
+    const mintFactory = new FlickENS__factory(owner);
+    const mockCoordinator = await new VRFCoordinatorV2Mock__factory(
+      owner
+    ).deploy(0, 0);
     const mintContract = await mintFactory.deploy(
       "TestCoin",
       "TC",
       "foo",
-      mintAmount,
       signer.address,
       [beneficiary.address],
       [1],
-      beneficiary.address
+      beneficiary.address,
+      mockCoordinator.address
     );
     await mintContract.setMintActive(true);
 
@@ -345,17 +347,19 @@ describe("Minting test", function () {
 
   it("can gift", async () => {
     const [owner, signer, beneficiary, user] = accounts;
-    const mintAmount = utils.parseEther("1");
-    const mintFactory = new NFT__factory(owner);
+    const mintFactory = new FlickENS__factory(owner);
+    const mockCoordinator = await new VRFCoordinatorV2Mock__factory(
+      owner
+    ).deploy(0, 0);
     const mintContract = await mintFactory.deploy(
       "TestCoin",
       "TC",
       "foo",
-      mintAmount,
       signer.address,
       [beneficiary.address],
       [1],
-      beneficiary.address
+      beneficiary.address,
+      mockCoordinator.address
     );
 
     await mintContract.gift([1], [user.address]);

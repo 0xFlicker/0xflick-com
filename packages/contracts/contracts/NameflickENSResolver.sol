@@ -1,11 +1,21 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.16;
 
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./IERC721AQueryable.sol";
+import "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
+import "@ensdomains/ens-contracts/contracts/resolvers/profiles/ABIResolver.sol";
+import "@ensdomains/ens-contracts/contracts/resolvers/profiles/AddrResolver.sol";
+import "@ensdomains/ens-contracts/contracts/resolvers/profiles/ContentHashResolver.sol";
+import "@ensdomains/ens-contracts/contracts/resolvers/profiles/DNSResolver.sol";
+import "@ensdomains/ens-contracts/contracts/resolvers/profiles/InterfaceResolver.sol";
+import "@ensdomains/ens-contracts/contracts/resolvers/profiles/NameResolver.sol";
+import "@ensdomains/ens-contracts/contracts/resolvers/profiles/PubkeyResolver.sol";
+import "@ensdomains/ens-contracts/contracts/resolvers/profiles/TextResolver.sol";
+import "erc721a/contracts/interfaces/IERC721AQueryable.sol";
 import "./IExtendedResolver.sol";
 import "./SignatureVerifier.sol";
+import "./StringToUintLib.sol";
 
 interface IResolverService {
   function resolve(bytes calldata name, bytes calldata data)
@@ -22,10 +32,20 @@ interface IResolverService {
  * Implements an ENS resolver that directs all queries to a CCIP read gateway.
  * Callers must implement EIP 3668 and ENSIP 10.
  */
-contract OffchainResolver is IExtendedResolver, ERC165, Ownable {
-  string public url;
+
+contract NameflickENSResolver is IExtendedResolver, ERC165, Ownable {
+  using StringToUintLib for string;
+
+  struct Resolution {
+    address controller;
+  }
+  string[] public urls;
   mapping(address => bool) public signers;
+  mapping(bytes32 => uint64) public expires;
+
+  ENS immutable ens;
   address public parentContract;
+  address immutable trustedReverseRegistrar;
 
   event NewSigners(address[] signers);
 
@@ -38,30 +58,24 @@ contract OffchainResolver is IExtendedResolver, ERC165, Ownable {
   );
 
   constructor(
+    ENS _ens,
+    address _trustedReverseRegistrar,
     address _parentContract,
-    string memory _url,
+    string[] memory _urls,
     address[] memory _signers
   ) {
+    ens = _ens;
+    trustedReverseRegistrar = _trustedReverseRegistrar;
     parentContract = _parentContract;
-    url = _url;
+    urls = _urls;
     for (uint256 i = 0; i < _signers.length; i++) {
       signers[_signers[i]] = true;
     }
     emit NewSigners(_signers);
   }
 
-  function setOffchainResolver(string memory _url) external onlyOwner {
-    url = _url;
-  }
-
-  function makeSignatureHash(
-    address target,
-    uint64 expires,
-    bytes memory request,
-    bytes memory result
-  ) external pure returns (bytes32) {
-    return
-      SignatureVerifier.makeSignatureHash(target, expires, request, result);
+  function setOffchainResolver(string[] memory _urls) external onlyOwner {
+    urls = _urls;
   }
 
   /**
@@ -81,13 +95,11 @@ contract OffchainResolver is IExtendedResolver, ERC165, Ownable {
       name,
       data
     );
-    string[] memory urls = new string[](1);
-    urls[0] = url;
     revert OffchainLookup(
       parentContract,
       urls,
       callData,
-      OffchainResolver.resolveWithProof.selector,
+      NameflickENSResolver.resolveWithProof.selector,
       callData
     );
   }
@@ -119,4 +131,23 @@ contract OffchainResolver is IExtendedResolver, ERC165, Ownable {
       interfaceID == type(IExtendedResolver).interfaceId ||
       super.supportsInterface(interfaceID);
   }
+
+  function stringToUint(string memory s) public pure returns (uint256) {
+    (bool success, uint256 result) = s.toUint();
+    if (!success) {
+      revert("invalid string");
+    }
+    return result;
+  }
+
+  // function isAuthorised(bytes32 node) internal view override returns (bool) {
+  //   if (msg.sender == trustedReverseRegistrar) {
+  //     return true;
+  //   }
+  //   address owner = ens.owner(node);
+  //   if (owner == address(nameWrapper)) {
+  //     owner = nameWrapper.ownerOf(uint256(node));
+  //   }
+  //   return owner == msg.sender || isApprovedForAll(owner, msg.sender);
+  // }
 }

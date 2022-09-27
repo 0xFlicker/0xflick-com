@@ -61,3 +61,19 @@ export function subdomainFromEnsName(ensName: string): string {
 export function rootFromEnsName(ensName: string): string {
   return ensName.split(".").slice(-2).join(".");
 }
+
+export function decodeDnsName(dnsName: Buffer) {
+  const labels = [];
+  let idx = 0;
+  while (true) {
+    const len = dnsName.readUInt8(idx);
+    if (len === 0) break;
+    labels.push(
+      Buffer.from(
+        Uint8Array.prototype.slice.call(dnsName, idx + 1, idx + len + 1)
+      ).toString("utf8")
+    );
+    idx += len + 1;
+  }
+  return labels.join(".");
+}

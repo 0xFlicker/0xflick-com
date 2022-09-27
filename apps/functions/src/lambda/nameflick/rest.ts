@@ -6,6 +6,7 @@ import { utils } from "ethers";
 import { RPCCall } from "./types.js";
 import { queryHandlers } from "./query.js";
 import { PRIVATE_KEY } from "./config.js";
+import { decodeDnsName } from "@0xflick/models";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Headers": "Content-Type",
@@ -17,18 +18,6 @@ const Resolver = new utils.Interface(Resolver_abi);
 const resolveInterface = IResolverService__factory.createInterface();
 const resolveFn = resolveInterface.getFunction("resolve");
 const resolveSigHash = resolveInterface.getSighash("resolve");
-
-function decodeDnsName(dnsname: Buffer) {
-  const labels = [];
-  let idx = 0;
-  while (true) {
-    const len = dnsname.readUInt8(idx);
-    if (len === 0) break;
-    labels.push(dnsname.slice(idx + 1, idx + len + 1).toString("utf8"));
-    idx += len + 1;
-  }
-  return labels.join(".");
-}
 
 async function query(
   name: string,

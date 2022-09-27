@@ -4,9 +4,17 @@
     "module": "NodeNext",
     "rootDir": "./src",
     "outDir": "./dist",
-    "paths": {},
+    "paths": {
+      "@0xflick/models": ["../../packages/models/src/index"],
+      "@0xflick/models/*": ["../../packages/models/src/*"]
+    },
     "composite": true
   },
   "exclude": ["**/node_modules", "**/.*/", "dist"],
-  "include": ["**/*.ts"]
+  "include": ["**/*.ts"],
+  "references": [
+    {
+      "path": "../../packages/models"
+    }
+  ]
 }

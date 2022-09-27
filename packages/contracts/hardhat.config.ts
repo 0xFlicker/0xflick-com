@@ -10,63 +10,12 @@ import "hardhat-gas-reporter";
 import "solidity-coverage";
 import { node_url, accounts, addForkConfiguration } from "./utils/network";
 import { utils } from "ethers";
-import { Enumerator__factory } from "./typechain/factories/contracts";
-const promiseNFT__factory = import("./typechain");
 
 dotenv.config();
 
-task("mint", "mint a token with a signature")
-  .addParam("to", "The account to mint to", "0x0", types.string)
-  .addParam("nonce", "The mint nonce", 0, types.int)
-  .addOptionalParam(
-    "transfer",
-    "optionally, transfer to",
-    undefined,
-    types.string
-  )
-  .setAction(async ({ to, nonce, transfer }, hre) => {
-    const { deployments, getNamedAccounts, network, run, ethers } = hre;
-    const { signer: signerAddress } = await getNamedAccounts();
-    const { NFT__factory } = await promiseNFT__factory;
-    const deployment = await deployments.get("NFT");
-    const signer = await ethers.getSigner(signerAddress);
-    const nonceBytes = ethers.utils.hexZeroPad(ethers.utils.hexlify(nonce), 32);
-    console.log(`Signer address: ${signerAddress}`);
-    const message = ethers.utils.solidityPack(
-      ["address", "bytes32"],
-      [to, nonceBytes]
-    );
-    const signature = await signer.signMessage(
-      // Needs to be cast to binary data, otherwise will be signed as a string
-      utils.arrayify(
-        // This call is the same a utils.keccak256(utils.solidityPack(...))
-        message
-      )
-    );
-    const minter = await ethers.getSigner(to);
-    const contract = NFT__factory.connect(deployment.address, minter);
-    const enumerator = Enumerator__factory.connect(
-      (await deployments.get("Enumerator")).address,
-      minter
-    );
-    console.log(`Minting to ${to} with nonce ${nonce}`);
-    await contract.presaleMint(to, nonceBytes, 1, signature);
-    if (transfer) {
-      console.log(`Transferring to ${transfer}`);
-      const token = await enumerator[
-        "tokenOfOwnerByIndex(address,address,uint256)"
-      ](contract.address, minter.address, 0);
-      console.log(`Tokens: ${token}`);
-      await contract["safeTransferFrom(address,address,uint256)"](
-        minter.address,
-        transfer,
-        token
-      );
-    }
-  });
 const config: HardhatUserConfig = {
   solidity: {
-    version: "0.8.9",
+    version: "0.8.16",
     settings: {
       optimizer: {
         enabled: true,
