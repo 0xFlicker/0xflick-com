@@ -66,8 +66,8 @@ contract FlickENS is
   //sale settings
   uint256 public cost = 0;
   uint256 public maxSupply = 2000;
-  uint256 public maxMint = 10;
   uint256 public preSaleMaxMintPerAccount = 10;
+  uint8 public maxMint = 10;
   bool public presaleActive = false;
   bool public publicSaleActive = false;
 
@@ -236,7 +236,7 @@ contract FlickENS is
     cost = _newCost;
   }
 
-  function setMaxMint(uint256 _newmaxMint) public onlyOwner {
+  function setMaxMint(uint8 _newmaxMint) public onlyOwner {
     maxMint = _newmaxMint;
   }
 
@@ -406,6 +406,18 @@ contract FlickENS is
     return uint256(keccak256(abi.encodePacked(tokenId, entropy)));
   }
 
+  function configureChainlink(
+    uint64 _vrfSubscriptionId,
+    bytes32 _vrfKeyHash,
+    uint32 _vrfCallbackGasLimit,
+    uint16 _vrfRequestConfirmations
+  ) external onlyOwner {
+    vrfSubscriptionId = _vrfSubscriptionId;
+    vrfKeyHash = _vrfKeyHash;
+    vrfCallbackGasLimit = _vrfCallbackGasLimit;
+    vrfRequestConfirmations = _vrfRequestConfirmations;
+  }
+
   function configureChainlink(uint64 _vrfSubscriptionId, bytes32 _vrfKeyHash)
     external
     onlyOwner
@@ -424,6 +436,7 @@ contract FlickENS is
         vrfCallbackGasLimit,
         1
       )
+      // always point an incoming request at the tail of the array
     ] = revealEntropy.length - 1;
   }
 
@@ -435,16 +448,22 @@ contract FlickENS is
     require(revealIndex == 0, "Already revealed");
     delete entropyRequests[requestId];
     revealEntropy[revealIndex] = randomWords[0];
+    // add a new slot for the next entropy
     revealEntropy.push(0);
     emit Reveal(totalSupply(), randomWords[0]);
   }
 
+  /**
+   * @dev To bypass chainlink VRF for a broken channel or to save LINK in case of slow mint. Can not overwrite an existing reveal.
+   */
   function ownerRevealEntropy(uint24 seedIndex, uint256 entropy)
     public
     onlyOwner
   {
     require(revealEntropy[seedIndex] == 0, "Already revealed");
     revealEntropy[seedIndex] = entropy;
+    // add a new slot for the next entropy
+    revealEntropy.push(0);
     emit AdminReveal(totalSupply(), entropy);
   }
 
