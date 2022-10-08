@@ -21,7 +21,7 @@ const twitterFollowName =
 const discordTestChannelId = process.env.DISCORD_TESTING_CHANNEL_ID || "";
 const discordMessageTopicArn = process.env.DISCORD_MESSAGE_TOPIC_ARN || "";
 const snsRegion = process.env.SNS_REGION || "us-east-1";
-const chainConfig = JSON.stringify(process.env.CHAIN_CONFIG || "{}");
+const chainConfig = JSON.parse(process.env.CHAIN_CONFIG || "{}");
 
 export function createConfig(providedConfig: Partial<IDeployConfig>) {
   const config = {
