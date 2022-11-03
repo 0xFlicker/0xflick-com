@@ -74,16 +74,6 @@ async function fetchPreSaleMaxMintPerAccount(
   }
 }
 
-async function fetchPaused(dispatch: AppDispatch, contract: FlickENS) {
-  try {
-    dispatch(actions.isPaused.fetch());
-    const paused = await contract.paused();
-    dispatch(actions.isPaused.fetchSuccess(paused));
-  } catch (error: any) {
-    dispatch(actions.isPaused.fetchError(error.message));
-  }
-}
-
 function fetchBalanceOf(dispatch: AppDispatch, contract?: FlickENS) {
   return async (address: string) => {
     if (!contract) {
@@ -120,7 +110,7 @@ function fetchPreSaleMinted(dispatch: AppDispatch, contract?: FlickENS) {
       dispatch(
         actions.preSaleMinted.fetchSuccess({
           input: { address },
-          value: mintAvailable.toNumber(),
+          value: mintAvailable,
         })
       );
     } catch (error: any) {
@@ -184,7 +174,7 @@ export function useMint() {
   const isPreSaleMaxMintPerAccountFetched = useAppSelector(
     selectors.isPreSaleMaxMintPerAccountFetched
   );
-  const isPausedFetched = useAppSelector(selectors.isPausedFetched);
+  const isPausedFetched = true;
 
   useEffect(() => {
     if (contract && web3IsConnected && !isNamedFetched) {
@@ -216,11 +206,6 @@ export function useMint() {
       fetchPresaleActive(dispatch, contract);
     }
   }, [contract, web3IsConnected, dispatch, isPresaleActiveFetched]);
-  useEffect(() => {
-    if (contract && web3IsConnected && !isPausedFetched) {
-      fetchPaused(dispatch, contract);
-    }
-  }, [contract, web3IsConnected, dispatch, isPausedFetched]);
 }
 
 export function usePreSaleActive() {

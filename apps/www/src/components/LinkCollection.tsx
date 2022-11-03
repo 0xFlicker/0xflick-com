@@ -45,7 +45,7 @@ export const LinkCollection: FC = () => {
           to="/demo"
         />
       </Grid2>
-      <Grid2 {...defaultGridBreakpoints}>
+      {/* <Grid2 {...defaultGridBreakpoints}>
         <LinkCard
           headerTitle="signup for nameflick"
           content={
@@ -61,10 +61,10 @@ export const LinkCollection: FC = () => {
           }}
           to="/signup/premint/from-links"
         />
-      </Grid2>
+      </Grid2> */}
       <Grid2 {...defaultGridBreakpoints}>
         <LinkCard
-          headerTitle="GitHub: open source"
+          headerTitle="open source: GitHub"
           content={
             <Typography color="text.secondary" sx={{ height: 80 }}>
               Look at what&apos;s under the hood
@@ -94,10 +94,26 @@ export const LinkCollection: FC = () => {
       </Grid2>
       <Grid2 {...defaultGridBreakpoints}>
         <LinkCard
+          headerTitle="social: NftyChat"
+          content={
+            <Typography color="text.secondary" sx={{ height: 80 }}>
+              Preferred social community because of its ENS first and native
+              web3 support
+            </Typography>
+          }
+          CardMediaProps={{
+            ...defaultCardMediaProps,
+            image: `/flick.png`,
+          }}
+          to="https://nftychat.xyz/community/7193783"
+        />
+      </Grid2>
+      <Grid2 {...defaultGridBreakpoints}>
+        <LinkCard
           headerTitle="social: Discord"
           content={
             <Typography color="text.secondary" sx={{ height: 80 }}>
-              Invite link: If you see this you are early
+              Discord because that&apos;s where people are
             </Typography>
           }
           CardMediaProps={{

@@ -47,7 +47,7 @@ interface IActionableCardProps {
 }
 
 const ActionableCard: FC<IActionableCardProps> = ({ tokenId, rarityData }) => {
-  const { contract, enumerator } = useERC721();
+  const { contract } = useERC721();
   const [url, setUrl] = useState("");
   const [attributes, setAttributes] = useState<IMetadataAttribute[]>([]);
 

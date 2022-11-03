@@ -9,30 +9,22 @@ import styles from "./OwnedTokens.module.css";
 
 interface IProps {}
 export const OwnedTokens: FC<IProps> = ({}) => {
-  const { contract, enumerator } = useERC721();
+  const { contract } = useERC721();
   const selectedAddress = useAppSelector(web3Selectors.address);
   const [tokens, setTokens] = useState<number[]>([]);
 
   useEffect(() => {
     async function getTokens() {
-      if (enumerator && contract && selectedAddress) {
-        const balance = (await contract.balanceOf(selectedAddress)).toNumber();
-        const promiseTokens: Promise<number>[] = [];
-        for (let i = 0; i < balance; i++) {
-          promiseTokens.push(
-            enumerator["tokenOfOwnerByIndex(address,address,uint256)"](
-              contract.address,
-              selectedAddress,
-              i
-            ).then((n) => n.toNumber())
-          );
-        }
-        const ownedTokens = await Promise.all(promiseTokens);
-        setTokens(ownedTokens);
+      if (contract && selectedAddress) {
+        setTokens(
+          (await contract.tokensOfOwner(selectedAddress)).map((t) =>
+            t.toNumber()
+          )
+        );
       }
     }
     getTokens().catch((e) => console.error(e));
-  }, [contract, enumerator, selectedAddress]);
+  }, [contract, selectedAddress]);
 
   return (
     <div className={styles.root}>
