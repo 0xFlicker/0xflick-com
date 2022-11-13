@@ -7,7 +7,7 @@ import Typography from "@mui/material/Typography";
 import { useAppSelector } from "app/store";
 import { useHasAllowedAction } from "features/auth/hooks";
 import { canPreSaleMint } from "features/auth/matchers";
-import { selectors as web3Selectors } from "features/web3";
+import { selectors as web3Selectors } from "@0xflick/feature-web3";
 import { useLocale } from "locales/hooks";
 import { FC, useCallback, useState } from "react";
 import {

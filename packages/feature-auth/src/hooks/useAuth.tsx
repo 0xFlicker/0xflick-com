@@ -9,11 +9,11 @@ import {
   useState,
 } from "react";
 import { selectors as authSelectors, actions as authActions } from "../redux";
-import { useWeb3 } from "features/web3";
+import { useWeb3 } from "@0xflick/feature-web3";
 import {
   actions as web3Actions,
   selectors as web3Selectors,
-} from "features/web3/redux";
+} from "@0xflick/feature-web3/redux";
 import { useAppDispatch, useAppSelector } from "app/store";
 import useLocalStorage from "use-local-storage";
 import { useNonce } from "./useNonce";
@@ -60,7 +60,7 @@ function useAuthContext() {
   const isWeb3Connected = useAppSelector(web3Selectors.isConnected);
   const address = useAppSelector(web3Selectors.address);
   const { data: ensName, isLoading: ensNameIsLoading } = useEnsName({
-    address,
+    address: address as `0x${string}`,
   });
   const { data: ensAvatar, isLoading: ensAvatarIsLoading } = useEnsAvatar({
     addressOrName: address,

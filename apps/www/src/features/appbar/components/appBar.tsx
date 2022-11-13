@@ -16,9 +16,9 @@ import {
 import { Menu as MenuIcon } from "@mui/icons-material";
 import NextImage from "next/image";
 import { ETheme } from "../hooks";
-import { Connect } from "features/web3";
+import { Connect } from "@0xflick/feature-web3";
 import { HomeMenu } from "./HomeMenu";
-import { ChainSelector } from "features/web3/components/ChainSelector";
+import { ChainSelector } from "@0xflick/feature-web3/src/components/ChainSelector";
 
 export const AppBar: FC<{
   onFlick?: MouseEventHandler;

@@ -3,7 +3,7 @@ import { useERC721 } from "../hooks";
 
 import CardGrid from "./CardGrid";
 import { useAppSelector } from "app/store";
-import { selectors as web3Selectors } from "features/web3";
+import { selectors as web3Selectors } from "@0xflick/feature-web3";
 
 import styles from "./OwnedTokens.module.css";
 

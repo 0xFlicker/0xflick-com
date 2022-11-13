@@ -1,7 +1,7 @@
 import { useAppDispatch, useAppSelector, AppDispatch } from "app/store";
 import { useERC721 } from "features/nfts/hooks";
 import { useCallback, useEffect, useReducer } from "react";
-import { selectors as web3Selectors } from "features/web3";
+import { selectors as web3Selectors } from "@0xflick/feature-web3";
 import { actions, selectors } from "./redux";
 import { FlickENS } from "@0xflick/contracts";
 import { utils } from "ethers";

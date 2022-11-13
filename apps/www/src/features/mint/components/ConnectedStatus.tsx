@@ -6,7 +6,7 @@ import {
   Cancel as CancelIcon,
 } from "@mui/icons-material";
 import { useAuth } from "features/auth/hooks";
-import { useWeb3 } from "features/web3";
+import { useWeb3 } from "@0xflick/feature-web3";
 
 export const ConnectedStatus: FC = () => {
   const { t } = useLocale("common");

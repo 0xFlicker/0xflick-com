@@ -1,7 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { useDispatch, useSelector } from "react-redux";
 
-import { reducer as web3Reducer } from "features/web3/redux";
+import { reducer as web3Reducer } from "@0xflick/feature-web3";
 import { reducer as configReducer } from "features/config/redux";
 import { reducer as mintReducer } from "features/mint/redux";
 import { reducer as mintApiReducer } from "features/mint/api";

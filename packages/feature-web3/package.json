@@ -1,0 +1,14 @@
+{
+  "name": "@0xflick/feature-web3",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts"
+    }
+  },
+  "license": "MIT",
+  "dependencies": {
+    "wagmi": "^0.7.10"
+  }
+}

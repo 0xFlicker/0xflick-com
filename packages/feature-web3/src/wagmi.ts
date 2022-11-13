@@ -6,8 +6,13 @@ import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import { CoinbaseWalletConnector } from "wagmi/connectors/coinbaseWallet";
 import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
 import { InjectedConnector } from "wagmi/connectors/injected";
-import { alchemyKey, appName, infuraKey, supportedChains } from "utils/config";
-import { lazySingleton } from "utils/factory";
+import {
+  alchemyKey,
+  appName,
+  infuraKey,
+  supportedChains,
+  lazySingleton,
+} from "@0xflick/utils";
 
 export const appProviders = [
   infuraProvider({

@@ -18,7 +18,7 @@ import { Refresh as RefreshIcon } from "@mui/icons-material";
 import { Fade } from "transitions/Fade";
 import { useLocale } from "locales/hooks";
 import { useAppDispatch, useAppSelector } from "app/store";
-import { selectors as web3Selectors } from "features/web3";
+import { selectors as web3Selectors } from "@0xflick/feature-web3";
 import { formatAddressShort } from "utils/formatter";
 import {
   usePreSaleMinted,
@@ -36,8 +36,6 @@ import { SerializedError } from "@reduxjs/toolkit";
 import { useERC721 } from "features/nfts/hooks";
 import { utils } from "ethers";
 import { useSavedToken, useAuth } from "features/auth/hooks";
-
-// const MintPreSaleSubmit
 
 const MintPreSaleSubmitContent: FC<{
   address?: string;

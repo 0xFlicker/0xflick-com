@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { FlickENS__factory } from "@0xflick/contracts";
-import { useWeb3 } from "features/web3";
+import { useWeb3 } from "@0xflick/feature-web3";
 import { useAppSelector } from "app/store";
 import { selectors as configSelectors } from "features/config";
 import { useSigner } from "wagmi";

@@ -1,6 +1,6 @@
 import { useAppDispatch, useAppSelector } from "app/store";
 import { useAuth } from "features/auth/hooks/useAuth";
-import { useWeb3 } from "features/web3";
+import { useWeb3 } from "@0xflick/feature-web3";
 import {
   createContext,
   FC,

@@ -2,33 +2,18 @@
   "compilerOptions": {
     "target": "ES2015",
     "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
+    "module": "NodeNext",
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "composite": true,
     "jsx": "preserve",
-    "incremental": true,
-    "baseUrl": "src/.",
-    "noImplicitAny": false,
-    "noImplicitThis": true,
-    "alwaysStrict": true,
-    "strictBindCallApply": true,
-    "strictFunctionTypes": true,
-    "strictNullChecks": false,
-    "strictPropertyInitialization": false,
     "paths": {
       "@0xflick/models": ["../../packages/models/src/index"],
       "@0xflick/backend": ["../../packages/backend/src/index"],
       "@0xflick/graphql": ["../../packages/backend/src/index"],
       "@0xflick/contracts": ["../../packages/contracts/index"],
       "@0xflick/assets": ["../../packages/assets/src/index"],
-      "@0xflick/feature-web3": ["../../packages/feature-web3/src/index"]
+      "@0xflick/utils": ["../../packages/utils/src/index"]
     },
     "plugins": [
       {
@@ -38,7 +23,7 @@
       }
     ]
   },
-  "include": ["next-env.d.ts", "ethereum.d.ts", "src/**/*.ts", "src/**/*.tsx"],
+  "include": ["ethereum.d.ts", "src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["./node_modules"],
   "references": [
     {
@@ -57,7 +42,7 @@
       "path": "../../packages/contracts"
     },
     {
-      "path": "../../packages/feature-web3"
+      "path": "../../packages/utils"
     }
   ]
 }

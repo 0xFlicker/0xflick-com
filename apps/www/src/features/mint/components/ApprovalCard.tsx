@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import { useLocale } from "locales/hooks";
 import { useAppDispatch } from "app/store";
-import { Connect, useWeb3 } from "features/web3";
+import { Connect, useWeb3 } from "@0xflick/feature-web3";
 
 import { useAuth } from "features/auth/hooks";
 import { useLazyIsFollowingQuery } from "features/twitter/api";

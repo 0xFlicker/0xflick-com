@@ -1,6 +1,6 @@
 import { FC, PropsWithChildren } from "react";
 import CssBaseline from "@mui/material/CssBaseline";
-import { Provider as Web3Provider } from "features/web3/Provider";
+import { Provider as Web3Provider } from "@0xflick/feature-web3/src/Provider";
 import { Provider as AuthProvider } from "features/auth/hooks/useAuth";
 import { ThemeProvider } from "@mui/material/styles";
 import { Provider } from "react-redux";

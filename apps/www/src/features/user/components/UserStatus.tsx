@@ -22,7 +22,11 @@ import { LoginWithTwitterButton } from "features/twitter/components/LoginWithTwi
 import { CopyToClipboardButton } from "features/faucet/components/CopyToClipboard";
 import { useManageAffiliates } from "features/affiliates/hooks/useManageAffiliates";
 import Chip from "@mui/material/Chip";
-import { useWeb3, selectors as web3Selectors, Connect } from "features/web3";
+import {
+  useWeb3,
+  selectors as web3Selectors,
+  Connect,
+} from "@0xflick/feature-web3";
 import { useAppSelector } from "app/store";
 import { WrappedLink } from "components/WrappedLink";
 
