@@ -5,13 +5,8 @@ import {
   UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { getOwner } from "../helpers";
-import {
-  EActions,
-  EResource,
-  UserModel,
-  IUser,
-  UserWithRolesModel,
-} from "@0xflick/models";
+import { UserModel, IUser, UserWithRolesModel } from "@0xflick/models";
+import { EActions, EResource } from "@0xflick/models/src/permissions";
 import { RolePermissionsDAO } from "./rolePermissions";
 import { UserRolesDAO } from "./userRoles";
 
@@ -83,7 +78,7 @@ export class UserDAO {
     }
     // Fetch all roles
     const roleIds = await userRolesDao.getAllRoleIds(address);
-    
+
     return new UserWithRolesModel({
       ...user,
       roleIds,
