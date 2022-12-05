@@ -2,5 +2,8 @@
   "name": "@0xflick/utils",
   "version": "1.0.0",
   "main": "src/index.ts",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "wagmi": "^0.8.10"
+  }
 }

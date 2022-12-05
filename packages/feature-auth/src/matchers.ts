@@ -1,9 +1,8 @@
 import {
-  EActions,
-  EResource,
   defaultAdminStrategyAll,
   isOneOfActionOnResource,
 } from "@0xflick/models";
+import { EActions, EResource } from "@0xflick/models/src/permissions";
 
 export const canSeeAdminPanel = defaultAdminStrategyAll(
   EResource.ADMIN,

@@ -2,7 +2,7 @@ import MenuList from "@mui/material/MenuList";
 import Typography from "@mui/material/Typography";
 import { FC } from "react";
 import { Main } from "./Main";
-import { useLocale } from "locales/hooks";
+import { useLocale } from "@0xflick/feature-locale";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import { UserStatus } from "features/user/components/UserStatus";

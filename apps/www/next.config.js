@@ -1,5 +1,16 @@
 const path = require("path");
-const withTM = require('next-transpile-modules')(['@0xflick/utils', '@0xflick/feature-web3', '@0xflick/backend', '@0xflick/models', '@0xflick/graphql', '@0xflick/contracts', '@0xflick/assets']);
+const withTM = require('next-transpile-modules')([
+  '@0xflick/app-store',
+  '@0xflick/feature-auth',
+  '@0xflick/feature-locale',
+  '@0xflick/feature-web3',
+  '@0xflick/backend',
+  '@0xflick/models',
+  '@0xflick/graphql',
+  '@0xflick/contracts',
+  '@0xflick/assets',
+  '@0xflick/utils',
+]);
 const { spawnSync } = require("child_process");
 
 

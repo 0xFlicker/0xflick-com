@@ -1,8 +1,8 @@
 import type { GetStaticProps } from "next";
-import enCommon from "locales/en/common.json";
-import enMint from "locales/en/mint.json";
-import enAdmin from "locales/en/admin.json";
-import enUser from "locales/en/user.json";
+import enCommon from "./en/common.json";
+import enMint from "./en/mint.json";
+import enAdmin from "./en/admin.json";
+import enUser from "./en/user.json";
 import { InitOptions } from "i18next";
 
 export const defaultI18nConfig = (): InitOptions => ({
@@ -12,7 +12,7 @@ export const defaultI18nConfig = (): InitOptions => ({
   defaultNS: "common",
   resources: {
     en: {
-      common: enCommon, 
+      common: enCommon,
       mint: enMint,
       admin: enAdmin,
       user: enUser,
@@ -23,6 +23,7 @@ export const defaultI18nConfig = (): InitOptions => ({
 export interface I18nProps {
   i18n: InitOptions;
 }
+
 export const getStaticProps: GetStaticProps<I18nProps> = async () => {
   return {
     props: {
@@ -30,3 +31,5 @@ export const getStaticProps: GetStaticProps<I18nProps> = async () => {
     },
   };
 };
+
+export * from "./hooks";

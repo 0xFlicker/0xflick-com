@@ -1,8 +1,8 @@
 import { FC } from "react";
 import { Backdrop, Box, Button, Grid, Modal, Typography } from "@mui/material";
 import Image from "next/image";
-import { Fade } from "transitions/Fade";
-import { useLocale } from "locales/hooks";
+import { Fade } from "../transitions/Fade";
+import { useLocale } from "@0xflick/feature-locale";
 
 interface IProps {
   open: boolean;

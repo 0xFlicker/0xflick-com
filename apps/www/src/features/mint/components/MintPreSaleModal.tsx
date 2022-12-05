@@ -16,8 +16,8 @@ import {
 } from "@mui/material";
 import { Refresh as RefreshIcon } from "@mui/icons-material";
 import { Fade } from "transitions/Fade";
-import { useLocale } from "locales/hooks";
-import { useAppDispatch, useAppSelector } from "app/store";
+import { useLocale } from "@0xflick/feature-locale";
+import { useAppDispatch, useAppSelector } from "@0xflick/app-store";
 import { selectors as web3Selectors } from "@0xflick/feature-web3";
 import { formatAddressShort } from "utils/formatter";
 import {

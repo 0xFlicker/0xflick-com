@@ -1,13 +1,13 @@
 import { FC, PropsWithChildren } from "react";
 import CssBaseline from "@mui/material/CssBaseline";
 import { Provider as Web3Provider } from "@0xflick/feature-web3/src/Provider";
-import { Provider as AuthProvider } from "features/auth/hooks/useAuth";
+import { Provider as AuthProvider } from "@0xflick/feature-auth/src/hooks/useAuth";
 import { ThemeProvider } from "@mui/material/styles";
 import { Provider } from "react-redux";
 import { Provider as ApolloProvider } from "graphql/Provider";
-import { Provider as LocaleProvider } from "locales/hooks";
+import { Provider as LocaleProvider } from "@0xflick/feature-locale";
 import { Provider as AffiliateProvider } from "features/affiliates/hooks/useManageAffiliates";
-import { store, useAppSelector } from "app/store";
+import { store, useAppSelector } from "@0xflick/app-store";
 import { selectors as appbarSelectors } from "features/appbar/redux";
 import { InitOptions } from "i18next";
 import dark from "themes/dark";

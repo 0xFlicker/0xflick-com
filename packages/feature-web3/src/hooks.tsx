@@ -6,7 +6,11 @@ import {
   useEffect,
   useMemo,
 } from "react";
-import { AppDispatch, useAppDispatch, useAppSelector } from "app/store";
+import {
+  AppDispatch,
+  useAppDispatch,
+  useAppSelector,
+} from "@0xflick/app-store";
 import { useAccount, useConnect, Chain, allChains, Connector } from "wagmi";
 import {
   actions as web3Actions,

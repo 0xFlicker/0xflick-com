@@ -1,7 +1,7 @@
 import Head from "next/head";
 import { Recon } from "layouts/Recon";
 import { DefaultProvider } from "context/default";
-import { getStaticProps } from "locales";
+import { getStaticProps } from "@0xflick/feature-locale";
 import { InitOptions } from "i18next";
 import { NextPage } from "next";
 

@@ -3,7 +3,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
 import InputIcon from "@mui/icons-material/Input";
 import { DarkModeSwitch } from "features/appbar/components/DarkModeSwitch";
-import { useLocale } from "locales/hooks";
+import { useLocale } from "@0xflick/feature-locale";
 import { FC } from "react";
 import { useSavedTheme } from "features/appbar/hooks";
 import ListItemIcon from "@mui/material/ListItemIcon";

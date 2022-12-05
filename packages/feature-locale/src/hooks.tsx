@@ -1,12 +1,7 @@
-import {
-  createContext,
-  FC,
-  PropsWithChildren,
-  useMemo,
-} from "react";
-import type { InitOptions } from "i18next";
+import { createContext, FC, PropsWithChildren, useMemo } from "react";
+import type { InitOptions, TFunction } from "i18next";
 import i18next from "i18next";
-import { useTranslation, initReactI18next, TFunction } from "react-i18next";
+import { useTranslation, initReactI18next } from "react-i18next";
 
 interface IContext {
   i18n?: InitOptions;

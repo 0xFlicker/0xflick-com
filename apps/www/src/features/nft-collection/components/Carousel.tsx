@@ -21,7 +21,7 @@ import {
   useScroll,
   useTexture,
 } from "@react-three/drei";
-import { useAppSelector } from "app/store";
+import { useAppSelector } from "@0xflick/app-store";
 import { selectors as appbarSelectors } from "features/appbar/redux";
 import { Minimap } from "./Minimap";
 

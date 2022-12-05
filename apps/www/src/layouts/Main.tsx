@@ -9,7 +9,7 @@ import {
 } from "react";
 import { Box, Toolbar, Typography } from "@mui/material";
 import { AppBar } from "features/appbar/components/appBar";
-import { useAppDispatch } from "app/store";
+import { useAppDispatch } from "@0xflick/app-store";
 import { actions as appbarActions } from "features/appbar/redux";
 
 export const Main: FC<

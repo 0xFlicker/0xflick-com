@@ -6,7 +6,7 @@ import { FC } from "react";
 import { Main } from "./Main";
 import { ResolverFormDemo } from "features/resolver/components/ResolverFormDemo";
 import { SiteMenu } from "features/appbar/components/SiteMenu";
-import { useLocale } from "locales/hooks";
+import { useLocale } from "@0xflick/feature-locale";
 
 export const Demo: FC = () => {
   const { t } = useLocale(["common"]);

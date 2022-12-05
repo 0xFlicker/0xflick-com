@@ -13,8 +13,8 @@ import { useWeb3 } from "@0xflick/feature-web3";
 import {
   actions as web3Actions,
   selectors as web3Selectors,
-} from "@0xflick/feature-web3/redux";
-import { useAppDispatch, useAppSelector } from "app/store";
+} from "@0xflick/feature-web3/src/redux";
+import { useAppDispatch, useAppSelector } from "@0xflick/app-store";
 import useLocalStorage from "use-local-storage";
 import { useNonce } from "./useNonce";
 import {
@@ -60,10 +60,10 @@ function useAuthContext() {
   const isWeb3Connected = useAppSelector(web3Selectors.isConnected);
   const address = useAppSelector(web3Selectors.address);
   const { data: ensName, isLoading: ensNameIsLoading } = useEnsName({
-    address: address as `0x${string}`,
+    address,
   });
   const { data: ensAvatar, isLoading: ensAvatarIsLoading } = useEnsAvatar({
-    addressOrName: address,
+    address,
   });
 
   const isUserSigningMessage = useAppSelector(

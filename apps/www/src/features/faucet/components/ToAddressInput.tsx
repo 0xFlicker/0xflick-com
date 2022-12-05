@@ -1,5 +1,5 @@
 import { TextField } from "@mui/material";
-import { useAppDispatch } from "app/store";
+import { useAppDispatch } from "@0xflick/app-store";
 import { FC, useCallback, useState } from "react";
 import { utils } from "ethers";
 import { recaptchaSlice } from "../recaptcha";

@@ -1,10 +1,10 @@
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import Button, { ButtonProps } from "@mui/material/Button";
-import { useAppDispatch, useAppSelector } from "app/store";
+import { useAppDispatch, useAppSelector } from "@0xflick/app-store";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { FC, useCallback, useState, MouseEvent } from "react";
-import { useLocale } from "locales/hooks";
+import { useLocale } from "@0xflick/feature-locale";
 import {
   actions as web3Actions,
   selectors as web3Selectors,
@@ -13,8 +13,8 @@ import {
 import { WalletModal } from "./WalletModal";
 import { WrongChainModal } from "./WrongChainModal";
 import { ConnectedDropDownModal } from "./ConnectedDropDownModal";
-import { useAuth } from "features/auth/hooks";
-import { defaultChain } from "utils/config";
+import { useAuth } from "@0xflick/feature-auth/src/hooks";
+import { defaultChain } from "@0xflick/utils";
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
 

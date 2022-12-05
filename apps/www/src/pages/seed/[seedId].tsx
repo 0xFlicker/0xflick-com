@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { defaultI18nConfig } from "locales";
+import { defaultI18nConfig } from "@0xflick/feature-locale";
 import { DefaultProvider } from "context/default";
 import type { GetStaticPaths, NextPage, GetStaticProps } from "next";
 import { BigNumber, utils } from "ethers";

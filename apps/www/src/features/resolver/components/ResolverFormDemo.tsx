@@ -3,7 +3,7 @@ import { Box, Button, LinearProgress, Typography } from "@mui/material";
 import { Formik, Form, Field } from "formik";
 import { utils } from "ethers";
 import { useSubmitPublicResolver } from "../graphql/useSubmitPublicResolver";
-import { useAppDispatch } from "app/store";
+import { useAppDispatch } from "@0xflick/app-store";
 import { actions as resolverActions } from "../redux";
 import { EmailInputForm } from "components/forms/EmailInputForm";
 import { SubdomainInputForm } from "components/forms/SubdomainInputForm";

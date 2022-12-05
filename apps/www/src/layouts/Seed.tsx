@@ -8,7 +8,7 @@ import {
 import { FancyModeSwitch } from "features/appbar/components/FancyModeSwitch";
 import { randomUint8ArrayOfLength } from "features/axolotlValley/hooks/useOffscreenCanvas";
 import { PleaseAxolotl } from "features/home/components/PleaseAxolotl";
-import { useLocale } from "locales/hooks";
+import { useLocale } from "@0xflick/feature-locale";
 import { FC, useCallback, useState } from "react";
 import { Share } from "@mui/icons-material";
 import { Main } from "./Main";

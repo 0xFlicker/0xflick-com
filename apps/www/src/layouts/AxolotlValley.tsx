@@ -8,7 +8,7 @@ import { useFancyMode } from "features/appbar/hooks";
 import { Preview } from "features/axolotlValley/components/Preview";
 import { randomUint8ArrayOfLength } from "features/axolotlValley/hooks/useOffscreenCanvas";
 import { PleaseAxolotl } from "features/home/components/PleaseAxolotl";
-import { useLocale } from "locales/hooks";
+import { useLocale } from "@0xflick/feature-locale";
 import { Main } from "./Main";
 
 export const AxolotlValley: FC = () => {

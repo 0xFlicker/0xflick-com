@@ -10,7 +10,7 @@ import MenuItem from "@mui/material/MenuItem";
 import MenuList from "@mui/material/MenuList";
 import Typography from "@mui/material/Typography";
 import CheckIcon from "@mui/icons-material/CheckCircle";
-import { useLocale } from "locales/hooks";
+import { useLocale } from "@0xflick/feature-locale";
 import { IconButton, ListItem } from "@mui/material";
 import { decorateChainImageUrl, TChain, useWeb3 } from "../hooks";
 import { supportedChains } from "utils/config";

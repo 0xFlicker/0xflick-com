@@ -1,6 +1,6 @@
 import { ListItemText, MenuItem, MenuList, Typography } from "@mui/material";
 import { FancyModeSwitch } from "features/appbar/components/FancyModeSwitch";
-import { useLocale } from "locales/hooks";
+import { useLocale } from "@0xflick/feature-locale";
 import { FC } from "react";
 import { Main } from "./Main";
 export const Recon: FC = () => {

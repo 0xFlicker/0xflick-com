@@ -1,4 +1,4 @@
-import { useAppDispatch, useAppSelector } from "app/store";
+import { useAppDispatch, useAppSelector } from "@0xflick/app-store";
 import { FC, useRef, useCallback, useEffect } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
 import { recaptchaSlice } from "../recaptcha";

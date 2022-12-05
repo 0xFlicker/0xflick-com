@@ -2,10 +2,10 @@ import { LoadingButton } from "@mui/lab";
 import { Snackbar, Typography } from "@mui/material";
 import { Send as SendIcon } from "@mui/icons-material";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
-import { useLocale } from "locales/hooks";
+import { useLocale } from "@0xflick/feature-locale";
 import { useDrinkFromFaucetMutation } from "../api";
 import { recaptchaSlice } from "../recaptcha";
-import { useAppDispatch, useAppSelector } from "app/store";
+import { useAppDispatch, useAppSelector } from "@0xflick/app-store";
 
 export const Drink: FC = () => {
   const { t } = useLocale("common");

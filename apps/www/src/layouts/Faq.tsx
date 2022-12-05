@@ -7,7 +7,7 @@ import { Main } from "./Main";
 import { useMint } from "features/mint/hooks";
 import { FAQ } from "features/home/components/FAQ";
 import { SiteMenu } from "features/appbar/components/SiteMenu";
-import { useLocale } from "locales/hooks";
+import { useLocale } from "@0xflick/feature-locale";
 
 export const Faq: FC = () => {
   const { t } = useLocale(["common"]);

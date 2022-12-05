@@ -11,8 +11,8 @@ import Snackbar from "@mui/material/Snackbar";
 import IconButton from "@mui/material/IconButton";
 import CopyIcon from "@mui/icons-material/ContentCopyRounded";
 import AddIcon from "@mui/icons-material/AddRounded";
-import { useLocale } from "locales/hooks";
-import { useAuth } from "features/auth/hooks";
+import { useLocale } from "@0xflick/feature-locale";
+import { useAuth } from "@0xflick/feature-auth/src/hooks";
 import { StatusField } from "components/StatusField";
 import {
   useIsFollowingQuery,
@@ -27,7 +27,7 @@ import {
   selectors as web3Selectors,
   Connect,
 } from "@0xflick/feature-web3";
-import { useAppSelector } from "app/store";
+import { useAppSelector } from "@0xflick/app-store";
 import { WrappedLink } from "components/WrappedLink";
 
 const MIN_HEIGHT = 320;

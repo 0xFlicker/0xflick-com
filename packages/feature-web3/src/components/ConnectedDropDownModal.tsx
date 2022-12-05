@@ -11,7 +11,7 @@ import Typography from "@mui/material/Typography";
 import LoginIcon from "@mui/icons-material/Login";
 import LogoutIcon from "@mui/icons-material/Logout";
 import ProfileIcon from "@mui/icons-material/AccountCircle";
-import { useLocale } from "locales/hooks";
+import { useLocale } from "@0xflick/feature-locale";
 import { WrappedLink } from "components/WrappedLink";
 import { ListItem } from "@mui/material";
 

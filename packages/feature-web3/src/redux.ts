@@ -149,9 +149,12 @@ const selectIsConnected = createSelector(
 );
 const selectAddress = createSelector(
   selectRoot,
-  (state) =>
-    state.accounts &&
-    (state.accounts.length > 0 ? state.accounts[0] : undefined)
+  (state): `0x${string}` | undefined => {
+    if (state.accounts.length === 0) {
+      return undefined;
+    }
+    return state.accounts[0] as `0x${string}`;
+  }
 );
 const selectCurrentChainId = createSelector(
   selectRoot,

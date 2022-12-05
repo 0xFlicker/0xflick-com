@@ -4,11 +4,11 @@ import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
 import CardHeader from "@mui/material/CardHeader";
 import Typography from "@mui/material/Typography";
-import { useAppSelector } from "app/store";
+import { useAppSelector } from "@0xflick/app-store";
 import { useHasAllowedAction } from "features/auth/hooks";
 import { canPreSaleMint } from "features/auth/matchers";
 import { selectors as web3Selectors } from "@0xflick/feature-web3";
-import { useLocale } from "locales/hooks";
+import { useLocale } from "@0xflick/feature-locale";
 import { FC, useCallback, useState } from "react";
 import {
   useTotalSupply,

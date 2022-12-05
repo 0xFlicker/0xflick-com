@@ -1,9 +1,9 @@
 import Grid2 from "@mui/material/Unstable_Grid2";
 import Typography from "@mui/material/Typography";
-import { useLocale } from "locales/hooks";
+import { useLocale } from "@0xflick/feature-locale";
 import { FC } from "react";
 import { LinkCard } from "../components/LinkCard";
-import { useAppSelector } from "app/store";
+import { useAppSelector } from "@0xflick/app-store";
 import { selectors as appBarSelectors } from "features/appbar/redux";
 
 const defaultCardMediaProps = {

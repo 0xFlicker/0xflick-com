@@ -9,7 +9,7 @@ import {
   CardMedia,
   Typography,
 } from "@mui/material";
-import { useAppSelector } from "app/store";
+import { useAppSelector } from "@0xflick/app-store";
 import { selectors as nameflickSelectors } from "../redux";
 import { tokenToUrl, tokenToStatusDescription } from "../utils";
 import { FlickLink } from "components/FlickLink";

@@ -1,5 +1,5 @@
 import { Box, Typography, CircularProgress } from "@mui/material";
-import { useLocale } from "locales/hooks";
+import { useLocale } from "@0xflick/feature-locale";
 import { FC } from "react";
 import {
   CheckCircle as CheckCircleIcon,

@@ -1,6 +1,6 @@
 import { useEffect, useCallback } from "react";
 import useLocalStorage from "use-local-storage";
-import { useAppDispatch, useAppSelector } from "app/store";
+import { useAppDispatch, useAppSelector } from "@0xflick/app-store";
 import {
   selectors as appbarSelectors,
   actions as appbarActions,

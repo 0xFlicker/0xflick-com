@@ -6,9 +6,7 @@ import { reducer as configReducer } from "features/config/redux";
 import { reducer as mintReducer } from "features/mint/redux";
 import { reducer as mintApiReducer } from "features/mint/api";
 import { reducer as recaptchaReducer } from "features/faucet/recaptcha";
-import { reducer as authReducer } from "features/auth/redux";
-import { reducer as authApiReducer } from "features/auth/api";
-// import { reducer as adminApiReducer } from "features/admin/api";
+import { reducer as authReducer } from "@0xflick/feature-auth/src/redux";
 import { reducer as appbarReducer } from "features/appbar/redux";
 import { reducer as nftCollectionApiReducer } from "features/nft-collection/api";
 import { reducer as twitterApiReducer } from "features/twitter/api";
@@ -23,8 +21,6 @@ export const store = configureStore({
     mintApi: mintApiReducer,
     recaptcha: recaptchaReducer,
     auth: authReducer,
-    authApi: authApiReducer,
-    // adminApi: adminApiReducer,
     appbar: appbarReducer,
     apiNftCollection: nftCollectionApiReducer,
     twitterApi: twitterApiReducer,

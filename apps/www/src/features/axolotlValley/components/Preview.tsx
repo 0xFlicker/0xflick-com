@@ -6,7 +6,7 @@ import {
 } from "@0xflick/assets";
 import useResizeObserver from "@react-hook/resize-observer";
 import { utils } from "ethers";
-import { useAppSelector } from "app/store";
+import { useAppSelector } from "@0xflick/app-store";
 import { selectors as configSelectors } from "features/config/redux";
 import { Line } from "@react-three/drei";
 import { LinearProgress, Paper } from "@mui/material";

@@ -10,7 +10,7 @@ import {
   Typography,
 } from "@mui/material";
 import { TransitionProps } from "@mui/material/transitions";
-import { useLocale } from "locales/hooks";
+import { useLocale } from "@0xflick/feature-locale";
 import Fade from "@mui/material/Fade";
 
 interface IProps {

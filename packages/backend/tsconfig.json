@@ -17,7 +17,7 @@
     "strictFunctionTypes": true,
     "strictNullChecks": false
   },
-  "include": ["**/*.ts", "../models/src/message.ts"],
+  "include": ["**/*.ts"],
   "exclude": ["**/node_modules", "**/.*/", "dist", "build"],
   "references": [
     {

@@ -1,4 +1,8 @@
-import { useAppDispatch, useAppSelector, AppDispatch } from "app/store";
+import {
+  useAppDispatch,
+  useAppSelector,
+  AppDispatch,
+} from "@0xflick/app-store";
 import { useERC721 } from "features/nfts/hooks";
 import { useCallback, useEffect, useReducer } from "react";
 import { selectors as web3Selectors } from "@0xflick/feature-web3";

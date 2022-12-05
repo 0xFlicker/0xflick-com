@@ -1,6 +1,6 @@
 import Grid from "@mui/material/Grid";
 import MenuList from "@mui/material/MenuList";
-import { useLocale } from "locales/hooks";
+import { useLocale } from "@0xflick/feature-locale";
 import { FC } from "react";
 import { Main } from "./Main";
 import { useSavedTheme } from "features/appbar/hooks";

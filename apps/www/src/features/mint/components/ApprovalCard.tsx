@@ -9,8 +9,8 @@ import {
   Typography,
   LinearProgress,
 } from "@mui/material";
-import { useLocale } from "locales/hooks";
-import { useAppDispatch } from "app/store";
+import { useLocale } from "@0xflick/feature-locale";
+import { useAppDispatch } from "@0xflick/app-store";
 import { Connect, useWeb3 } from "@0xflick/feature-web3";
 
 import { useAuth } from "features/auth/hooks";

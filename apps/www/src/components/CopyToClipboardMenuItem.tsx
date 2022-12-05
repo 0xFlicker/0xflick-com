@@ -7,7 +7,7 @@ import {
   Snackbar,
 } from "@mui/material";
 import { useState } from "react";
-import { useLocale } from "locales/hooks";
+import { useLocale } from "@0xflick/feature-locale";
 
 export const CopyToClipboardMenuItem: FC<
   PropsWithChildren<{

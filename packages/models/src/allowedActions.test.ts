@@ -1,4 +1,4 @@
-import { EActions, EResource } from "@0xflick/models";
+import { EActions, EResource } from "./permissions";
 import {
   defaultAdminHandlingForResource,
   isActionOnResource,

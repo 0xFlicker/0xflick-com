@@ -14,7 +14,7 @@ import {
   INameflick,
   INameflickToken,
   subdomainFromEnsName,
-} from "@0xflick/models";
+} from "@0xflick/models/src/nameflick";
 import { RecordUpdate } from "./RecordUpdate";
 import { RecordCreate, TValues } from "./RecordCreate";
 import { utils } from "ethers";

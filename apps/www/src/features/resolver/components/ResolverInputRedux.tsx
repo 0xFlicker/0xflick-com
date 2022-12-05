@@ -1,5 +1,5 @@
 import { ChangeEventHandler, FC, useCallback } from "react";
-import { useAppDispatch, useAppSelector } from "app/store";
+import { useAppDispatch, useAppSelector } from "@0xflick/app-store";
 import {
   Box,
   Input,

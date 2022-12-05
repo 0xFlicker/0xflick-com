@@ -15,7 +15,7 @@ import { PreSaleMintCard } from "features/mint";
 import { TokenDescription } from "../features/mint/components/TokenDescription";
 import { PresaleWhatNextCard } from "features/mint/components/PresaleWhatNextCard";
 import { SiteMenu } from "features/appbar/components/SiteMenu";
-import { useLocale } from "locales/hooks";
+import { useLocale } from "@0xflick/feature-locale";
 
 export const PreSaleSignup: FC<{ affiliate?: string }> = ({ affiliate }) => {
   const { t } = useLocale(["common"]);

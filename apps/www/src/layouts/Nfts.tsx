@@ -1,11 +1,11 @@
 import { FC, useCallback, useState } from "react";
 import MenuList from "@mui/material/MenuList";
-import { useAppSelector } from "app/store";
+import { useAppSelector } from "@0xflick/app-store";
 import { Carousel } from "features/nft-collection/components/Carousel";
 import { useGetNftCollectionQuery } from "features/nft-collection/api";
 import { INfts } from "@0xflick/models";
 import { Main } from "./Main";
-import { useLocale } from "locales/hooks";
+import { useLocale } from "@0xflick/feature-locale";
 import { selectors as appbarSelectors } from "features/appbar/redux";
 import { randomUint8ArrayOfLength } from "features/axolotlValley/hooks/useOffscreenCanvas";
 import { SiteMenu } from "features/appbar/components/SiteMenu";

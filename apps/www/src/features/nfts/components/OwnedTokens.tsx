@@ -2,7 +2,7 @@ import { FC, useEffect, useState } from "react";
 import { useERC721 } from "../hooks";
 
 import CardGrid from "./CardGrid";
-import { useAppSelector } from "app/store";
+import { useAppSelector } from "@0xflick/app-store";
 import { selectors as web3Selectors } from "@0xflick/feature-web3";
 
 import styles from "./OwnedTokens.module.css";

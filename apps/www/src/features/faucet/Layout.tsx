@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { Typography, Container, Paper, Box } from "@mui/material";
-import { useLocale } from "locales/hooks";
+import { useLocale } from "@0xflick/feature-locale";
 import { ReCaptcha } from "./components/ReCaptcha";
 import { Drink } from "./components/Drink";
 import { ToAddressInput } from "./components/ToAddressInput";

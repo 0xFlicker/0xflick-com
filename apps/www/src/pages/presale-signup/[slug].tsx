@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { defaultI18nConfig, I18nProps } from "locales";
+import { defaultI18nConfig, I18nProps } from "@0xflick/feature-locale";
 import { DefaultProvider } from "context/default";
 import { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import { PreSaleSignup } from "layouts/PreSaleSignup";

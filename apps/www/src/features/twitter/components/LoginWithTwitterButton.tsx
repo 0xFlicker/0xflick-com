@@ -2,7 +2,7 @@ import { FC } from "react";
 import { Button } from "@mui/material";
 import { Twitter as TwitterIcon } from "@mui/icons-material";
 import { useRouter } from "next/router";
-import { useLocale } from "locales/hooks";
+import { useLocale } from "@0xflick/feature-locale";
 
 export const LoginWithTwitterButton: FC<{ disabled?: boolean }> = ({
   disabled,
