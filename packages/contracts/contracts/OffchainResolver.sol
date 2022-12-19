@@ -4,7 +4,7 @@ pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./IERC721AQueryable.sol";
-import "./IExtendedResolver.sol";
+import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IExtendedResolver.sol";
 import "./SignatureVerifier.sol";
 
 interface IResolverService {
@@ -74,7 +74,7 @@ contract OffchainResolver is IExtendedResolver, ERC165, Ownable {
     external
     view
     override
-    returns (bytes memory)
+    returns (bytes memory, address)
   {
     bytes memory callData = abi.encodeWithSelector(
       IResolverService.resolve.selector,

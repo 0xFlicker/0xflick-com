@@ -24,12 +24,16 @@
     "strictPropertyInitialization": false,
     "paths": {
       "@0xflick/app-store": ["../../packages/app-store/src/index"],
+      "@0xflick/components/*": ["../../packages/components/src/*"],
       "@0xflick/models": ["../../packages/models/src/index"],
       "@0xflick/backend": ["../../packages/backend/src/index"],
       "@0xflick/graphql": ["../../packages/backend/src/index"],
       "@0xflick/contracts": ["../../packages/contracts/index"],
       "@0xflick/assets": ["../../packages/assets/src/index"],
       "@0xflick/feature-auth": ["../../packages/feature-auth/src/index"],
+      "@0xflick/feature-contract": [
+        "../../packages/feature-contract/src/index"
+      ],
       "@0xflick/feature-web3": ["../../packages/feature-web3/src/index"],
       "@0xflick/utils": ["../../packages/utils/src/index"]
     },
@@ -48,6 +52,9 @@
       "path": "../../packages/app-store"
     },
     {
+      "path": "../../packages/components"
+    },
+    {
       "path": "../../packages/models"
     },
     {
@@ -64,6 +71,9 @@
     },
     {
       "path": "../../packages/feature-auth"
+    },
+    {
+      "path": "../../packages/feature-contract"
     },
     {
       "path": "../../packages/feature-web3"

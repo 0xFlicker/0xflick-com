@@ -21,7 +21,7 @@ export const PreSaleSignup: FC<{ affiliate?: string }> = ({ affiliate }) => {
   const { t } = useLocale(["common"]);
   const canPreSale = useHasAllowedAction(canPreSaleMint);
   useMint();
-  const { handleChange: handleThemeChange } = useSavedTheme();
+  const { toggleTheme: handleThemeChange } = useSavedTheme();
   return (
     <Main
       menu={

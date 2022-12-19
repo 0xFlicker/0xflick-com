@@ -1,22 +1,21 @@
 import { TextField } from "@mui/material";
-import { useAppDispatch } from "@0xflick/app-store";
 import { FC, useCallback, useState } from "react";
 import { utils } from "ethers";
-import { recaptchaSlice } from "../recaptcha";
 
-export const ToAddressInput: FC = () => {
-  const dispatch = useAppDispatch();
+export const ToAddressInput: FC<{
+  handleAddress: (value: string) => void;
+}> = ({ handleAddress }) => {
   const [isBad, setIsBad] = useState(false);
   const onChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       if (!utils.isAddress(e.target.value)) {
-        dispatch(recaptchaSlice.actions.to(""));
+        handleAddress("");
         return setIsBad(true);
       }
       setIsBad(false);
-      dispatch(recaptchaSlice.actions.to(e.target.value));
+      handleAddress(e.target.value);
     },
-    [dispatch]
+    [handleAddress]
   );
   return (
     <TextField

@@ -16,7 +16,9 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 // import { HeroBackground } from "./HeroBackground";
 import { useSpring, animated, config } from "react-spring";
-import { LinkCollection } from "components/LinkCollection";
+import { LinkCollection } from "@0xflick/components/src/LinkCollection";
+import { useAppSelector } from "@0xflick/app-store";
+import { useSavedTheme } from "features/appbar/hooks";
 
 const SlideFromSide: FC<
   PropsWithChildren<{
@@ -26,6 +28,7 @@ const SlideFromSide: FC<
 > = ({ children, right, scrollY }) => {
   const rotationLength = 90;
   const elRef = useRef<HTMLDivElement>(null);
+
   const [state, setState] = useState<{
     inView: boolean;
     positionAtEnter: number;
@@ -178,6 +181,7 @@ export const Hero: FC = () => {
   //   event.preventDefault();
   // }, []);
   // Center the hero text vertically and horizontally.
+  const { isDarkMode } = useSavedTheme();
   const parallaxStyleCenter: CSSProperties = useMemo(
     () => ({
       display: "flex",
@@ -266,7 +270,7 @@ export const Hero: FC = () => {
         </ParallaxLayer>
         <ParallaxLayer offset={3} speed={0} factor={1}>
           <Container maxWidth="xl">
-            <LinkCollection />
+            <LinkCollection isDarkMode={isDarkMode} />
           </Container>
         </ParallaxLayer>
         {/* <ParallaxLayer sticky={{ start: 3, end: 4.4 }} speed={0} factor={1}>

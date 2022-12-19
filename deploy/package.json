@@ -7,6 +7,8 @@
   "scripts": {
     "build": "tsc",
     "cdk": " node --experimental-json-modules ./node_modules/.bin/cdk",
+    "cdk:0xflick": "AWS_PROFILE=0xflick-portfolio-admin DEPLOYMENT=0xflick.com node --experimental-json-modules ./node_modules/.bin/cdk",
+    "cdk:nameflick": "AWS_PROFILE=nameflick DEPLOYMENT=nameflick.com node --experimental-json-modules ./node_modules/.bin/cdk",
     "deploy:0xflick": "AWS_PROFILE=0xflick-portfolio-admin DEPLOYMENT=0xflick.com node --experimental-json-modules ./node_modules/.bin/cdk deploy",
     "deploy:nameflick": "AWS_PROFILE=nameflick DEPLOYMENT=nameflick.com node --experimental-json-modules ./node_modules/.bin/cdk deploy",
     "bootstrap": "yarn cdk --app \"node --loader ts-node/esm stack/bootstrap.ts\" bootstrap",
@@ -31,7 +33,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "aws-cdk": "^2.32.1",
+    "aws-cdk": "^2.55.1",
     "jose": "^4.8.3"
   }
 }

@@ -1,0 +1,14 @@
+{
+  "name": "@0xflick/components",
+  "version": "1.0.0",
+  "description": "Common React components",
+  "exports": {
+    "./src/*": "./src/*"
+  },
+  "author": "0xflick <github@0xflick.xyz>",
+  "license": "MIT",
+  "dependencies": {
+    "@mui/material": "^5.11.0",
+    "react": "^18.2.0"
+  }
+}

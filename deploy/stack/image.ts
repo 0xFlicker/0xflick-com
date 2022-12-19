@@ -26,7 +26,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export class ImageStack extends cdk.Stack {
   public readonly api: apigateway.RestApi;
   constructor(scope: cdk.Stage, id: string, props: ImageProps) {
-    const { domain, infuraIpfsAuth, corsAllowedOrigins, rootDomain, ...rest } = props;
+    const { domain, infuraIpfsAuth, corsAllowedOrigins, rootDomain, ...rest } =
+      props;
     super(scope, id, rest);
 
     // Fetch table names from SSM Parameter Store
@@ -221,7 +222,7 @@ export class ImageStack extends cdk.Stack {
         "https://localhost:9000",
         `https://${rootDomain}`,
       ],
-      allowMethods: ["GET", "OPTION"],
+      allowMethods: ["GET"],
     });
     axolotlResource.addMethod(
       "GET",
@@ -270,7 +271,7 @@ export class ImageStack extends cdk.Stack {
         "https://localhost:9000",
         `https://${rootDomain}`,
       ],
-      allowMethods: ["GET", "OPTION"],
+      allowMethods: ["GET"],
     });
     nameflickImageResource.addMethod(
       "GET",
@@ -378,6 +379,9 @@ export class ImageStack extends cdk.Stack {
     });
     new cdk.CfnOutput(this, "imageBucket", {
       value: resizerBucket.bucketName,
+    });
+    new cdk.CfnOutput(this, "nameflickImageBucket", {
+      value: nameflickImageBucket.bucketName,
     });
     new cdk.CfnOutput(this, "axolotlHttpApi", {
       value: axolotlHttpApi.url,

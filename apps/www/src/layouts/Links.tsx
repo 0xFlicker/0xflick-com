@@ -1,7 +1,5 @@
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
-import ListItemText from "@mui/material/ListItemText";
-import MenuItem from "@mui/material/MenuItem";
 import MenuList from "@mui/material/MenuList";
 import Typography from "@mui/material/Typography";
 import { useLocale } from "@0xflick/feature-locale";
@@ -9,8 +7,7 @@ import { FC } from "react";
 import { Main } from "./Main";
 import { useSavedTheme } from "features/appbar/hooks";
 import { useAppSelector } from "@0xflick/app-store";
-import { selectors as appBarSelectors } from "features/appbar/redux";
-import { LinkCollection } from "components/LinkCollection";
+import { LinkCollection } from "@0xflick/components/src/LinkCollection";
 import { SiteMenu } from "features/appbar/components/SiteMenu";
 
 const defaultCardMediaProps = {
@@ -34,8 +31,7 @@ const defaultGridBreakpoints = {
 
 export const Links: FC = () => {
   const { t } = useLocale(["common"]);
-  const isDarkMode = useAppSelector(appBarSelectors.darkMode);
-  const { handleChange: handleThemeChange } = useSavedTheme();
+  const { toggleTheme: handleThemeChange, isDarkMode } = useSavedTheme();
   return (
     <Main
       menu={
@@ -65,7 +61,7 @@ export const Links: FC = () => {
             alignContent: "center",
           }}
         >
-          <LinkCollection />
+          <LinkCollection isDarkMode={isDarkMode} />
         </Box>
       </Container>
     </Main>

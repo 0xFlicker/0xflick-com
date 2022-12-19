@@ -12,7 +12,7 @@ import {
 import { useAppSelector } from "@0xflick/app-store";
 import { selectors as nameflickSelectors } from "../redux";
 import { tokenToUrl, tokenToStatusDescription } from "../utils";
-import { FlickLink } from "components/FlickLink";
+import { FlickLink } from "@0xflick/components/src/FlickLink";
 
 export const ListNameflickManage: FC = () => {
   const ownedTokens = useAppSelector(nameflickSelectors.ownedTokens);

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.9 <0.9.0;
 import "@openzeppelin/contracts/utils/Strings.sol";
+import "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
 import "./ITokenURIGenerator.sol";
 
 contract ExampleTokenUri is ITokenURIGenerator {

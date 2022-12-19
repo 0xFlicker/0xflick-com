@@ -16,7 +16,7 @@ import { Preview } from "features/axolotlValley/components/Preview";
 import { useRouter } from "next/router";
 import { utils } from "ethers";
 import { useSavedTheme, useFancyMode } from "features/appbar/hooks";
-import { CopyToClipboardMenuItem } from "components/CopyToClipboardMenuItem";
+import { CopyToClipboardMenuItem } from "@0xflick/components/src/CopyToClipboardMenuItem";
 import { SiteMenu } from "features/appbar/components/SiteMenu";
 
 export const Seed: FC<{ seed?: Uint8Array }> = ({ seed }) => {
@@ -27,7 +27,7 @@ export const Seed: FC<{ seed?: Uint8Array }> = ({ seed }) => {
     const newSeedStr = utils.hexlify(newSeed);
     router.push(`/seed/${newSeedStr}`);
   }, [router]);
-  const { handleChange: handleThemeChange } = useSavedTheme();
+  const { toggleTheme: handleThemeChange } = useSavedTheme();
   const { isFancyMode, handleChange: handleFancyChange } = useFancyMode();
   return (
     <Main

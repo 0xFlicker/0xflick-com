@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useState } from "react";
 import { Typography, Container, Paper, Box } from "@mui/material";
 import { useLocale } from "@0xflick/feature-locale";
 import { ReCaptcha } from "./components/ReCaptcha";
@@ -7,6 +7,9 @@ import { ToAddressInput } from "./components/ToAddressInput";
 
 export const Layout: FC = () => {
   const { t } = useLocale("common");
+  const [txHash, setTxHash] = useState<string | null>(null);
+  const [token, setToken] = useState("");
+  const [to, setTo] = useState("");
   return (
     <>
       <main>
@@ -25,17 +28,17 @@ export const Layout: FC = () => {
             </Box>
 
             <Box display="flex" justifyContent="center">
-              <ReCaptcha />
+              <ReCaptcha handleRecaptchaChange={setToken} txHash={txHash} />
             </Box>
             <Box
               display="flex"
               justifyContent="center"
               sx={{ py: 2, px: 8, m: "auto" }}
             >
-              <ToAddressInput />
+              <ToAddressInput handleAddress={setTo} />
             </Box>
             <Box display="flex" justifyContent="center" sx={{ pb: 4 }}>
-              <Drink />
+              <Drink setTxHash={setTxHash} to={to} token={token} />
             </Box>
           </Paper>
         </Container>

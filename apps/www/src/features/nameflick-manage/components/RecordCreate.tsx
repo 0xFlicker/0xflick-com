@@ -2,9 +2,9 @@ import { FC, useMemo } from "react";
 import { Box, Button, LinearProgress } from "@mui/material";
 import { Formik, Form, Field } from "formik";
 import { utils } from "ethers";
-import { EmailInputForm } from "components/forms/EmailInputForm";
-import { SubdomainInputForm } from "components/forms/SubdomainInputForm";
-import { EthereumAddressInput } from "components/forms/EthereumAddressInput";
+import { EmailInputForm } from "@0xflick/components/src/forms/EmailInputForm";
+import { SubdomainInputForm } from "@0xflick/components/src/forms/SubdomainInputForm";
+import { EthereumAddressInput } from "@0xflick/components/src/forms/EthereumAddressInput";
 import {
   INameflick,
   subdomainFromEnsName,

@@ -5,7 +5,7 @@ import {
   useThree,
   useFrame,
 } from "@react-three/fiber";
-import { FrameLimiter } from "components/threeFiber/FrameLimiter";
+import { FrameLimiter } from "@0xflick/components/src/threeFiber/FrameLimiter";
 import {
   Box,
   Cylinder,

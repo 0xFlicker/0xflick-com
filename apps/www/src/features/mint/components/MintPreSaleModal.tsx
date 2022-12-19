@@ -25,17 +25,12 @@ import {
   usePreSaleMaxMintPerAccount,
   usePreSaleActive,
 } from "../hooks";
-import {
-  MintPreSaleModalStep,
-  actions as mintActions,
-  selectors as mintSelectors,
-} from "../redux";
 import { useLazyPreSaleSignatureQuery } from "../api";
 import { FetchBaseQueryError, skipToken } from "@reduxjs/toolkit/query";
 import { SerializedError } from "@reduxjs/toolkit";
 import { useERC721 } from "features/nfts/hooks";
 import { utils } from "ethers";
-import { useSavedToken, useAuth } from "features/auth/hooks";
+import { useSavedToken, useAuth } from "@0xflick/feature-auth/src/hooks";
 
 const MintPreSaleSubmitContent: FC<{
   address?: string;
@@ -133,6 +128,19 @@ export enum MintPreSaleCloseReason {
   CANCELLED_DURING_TRANSACTION = "cancelled_during_transaction",
 }
 
+enum MintPreSaleModalStep {
+  UNKNOWN = "UNKNOWN",
+  AUTHENTICATE = "AUTHENTICATE",
+  IS_ACTIVE = "IS_ACTIVE",
+  ALLOCATION = "ALLOCATION",
+  SIGNATURE = "SIGNATURE",
+  SUBMIT = "SUBMIT",
+  TRANSACTION = "TRANSACTION",
+  SUCCESS = "SUCCESS",
+  FAILED = "FAILED",
+  REJECTED = "REJECTED",
+}
+
 interface IProps {
   open: boolean;
   handleClose: (reason?: MintPreSaleCloseReason) => void;
@@ -143,19 +151,14 @@ export const MintPreSaleModal: FC<IProps> = ({ open, handleClose }) => {
   const { signIn, isAuthenticated, isAnonymous } = useAuth();
   const [submitAbortController, setSubmitAbortController] =
     useState<AbortController>();
-  const step = useAppSelector(mintSelectors.preSaleStep);
+  const [step, setStep] = useState<MintPreSaleModalStep>(
+    MintPreSaleModalStep.UNKNOWN
+  );
   const { contract } = useERC721(true);
   const address = useAppSelector(web3Selectors.address);
-  const dispatch = useAppDispatch();
   const [amount, setAmount] = useState(0);
   const [txHash, setTxHash] = useState<string | undefined>();
 
-  const setStep = useCallback(
-    (step: MintPreSaleModalStep) => {
-      dispatch(mintActions.preSaleStep(step));
-    },
-    [dispatch]
-  );
   useEffect(() => {
     if (step === MintPreSaleModalStep.UNKNOWN) {
       if (isAuthenticated) {

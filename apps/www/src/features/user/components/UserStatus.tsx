@@ -13,7 +13,7 @@ import CopyIcon from "@mui/icons-material/ContentCopyRounded";
 import AddIcon from "@mui/icons-material/AddRounded";
 import { useLocale } from "@0xflick/feature-locale";
 import { useAuth } from "@0xflick/feature-auth/src/hooks";
-import { StatusField } from "components/StatusField";
+import { StatusField } from "@0xflick/components/src/StatusField";
 import {
   useIsFollowingQuery,
   useLazyIsFollowingQuery,
@@ -28,7 +28,7 @@ import {
   Connect,
 } from "@0xflick/feature-web3";
 import { useAppSelector } from "@0xflick/app-store";
-import { WrappedLink } from "components/WrappedLink";
+import { WrappedLink } from "@0xflick/components/src/WrappedLink";
 
 const MIN_HEIGHT = 320;
 const UserLoginCard: FC = () => {

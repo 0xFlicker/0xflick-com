@@ -3,10 +3,10 @@ import { FC, useRef, useCallback, useEffect } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
 import { recaptchaSlice } from "../recaptcha";
 
-export const ReCaptcha: FC = () => {
-  const dispatch = useAppDispatch();
-  const txHash = useAppSelector((state) => state.recaptcha.txHash);
-
+export const ReCaptcha: FC<{
+  handleRecaptchaChange: (value: string | null) => void;
+  txHash?: string;
+}> = ({ handleRecaptchaChange, txHash }) => {
   const recaptchaRef = useRef<ReCAPTCHA>(null);
   useEffect(() => {
     if (recaptchaRef.current) {
@@ -16,12 +16,10 @@ export const ReCaptcha: FC = () => {
 
   const onReCAPTCHAChange = useCallback(
     (value: string | null) => {
-      if (value) {
-        return dispatch(recaptchaSlice.actions.token(value));
-      }
+      handleRecaptchaChange(value);
       recaptchaRef.current?.reset();
     },
-    [dispatch]
+    [handleRecaptchaChange]
   );
 
   return (

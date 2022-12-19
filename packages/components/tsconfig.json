@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "ES2015",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "module": "NodeNext",
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "composite": true,
+    "jsx": "preserve",
+    "paths": {},
+    "plugins": []
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["./node_modules"],
+  "references": []
+}

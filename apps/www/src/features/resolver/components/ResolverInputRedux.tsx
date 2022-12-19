@@ -14,6 +14,10 @@ import {
 } from "../redux";
 import { Diamond } from "@mui/icons-material";
 
+/*
+ * FIXME: stop using redux
+ */
+
 export const ResolverInput: FC = () => {
   const dispatch = useAppDispatch();
   const domain = useAppSelector(resolverSelectors.domain);

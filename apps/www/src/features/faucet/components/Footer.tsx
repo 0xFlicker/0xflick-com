@@ -2,7 +2,6 @@ import { FC } from "react";
 import { Container, Box, Typography } from "@mui/material";
 import { ContentCopyRounded as CopyIcon } from "@mui/icons-material";
 import { CopyToClipboardButton } from "./CopyToClipboard";
-import { AddRpc } from "./AddRpc";
 import { Follow } from "./Follow";
 
 export const Footer: FC = () => {
@@ -30,10 +29,6 @@ export const Footer: FC = () => {
             >
               0xflick.eth
             </CopyToClipboardButton>
-          </Typography>
-          <Typography variant="body1">
-            Need a sepolia testnet RPC? Here is a free one
-            <AddRpc />
           </Typography>
           <Typography variant="body1" mt="8px">
             IP address hashed anonymously and stored temporarily to rate limit

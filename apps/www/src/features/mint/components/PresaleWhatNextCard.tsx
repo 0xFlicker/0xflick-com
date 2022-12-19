@@ -3,7 +3,7 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardHeader from "@mui/material/CardHeader";
 import Typography from "@mui/material/Typography";
-import { WrappedLink } from "components/WrappedLink";
+import { WrappedLink } from "@0xflick/components/src/WrappedLink";
 
 export const PresaleWhatNextCard: FC = () => {
   return (

@@ -8,10 +8,10 @@ import { Provider as ApolloProvider } from "graphql/Provider";
 import { Provider as LocaleProvider } from "@0xflick/feature-locale";
 import { Provider as AffiliateProvider } from "features/affiliates/hooks/useManageAffiliates";
 import { store, useAppSelector } from "@0xflick/app-store";
-import { selectors as appbarSelectors } from "features/appbar/redux";
 import { InitOptions } from "i18next";
 import dark from "themes/dark";
 import light from "themes/light";
+import { useSavedTheme } from "features/appbar/hooks";
 
 export const StateWithWebContent: FC<PropsWithChildren<{}>> = ({
   children,
@@ -25,7 +25,7 @@ export const StateWithWebContent: FC<PropsWithChildren<{}>> = ({
 export const StateAvailableContent: FC<PropsWithChildren<{}>> = ({
   children,
 }) => {
-  const isDarkMode = useAppSelector(appbarSelectors.darkMode);
+  const { isDarkMode } = useSavedTheme();
   return (
     <ApolloProvider>
       <ThemeProvider theme={isDarkMode ? dark : light}>

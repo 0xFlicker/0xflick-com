@@ -7,7 +7,7 @@ import { useLocale } from "@0xflick/feature-locale";
 import { FC } from "react";
 import { useSavedTheme } from "features/appbar/hooks";
 import ListItemIcon from "@mui/material/ListItemIcon";
-import { WrappedLink } from "components/WrappedLink";
+import { WrappedLink } from "@0xflick/components/src/WrappedLink";
 
 export const SiteMenu: FC<{
   // Yeah need to do a real sitemap and route stuff...
@@ -17,7 +17,7 @@ export const SiteMenu: FC<{
   isSignup?: boolean;
 }> = ({ isDemo = false, isFaq = false, isLinks = false, isSignup = false }) => {
   const { t } = useLocale(["common"]);
-  const { handleChange: handleThemeChange, isDarkMode } = useSavedTheme();
+  const { toggleTheme: handleThemeChange, isDarkMode } = useSavedTheme();
   return (
     <>
       <MenuItem component={WrappedLink} href="/demo" disabled={isDemo}>

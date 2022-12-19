@@ -1,5 +1,4 @@
 import { FC, useEffect } from "react";
-import Head from "next/head";
 
 export const Follow: FC = () => {
   return (

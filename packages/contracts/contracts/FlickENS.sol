@@ -28,7 +28,7 @@ import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "./INameflickNFT.sol";
 import "./ITokenURIGenerator.sol";
-import "./IExtendedResolver.sol";
+import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IExtendedResolver.sol";
 import "hardhat/console.sol";
 
 interface IExtendedResolverWithProof {

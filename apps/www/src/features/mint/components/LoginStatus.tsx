@@ -6,7 +6,7 @@ import {
   Cancel as CancelIcon,
 } from "@mui/icons-material";
 import { useAuth } from "features/auth/hooks";
-import { StatusField } from "components/StatusField";
+import { StatusField } from "@0xflick/components/src/StatusField";
 
 export const LoginStatus: FC = () => {
   const { t } = useLocale("common");

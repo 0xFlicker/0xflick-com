@@ -3,11 +3,9 @@ import { Box, Button, LinearProgress, Typography } from "@mui/material";
 import { Formik, Form, Field } from "formik";
 import { utils } from "ethers";
 import { useSubmitPublicResolver } from "../graphql/useSubmitPublicResolver";
-import { useAppDispatch } from "@0xflick/app-store";
-import { actions as resolverActions } from "../redux";
-import { EmailInputForm } from "components/forms/EmailInputForm";
-import { SubdomainInputForm } from "components/forms/SubdomainInputForm";
-import { EthereumAddressInput } from "components/forms/EthereumAddressInput";
+import { EmailInputForm } from "@0xflick/components/src/forms/EmailInputForm";
+import { SubdomainInputForm } from "@0xflick/components/src/forms/SubdomainInputForm";
+import { EthereumAddressInput } from "@0xflick/components/src/forms/EthereumAddressInput";
 
 interface IValues {
   subdomain: string;
@@ -15,9 +13,8 @@ interface IValues {
   textRecordEmail: string;
 }
 const SubDomainComponent = SubdomainInputForm("public.nameflick.eth");
-export const ResolverFormDemo: FC = () => {
+export const ResolverFormDemo: FC<{ onDone: () => void }> = ({ onDone }) => {
   const { submit, etherscan } = useSubmitPublicResolver();
-  const dispatch = useAppDispatch();
 
   return (
     <>
@@ -57,7 +54,7 @@ export const ResolverFormDemo: FC = () => {
             },
           }).then(() => {
             setSubmitting(false);
-            dispatch(resolverActions.close());
+            onDone();
           });
         }}
       >

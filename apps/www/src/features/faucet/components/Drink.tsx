@@ -4,18 +4,18 @@ import { Send as SendIcon } from "@mui/icons-material";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale } from "@0xflick/feature-locale";
 import { useDrinkFromFaucetMutation } from "../api";
-import { recaptchaSlice } from "../recaptcha";
-import { useAppDispatch, useAppSelector } from "@0xflick/app-store";
 
-export const Drink: FC = () => {
+export const Drink: FC<{
+  token: string;
+  to: string;
+  setTxHash: (txHash: string) => void;
+}> = ({ token, to, setTxHash }) => {
   const { t } = useLocale("common");
   const [open, setOpen] = useState(false);
   const [errorOpen, setErrorOpen] = useState(false);
-  const dispatch = useAppDispatch();
   const [requestDrink, { data, error, isLoading }] =
+    // FIXME: use graphql
     useDrinkFromFaucetMutation();
-  const token = useAppSelector((state) => state.recaptcha.token);
-  const to = useAppSelector((state) => state.recaptcha.to);
   const onClick = useCallback(() => {
     if (token && to) {
       requestDrink({ token, to });
@@ -32,9 +32,9 @@ export const Drink: FC = () => {
   useEffect(() => {
     if (data?.txHash) {
       setOpen(true);
-      dispatch(recaptchaSlice.actions.txHash(data.txHash));
+      setTxHash(data.txHash);
     }
-  }, [data, dispatch]);
+  }, [data, setTxHash]);
   useEffect(() => {
     if (error) {
       setErrorOpen(true);

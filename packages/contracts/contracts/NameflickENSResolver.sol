@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.16;
+pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@ensdomains/ens-contracts/contracts/registry/ENS.sol";
 import "@ensdomains/ens-contracts/contracts/resolvers/profiles/ABIResolver.sol";
@@ -12,10 +14,12 @@ import "@ensdomains/ens-contracts/contracts/resolvers/profiles/InterfaceResolver
 import "@ensdomains/ens-contracts/contracts/resolvers/profiles/NameResolver.sol";
 import "@ensdomains/ens-contracts/contracts/resolvers/profiles/PubkeyResolver.sol";
 import "@ensdomains/ens-contracts/contracts/resolvers/profiles/TextResolver.sol";
+import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IExtendedResolver.sol";
+
 import "erc721a/contracts/interfaces/IERC721AQueryable.sol";
-import "./IExtendedResolver.sol";
 import "./SignatureVerifier.sol";
 import "./StringToUintLib.sol";
+import "./BytesLib.sol";
 
 interface IResolverService {
   function resolve(bytes calldata name, bytes calldata data)
@@ -28,24 +32,39 @@ interface IResolverService {
     );
 }
 
+// interface INameflickContractLookup {
+//   function getContract(bytes calldata name) external view returns (address);
+
+//   function isRegistered(bytes calldata name) external view returns (bool);
+// }
+
+// sighash of addr(bytes32)
+bytes4 constant ADDR_ETH_INTERFACE_ID = 0x3b3b57de;
+// sighash of addr(bytes32,uint)
+bytes4 constant ADDR_INTERFACE_ID = 0xf1cb7e06;
+
 /**
  * Implements an ENS resolver that directs all queries to a CCIP read gateway.
  * Callers must implement EIP 3668 and ENSIP 10.
  */
-
 contract NameflickENSResolver is IExtendedResolver, ERC165, Ownable {
   using StringToUintLib for string;
+  using BytesLib for bytes;
 
   struct Resolution {
     address controller;
   }
   string[] public urls;
   mapping(address => bool) public signers;
-  mapping(bytes32 => uint64) public expires;
+  mapping(bytes => address) public nfts;
 
   ENS immutable ens;
   address public parentContract;
-  address immutable trustedReverseRegistrar;
+  // address immutable trustedReverseRegistrar;
+  // address public nameflickContractResolver;
+
+  error ERC1155_CannotResolveAddress();
+  error ERC721_InvalidToken();
 
   event NewSigners(address[] signers);
 
@@ -59,13 +78,12 @@ contract NameflickENSResolver is IExtendedResolver, ERC165, Ownable {
 
   constructor(
     ENS _ens,
-    address _trustedReverseRegistrar,
     address _parentContract,
     string[] memory _urls,
     address[] memory _signers
   ) {
     ens = _ens;
-    trustedReverseRegistrar = _trustedReverseRegistrar;
+    // trustedReverseRegistrar = _trustedReverseRegistrar;
     parentContract = _parentContract;
     urls = _urls;
     for (uint256 i = 0; i < _signers.length; i++) {
@@ -88,8 +106,26 @@ contract NameflickENSResolver is IExtendedResolver, ERC165, Ownable {
     external
     view
     override
-    returns (bytes memory)
+    returns (bytes memory, address)
   {
+    // Check if there is a registered nameflick contract
+    // if (nameflickContractResolver != address(0)) {
+    //   if (
+    //     IERC165(nameflickContractResolver).supportsInterface(
+    //       type(INameflickContractLookup).interfaceId
+    //     ) &&
+    //     INameflickContractLookup(nameflickContractResolver).isRegistered(
+    //       name
+    //     ) &&
+    //     IERC165(nameflickContractResolver).supportsInterface(
+    //       type(IExtendedResolver).interfaceId
+    //     )
+    //   ) {
+    //     // if so, resolve the address from the contract resolver
+    //     return IExtendedResolver(nameflickContractResolver).resolve(name, data);
+    //   }
+    // }
+
     bytes memory callData = abi.encodeWithSelector(
       IResolverService.resolve.selector,
       name,
@@ -138,6 +174,63 @@ contract NameflickENSResolver is IExtendedResolver, ERC165, Ownable {
       revert("invalid string");
     }
     return result;
+  }
+
+  function isContractERC721(address contractAddress)
+    public
+    view
+    returns (bool)
+  {
+    return ERC165(contractAddress).supportsInterface(type(IERC721).interfaceId);
+  }
+
+  function isContractERC1155(address contractAddress)
+    public
+    view
+    returns (bool)
+  {
+    return
+      ERC165(contractAddress).supportsInterface(type(IERC1155).interfaceId);
+  }
+
+  function registerContract(bytes calldata name, address contractAddress)
+    external
+    onlyOwner
+  {
+    // If so, check if the caller is the owner
+    require(
+      Ownable(contractAddress).owner() == msg.sender,
+      "Caller not owner of contract"
+    );
+    // Check if the name is owner for the ENS
+    require(
+      ens.owner(name.namehash(0)) == msg.sender,
+      "Name not owner for ENS"
+    );
+    // If so, register the contract
+    nfts[name] = contractAddress;
+  }
+
+  function contractForName(bytes calldata name)
+    external
+    view
+    returns (address)
+  {
+    return nfts[name];
+  }
+
+  function ownerOfName(address contractAddress, uint256 tokenId)
+    public
+    view
+    returns (address)
+  {
+    if (isContractERC1155(contractAddress)) {
+      revert ERC1155_CannotResolveAddress();
+    }
+    if (isContractERC721(contractAddress)) {
+      return IERC721(contractAddress).ownerOf(tokenId);
+    }
+    revert ERC721_InvalidToken();
   }
 
   // function isAuthorised(bytes32 node) internal view override returns (bool) {

@@ -7,10 +7,9 @@ import {
   MouseEventHandler,
   ReactNode,
 } from "react";
-import { Box, Toolbar, Typography } from "@mui/material";
+import { Box, Toolbar } from "@mui/material";
 import { AppBar } from "features/appbar/components/appBar";
-import { useAppDispatch } from "@0xflick/app-store";
-import { actions as appbarActions } from "features/appbar/redux";
+import { useSavedTheme } from "features/appbar/hooks";
 
 export const Main: FC<
   PropsWithChildren<{
@@ -21,15 +20,13 @@ export const Main: FC<
 > = ({ children, menu, title, onFlick }) => {
   const targetRef = useRef<HTMLDivElement>(null);
   const toolbarRef = useRef<HTMLDivElement>(null);
-  const dispatch = useAppDispatch();
+  const { setDarkMode } = useSavedTheme();
   useEffect(() => {
-    dispatch(
-      appbarActions.setDarkMode(
-        window.matchMedia &&
-          window.matchMedia("(prefers-color-scheme: dark)").matches
-      )
+    setDarkMode(
+      window.matchMedia &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches
     );
-  }, [dispatch]);
+  }, [setDarkMode]);
   const [height, setSize] = useState<number>(0);
 
   useEffect(() => {
