@@ -1,6 +1,6 @@
 import { GraphQLResolveInfo } from 'graphql';
 import { IUser } from '@0xflick/models';
-import { TRole, TPermission, TAffiliates } from './models';
+import { TRole, TPermission, TAffiliates, TOpenSeaAssetContract } from './models';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -270,6 +270,28 @@ export type Nonce = {
   nonce: Scalars['Int'];
 };
 
+export type OpenSeaCollection = {
+  __typename?: 'OpenSeaCollection';
+  description: Scalars['String'];
+  discordUrl?: Maybe<Scalars['String']>;
+  editors: Array<Scalars['String']>;
+  externalUrl?: Maybe<Scalars['String']>;
+  id: Scalars['ID'];
+  imageUrl?: Maybe<Scalars['String']>;
+  instagramUsername?: Maybe<Scalars['String']>;
+  name: Scalars['String'];
+  slug: Scalars['String'];
+  telegramUrl?: Maybe<Scalars['String']>;
+  twitterUsername?: Maybe<Scalars['String']>;
+};
+
+export enum OpenSeaSafelistRequestStatus {
+  Approved = 'APPROVED',
+  NotRequested = 'NOT_REQUESTED',
+  Requested = 'REQUESTED',
+  Verified = 'VERIFIED'
+}
+
 export type Permission = {
   __typename?: 'Permission';
   action: PermissionAction;
@@ -318,6 +340,7 @@ export type Query = {
   nameflickByEnsHash?: Maybe<Nameflick>;
   nameflickByFqdn?: Maybe<Nameflick>;
   nameflicksByRootDomain: Array<Nameflick>;
+  openSeaCollectionByAddress?: Maybe<OpenSeaCollection>;
   role: Role;
   roles: Array<Role>;
   self?: Maybe<Web3User>;
@@ -347,6 +370,11 @@ export type QueryNameflickByFqdnArgs = {
 
 export type QueryNameflicksByRootDomainArgs = {
   rootDomain: Scalars['String'];
+};
+
+
+export type QueryOpenSeaCollectionByAddressArgs = {
+  address: Scalars['String'];
 };
 
 
@@ -495,6 +523,8 @@ export type ResolversTypes = {
   Nft: ResolverTypeWrapper<Nft>;
   NftToken: ResolverTypeWrapper<NftToken>;
   Nonce: ResolverTypeWrapper<Nonce>;
+  OpenSeaCollection: ResolverTypeWrapper<TOpenSeaAssetContract>;
+  OpenSeaSafelistRequestStatus: OpenSeaSafelistRequestStatus;
   Permission: ResolverTypeWrapper<TPermission>;
   PermissionAction: PermissionAction;
   PermissionInput: PermissionInput;
@@ -533,6 +563,7 @@ export type ResolversParentTypes = {
   Nft: Nft;
   NftToken: NftToken;
   Nonce: Nonce;
+  OpenSeaCollection: TOpenSeaAssetContract;
   Permission: TPermission;
   PermissionInput: PermissionInput;
   PresaleApprovalResponse: PresaleApprovalResponse;
@@ -690,6 +721,21 @@ export type NonceResolvers<ContextType = any, ParentType extends ResolversParent
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type OpenSeaCollectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['OpenSeaCollection'] = ResolversParentTypes['OpenSeaCollection']> = {
+  description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  discordUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  editors?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
+  externalUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  imageUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  instagramUsername?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  slug?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  telegramUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  twitterUsername?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type PermissionResolvers<ContextType = any, ParentType extends ResolversParentTypes['Permission'] = ResolversParentTypes['Permission']> = {
   action?: Resolver<ResolversTypes['PermissionAction'], ParentType, ContextType>;
   identifier?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -709,6 +755,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   nameflickByEnsHash?: Resolver<Maybe<ResolversTypes['Nameflick']>, ParentType, ContextType, RequireFields<QueryNameflickByEnsHashArgs, 'ensHash'>>;
   nameflickByFqdn?: Resolver<Maybe<ResolversTypes['Nameflick']>, ParentType, ContextType, RequireFields<QueryNameflickByFqdnArgs, 'fqdn'>>;
   nameflicksByRootDomain?: Resolver<Array<ResolversTypes['Nameflick']>, ParentType, ContextType, RequireFields<QueryNameflicksByRootDomainArgs, 'rootDomain'>>;
+  openSeaCollectionByAddress?: Resolver<Maybe<ResolversTypes['OpenSeaCollection']>, ParentType, ContextType, RequireFields<QueryOpenSeaCollectionByAddressArgs, 'address'>>;
   role?: Resolver<ResolversTypes['Role'], ParentType, ContextType, RequireFields<QueryRoleArgs, 'id'>>;
   roles?: Resolver<Array<ResolversTypes['Role']>, ParentType, ContextType>;
   self?: Resolver<Maybe<ResolversTypes['Web3User']>, ParentType, ContextType>;
@@ -761,6 +808,7 @@ export type Resolvers<ContextType = any> = {
   Nft?: NftResolvers<ContextType>;
   NftToken?: NftTokenResolvers<ContextType>;
   Nonce?: NonceResolvers<ContextType>;
+  OpenSeaCollection?: OpenSeaCollectionResolvers<ContextType>;
   Permission?: PermissionResolvers<ContextType>;
   PresaleApprovalResponse?: PresaleApprovalResponseResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;

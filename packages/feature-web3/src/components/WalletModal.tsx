@@ -1,25 +1,70 @@
-import { FC } from "react";
+import { FC, useCallback } from "react";
 import { Backdrop, Box, Button, Grid, Modal, Typography } from "@mui/material";
 import Image from "next/image";
 import { Fade } from "../transitions/Fade";
 import { useLocale } from "@0xflick/feature-locale";
+import { useConnect } from "wagmi";
+import {
+  isCoinbaseWalletConnector,
+  isInjectedConnector,
+  isMetamaskConnector,
+  isWalletConnector,
+  TAppConnectors,
+} from "../wagmi";
 
 interface IProps {
   open: boolean;
   handleClose: () => void;
-  handleMetamask: () => void;
-  handleWalletConnect: () => void;
-  handleCoinbaseConnect: () => void;
 }
 
-export const WalletModal: FC<IProps> = ({
-  open,
-  handleClose,
-  handleMetamask,
-  handleWalletConnect,
-  handleCoinbaseConnect,
-}) => {
+export const WalletModal: FC<IProps> = ({ open, handleClose }) => {
   const { t } = useLocale("common");
+  const { connect, error, isLoading, connectors } = useConnect({
+    onSettled: handleClose,
+  });
+  const handleMetamask = useCallback(() => {
+    const connector = connectors.find((c) => {
+      return isMetamaskConnector(c as TAppConnectors);
+    });
+    if (connector) {
+      connect({
+        connector,
+      });
+    }
+  }, [connect]);
+
+  const handleWalletConnect = useCallback(() => {
+    const connector = connectors.find((c) => {
+      return isWalletConnector(c as TAppConnectors);
+    });
+    if (connector) {
+      connect({
+        connector,
+      });
+    }
+  }, [connect]);
+
+  const handleCoinbaseConnect = useCallback(() => {
+    const connector = connectors.find((c) => {
+      return isCoinbaseWalletConnector(c as TAppConnectors);
+    });
+    if (connector) {
+      connect({
+        connector,
+      });
+    }
+  }, [connect]);
+
+  const handleFrameConnect = useCallback(() => {
+    const connector = connectors.find((c) => {
+      return isInjectedConnector(c as TAppConnectors);
+    });
+    if (connector) {
+      connect({
+        connector,
+      });
+    }
+  }, [connect]);
   return (
     <Modal
       aria-labelledby="modal-wallet-title"
@@ -106,6 +151,22 @@ export const WalletModal: FC<IProps> = ({
                 }
               >
                 {t("button_coinbase_wallet")}
+              </Button>
+            </Grid>
+            <Grid item style={{ marginTop: "1rem" }}>
+              <Button
+                onClick={handleFrameConnect}
+                variant="outlined"
+                startIcon={
+                  <Image
+                    alt=""
+                    src="/wallets/FrameLogo512.png"
+                    width={25}
+                    height={25}
+                  />
+                }
+              >
+                {t("button_frame_wallet")}
               </Button>
             </Grid>
           </Grid>

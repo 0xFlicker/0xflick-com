@@ -31,6 +31,7 @@ import { SerializedError } from "@reduxjs/toolkit";
 import { useERC721 } from "features/nfts/hooks";
 import { utils } from "ethers";
 import { useSavedToken, useAuth } from "@0xflick/feature-auth/src/hooks";
+import { useAccount } from "wagmi";
 
 const MintPreSaleSubmitContent: FC<{
   address?: string;
@@ -155,7 +156,7 @@ export const MintPreSaleModal: FC<IProps> = ({ open, handleClose }) => {
     MintPreSaleModalStep.UNKNOWN
   );
   const { contract } = useERC721(true);
-  const address = useAppSelector(web3Selectors.address);
+  const { address } = useAccount();
   const [amount, setAmount] = useState(0);
   const [txHash, setTxHash] = useState<string | undefined>();
 

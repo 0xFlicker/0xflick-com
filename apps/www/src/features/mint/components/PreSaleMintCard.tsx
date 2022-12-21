@@ -17,12 +17,13 @@ import {
   usePreSaleActive,
 } from "../hooks";
 import { MintPreSaleCloseReason, MintPreSaleModal } from "./MintPreSaleModal";
+import { useAccount } from "wagmi";
 
 export const PreSaleMintCard: FC = () => {
   const [mintOpen, setMintOpen] = useState(false);
   const { t } = useLocale(["mint"]);
 
-  const address = useAppSelector(web3Selectors.address);
+  const { address } = useAccount();
   const { isFetching: isPresaleActiveFetching, preSaleActive } =
     usePreSaleActive();
   const { isFetching: balanceOfFetching, balanceOf } = useBalanceOf(address);

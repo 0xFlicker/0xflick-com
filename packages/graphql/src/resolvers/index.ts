@@ -25,6 +25,11 @@ import {
   queryResolvers as queryResolversNameflick,
 } from "./nameflick";
 import {
+  typeSchema as typeSchemaOpenSea,
+  queryResolvers as queryResolversOpenSea,
+  resolvers as resolversOpenSea,
+} from "./opensea";
+import {
   typeSchema as typeSchemaPresale,
   mutationResolver as mutationResolverPresale,
 } from "./presale";
@@ -36,8 +41,6 @@ import {
 } from "./affiliates";
 import { Resolvers } from "../resolvers.generated";
 import { TContext } from "../context";
-import { sendDiscordMessage } from "@0xflick/backend/src/discord/send";
-import { APIEmbedField } from "discord-api-types/v10";
 import { createLogger } from "@0xflick/backend";
 
 const logger = createLogger({
@@ -52,6 +55,7 @@ export const typeDefs = gql`
   ${typeSchemaNfts}
   ${typeSchemaPresale}
   ${typeSchemaAffiliate}
+  ${typeSchemaOpenSea}
 
   type Query {
     nameflickByFqdn(fqdn: ID!): Nameflick
@@ -63,6 +67,7 @@ export const typeDefs = gql`
     role(id: ID!): Role!
     roles: [Role!]!
     affiliateForAddress(address: String!): AffiliateQuery!
+    openSeaCollectionByAddress(address: String!): OpenSeaCollection
   }
 
   type Mutation {
@@ -98,6 +103,7 @@ export const resolvers: Resolvers<TContext> = {
     ...queryResolversAuth,
     ...queryResolversAdmin,
     ...queryResolversAffiliate,
+    ...queryResolversOpenSea,
   },
   Mutation: {
     ...mutationResolversNameflick,
@@ -110,4 +116,5 @@ export const resolvers: Resolvers<TContext> = {
   ...resolversAuth,
   ...resolversAdmin,
   ...resolversAffiliate,
+  ...resolversOpenSea,
 };

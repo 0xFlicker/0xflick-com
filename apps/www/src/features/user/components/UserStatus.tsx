@@ -14,10 +14,7 @@ import AddIcon from "@mui/icons-material/AddRounded";
 import { useLocale } from "@0xflick/feature-locale";
 import { useAuth } from "@0xflick/feature-auth/src/hooks";
 import { StatusField } from "@0xflick/components/src/StatusField";
-import {
-  useIsFollowingQuery,
-  useLazyIsFollowingQuery,
-} from "features/twitter/api";
+
 import { LoginWithTwitterButton } from "features/twitter/components/LoginWithTwitterButton";
 import { CopyToClipboardButton } from "features/faucet/components/CopyToClipboard";
 import { useManageAffiliates } from "features/affiliates/hooks/useManageAffiliates";
@@ -29,6 +26,7 @@ import {
 } from "@0xflick/feature-web3";
 import { useAppSelector } from "@0xflick/app-store";
 import { WrappedLink } from "@0xflick/components/src/WrappedLink";
+import { useIsFollowerLazyQuery } from "features/twitter/graphql/isFollowerQuery.generated";
 
 const MIN_HEIGHT = 320;
 const UserLoginCard: FC = () => {
@@ -102,15 +100,16 @@ const UserStatusTwitter: FC<{}> = () => {
   const { isAuthenticated } = useAuth();
   const [
     fetchIsFollowing,
-    { isError, isFetching, isLoading, isSuccess, data, isUninitialized },
-  ] = useLazyIsFollowingQuery();
+    { error: isError, loading: isLoading, data },
+    // { isError, isFetching, isLoading, isSuccess, data, isUninitialized },
+  ] = useIsFollowerLazyQuery();
   useEffect(() => {
     if (isAuthenticated) {
       fetchIsFollowing();
     }
   }, [fetchIsFollowing, isAuthenticated]);
-  const needsLogin = isSuccess && "needsLogin" in data && data.needsLogin;
-  const isCurrentlyLoading = isLoading || isFetching;
+  const needsLogin = !!isAuthenticated;
+  const isCurrentlyLoading = isLoading;
   return (
     <Card
       variant="elevation"

@@ -1,5 +1,15 @@
-import { chain, Chain, allChains } from "wagmi";
+import { Chain, mainnet, goerli, sepolia } from "@wagmi/chains";
 import { lazySingleton } from "./factory";
+
+export const supportedAppChains = [mainnet, goerli, sepolia] as const;
+
+sepolia.contracts = {
+  ...sepolia.contracts,
+  ensRegistry: {
+    address: "0xBc4693CB0F572b99f6aB4462602b5A0B8585010B",
+  },
+};
+const supportedAppChainNames = supportedAppChains.map(({ network }) => network);
 
 export const infuraKey = {
   get() {
@@ -104,13 +114,21 @@ export const supportedChains = lazySingleton(() => {
   if (!process.env.NEXT_PUBLIC_SUPPORTED_CHAINS) {
     throw new Error("SUPPORTED_CHAINS is not set");
   }
-  const supportedChainNames: keyof typeof chain = JSON.parse(
-    process.env.NEXT_PUBLIC_SUPPORTED_CHAINS
-  );
   const chains: Chain[] = [];
-  for (const chainName of supportedChainNames) {
-    const wagmiChain = allChains.find(({ network }) => network === chainName);
+  for (const chainName of JSON.parse(
+    process.env.NEXT_PUBLIC_SUPPORTED_CHAINS
+  ) as string[]) {
+    const wagmiChain = supportedAppChains.find(
+      ({ network }) => network === chainName
+    );
     if (wagmiChain) {
+      if (
+        wagmiChain.network === "sepolia" &&
+        wagmiChain.contracts?.ensRegistry
+      ) {
+        // wagmiChain.contracts.ensRegistry.address =
+        //   "0xBc4693CB0F572b99f6aB4462602b5A0B8585010B";
+      }
       chains.push(wagmiChain);
     }
   }
@@ -122,6 +140,8 @@ export const defaultChain = lazySingleton(() => {
     throw new Error("NEXT_PUBLIC_DEFAULT_CHAIN_ID is not set");
   }
   const chainId = process.env.NEXT_PUBLIC_DEFAULT_CHAIN_ID;
-  const wagmiChain = allChains.find(({ id }) => id === Number(chainId));
-  return wagmiChain;
+  const wagmiChain = supportedAppChains.find(
+    ({ id }) => id === Number(chainId)
+  );
+  return wagmiChain || mainnet;
 });

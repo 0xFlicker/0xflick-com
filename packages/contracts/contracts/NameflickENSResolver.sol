@@ -92,7 +92,7 @@ contract NameflickENSResolver is IExtendedResolver, ERC165, Ownable {
     emit NewSigners(_signers);
   }
 
-  function setOffchainResolver(string[] memory _urls) external onlyOwner {
+  function setUrls(string[] memory _urls) external onlyOwner {
     urls = _urls;
   }
 

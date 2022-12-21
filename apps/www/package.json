@@ -22,7 +22,7 @@
     "@aws-sdk/lib-dynamodb": "^3.113.0",
     "@emotion/react": "^11.9.3",
     "@emotion/styled": "^11.9.3",
-    "@ethersproject/providers": "^5.6.8",
+    "@ethersproject/providers": "^5.7.2",
     "@metamask/detect-provider": "^1.2.0",
     "@metamask/onboarding": "^1.0.1",
     "@metamask/providers": "^9.0.0",
@@ -40,7 +40,7 @@
     "apollo-server-micro": "^3.10.0",
     "aws-crt": "^1.14.1",
     "classnames": "^2.3.1",
-    "ethers": "^5.7.1",
+    "ethers": "^5.7.2",
     "formik": "^2.2.9",
     "formik-mui": "^5.0.0-alpha.0",
     "graphql": "16.5.0",
@@ -63,7 +63,7 @@
     "three": "^0.141.0",
     "use-local-storage": "^2.3.6",
     "uuid": "^8.3.2",
-    "wagmi": "^0.8.10"
+    "wagmi": "^0.9.4"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "2.11.6",

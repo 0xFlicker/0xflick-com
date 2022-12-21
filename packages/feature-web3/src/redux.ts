@@ -1,12 +1,13 @@
 import { createSelector, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { utils } from "ethers";
-import { defaultChain } from "utils/config";
+import { defaultChain } from "@0xflick/utils/src/config";
 
 export enum WalletType {
   NONE = "NONE",
   METAMASK = "METAMASK",
   WALLET_CONNECT = "WALLET_CONNECT",
   COINBASE_WALLET = "COINBASE_WALLET",
+  FRAME_WALLET = "FRAME_WALLET",
   INJECTED = "INJECTED",
 }
 
@@ -17,7 +18,6 @@ export enum WalletStatus {
   CONNECTED = "CONNECTED",
   SIGNED_IN = "SIGNED_IN",
   DISCONNECTED = "DISCONNECTED",
-  WRONG_NETWORK = "WRONG_NETWORK",
   SWITCH_CHAIN = "SWITCH_CHAIN",
   ERROR = "ERROR",
   RESET = "RESET",
@@ -28,9 +28,7 @@ export interface IState {
   pendingWalletType?: WalletType;
   status: WalletStatus;
   isWalletSelectModalOpen: boolean;
-  accounts: string[];
-  currentChainId: number;
-  pendingChainId?: number;
+  accounts: `0x${string}`[];
   error?: {
     message: string;
     name: string;
@@ -43,7 +41,6 @@ const initialState: IState = {
   status: WalletStatus.UNKNOWN,
   isWalletSelectModalOpen: false,
   accounts: [],
-  currentChainId: defaultChain.get().id,
 };
 
 const slice = createSlice({
@@ -91,12 +88,6 @@ const slice = createSlice({
     disconnected(state) {
       state.status = WalletStatus.DISCONNECTED;
     },
-    wrongNetwork(state) {
-      state.status = WalletStatus.WRONG_NETWORK;
-    },
-    switchChain(state) {
-      state.status = WalletStatus.SWITCH_CHAIN;
-    },
     error(
       state: IState,
       action: PayloadAction<{
@@ -114,13 +105,6 @@ const slice = createSlice({
     },
     setAccounts(state, action: PayloadAction<string[]>) {
       state.accounts = action.payload.map(utils.getAddress);
-    },
-    switchToChain(state, action: PayloadAction<number>) {
-      state.pendingChainId = action.payload;
-    },
-    setChainId(state, action: PayloadAction<number>) {
-      state.currentChainId = action.payload;
-      state.pendingChainId = undefined;
     },
   },
 });
@@ -156,14 +140,6 @@ const selectAddress = createSelector(
     return state.accounts[0] as `0x${string}`;
   }
 );
-const selectCurrentChainId = createSelector(
-  selectRoot,
-  (state) => state.currentChainId
-);
-const selectPendingChainId = createSelector(
-  selectRoot,
-  (state) => state.pendingChainId
-);
 
 export const selectors = {
   isWalletSelectModalOpen: selectIsWalletSelectModalOpen,
@@ -173,8 +149,6 @@ export const selectors = {
   pendingType: selectPendingWalletType,
   status: selectWalletStatus,
   address: selectAddress,
-  currentChainId: selectCurrentChainId,
-  pendingChainId: selectPendingChainId,
 };
 
 export const { actions, reducer } = slice;

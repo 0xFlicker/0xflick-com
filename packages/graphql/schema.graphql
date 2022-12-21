@@ -203,6 +203,27 @@ type AffiliateMutation {
   role: Role!
 }
 
+enum OpenSeaSafelistRequestStatus {
+  NOT_REQUESTED
+  REQUESTED
+  APPROVED
+  VERIFIED
+}
+
+type OpenSeaCollection {
+  id: ID!
+  name: String!
+  slug: String!
+  externalUrl: String
+  discordUrl: String
+  telegramUrl: String
+  twitterUsername: String
+  instagramUsername: String
+  description: String!
+  imageUrl: String
+  editors: [String!]!
+}
+
 type Query {
   nameflickByFqdn(fqdn: ID!): Nameflick
   nameflickByEnsHash(ensHash: String!): Nameflick
@@ -213,6 +234,7 @@ type Query {
   role(id: ID!): Role!
   roles: [Role!]!
   affiliateForAddress(address: String!): AffiliateQuery!
+  openSeaCollectionByAddress(address: String!): OpenSeaCollection
 }
 
 type Mutation {

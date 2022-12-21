@@ -28,7 +28,7 @@ export const StateAvailableContent: FC<PropsWithChildren<{}>> = ({
   const { isDarkMode } = useSavedTheme();
   return (
     <ApolloProvider>
-      <ThemeProvider theme={isDarkMode ? dark : light}>
+      <ThemeProvider theme={dark}>
         <Web3Provider>
           <StateWithWebContent>{children}</StateWithWebContent>
         </Web3Provider>

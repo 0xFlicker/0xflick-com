@@ -17,22 +17,47 @@ const func: DeployFunction = async ({
     log: true,
     waitConfirmations: 1,
   });
+  const reverseRegistryDeployment = await deploy("ReverseRegistrar", {
+    from: deployer,
+    args: [ensDeployment.address],
+    log: true,
+    waitConfirmations: 5,
+  });
+
+  if (reverseRegistryDeployment.newlyDeployed) {
+    await run("verify:verify", {
+      address: reverseRegistryDeployment.address,
+      constructorArguments: reverseRegistryDeployment.args,
+    });
+  }
+  const publicResolverDeployment = await deploy("PublicResolver", {
+    from: deployer,
+    args: [
+      ensDeployment.address,
+      "0x0000000000000000000000000000000000000000",
+      deployer,
+      reverseRegistryDeployment.address,
+    ],
+    log: true,
+    waitConfirmations: 5,
+  });
+  if (publicResolverDeployment.newlyDeployed) {
+    await run("verify:verify", {
+      address: publicResolverDeployment.address,
+      constructorArguments: publicResolverDeployment.args,
+    });
+  }
+
   const baseRegistrarDeployment = await deploy("BaseRegistrarImplementation", {
     from: deployer,
     args: [ensDeployment.address, utils.namehash("eth")],
     log: true,
     waitConfirmations: 5,
   });
-  if (ensDeployment.newlyDeployed) {
-    await run("verify:verify", {
-      address: ensDeployment.address,
-      constructorArguments: [],
-    });
-  }
   if (baseRegistrarDeployment.newlyDeployed) {
     await run("verify:verify", {
       address: baseRegistrarDeployment.address,
-      constructorArguments: [ensDeployment.address, utils.id("eth")],
+      constructorArguments: baseRegistrarDeployment.args,
     });
   }
 };

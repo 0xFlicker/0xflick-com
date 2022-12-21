@@ -6,11 +6,11 @@ import { authorizedUser } from "./user";
 
 export async function verifyAuthorizedUser(
   context: TContext,
-  authorizer: (item: TAllowedAction[], user: UserWithRolesModel) => boolean
+  authorizer?: (item: TAllowedAction[], user: UserWithRolesModel) => boolean
 ) {
   const user = await authorizedUser(context);
 
-  return defaultAuthorizer(context, user, authorizer);
+  return authorizer ? defaultAuthorizer(context, user, authorizer) : user;
 }
 
 export async function defaultAuthorizer(
@@ -36,4 +36,5 @@ export async function defaultAuthorizer(
   if (!isAuthorized) {
     throw new AuthError("Forbidden", "NOT_AUTHORIZED");
   }
+  return user;
 }

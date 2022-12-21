@@ -17,6 +17,8 @@ import { useAuth } from "@0xflick/feature-auth/src/hooks";
 import { defaultChain } from "@0xflick/utils";
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
+import { useAccount } from "wagmi";
+import { useWeb3 } from "../hooks";
 
 const Connect: FC<{
   size?: ButtonProps["size"];
@@ -51,12 +53,11 @@ const Connect: FC<{
   const handleMenu = useCallback((event: MouseEvent) => {
     setMenuAnchorEl(event.currentTarget);
   }, []);
-  // const { chain } = useWeb3();
+  const { selectedAddress: address } = useWeb3();
   // const chainName = chain?.name;
   const isOpen = useAppSelector(web3Selectors.isWalletSelectModalOpen);
   const isWrongNetwork = useAppSelector(web3Selectors.isWrongNetwork);
-  const selectedAddress = useAppSelector(web3Selectors.address);
-  const currentChainId = useAppSelector(web3Selectors.currentChainId);
+
   const currentChainName = defaultChain.get().name;
   const handleLogin = useCallback(() => {
     setMenuAnchorEl(null);
@@ -70,29 +71,14 @@ const Connect: FC<{
   const handleModalClose = useCallback(() => {
     dispatch(web3Actions.closeWalletSelectModal());
   }, [dispatch]);
-  const handleMetamask = useCallback(() => {
-    dispatch(web3Actions.walletPending(WalletType.METAMASK));
-    dispatch(web3Actions.closeWalletSelectModal());
-  }, [dispatch]);
-  const handleWalletConnect = useCallback(() => {
-    dispatch(web3Actions.walletPending(WalletType.WALLET_CONNECT));
-    dispatch(web3Actions.closeWalletSelectModal());
-  }, [dispatch]);
-  const handleCoinbaseConnect = useCallback(() => {
-    dispatch(web3Actions.walletPending(WalletType.COINBASE_WALLET));
-    dispatch(web3Actions.closeWalletSelectModal());
-  }, [dispatch]);
   const handleChangeNetworkAbort = useCallback(() => {
     dispatch(web3Actions.reset());
-  }, [dispatch]);
-  const handleSwitchNetwork = useCallback(() => {
-    dispatch(web3Actions.switchChain());
   }, [dispatch]);
 
   return (
     <>
-      {selectedAddress ? (
-        <Tooltip title={ensName ? ensName : selectedAddress}>
+      {address ? (
+        <Tooltip title={ensName ? ensName : address}>
           <Button
             startIcon={isAuthenticated ? <CheckCircleIcon /> : null}
             variant="outlined"
@@ -128,7 +114,7 @@ const Connect: FC<{
                   maxWidth: "12rem",
                 }}
               >
-                {ensName ? ensName : selectedAddress}
+                {ensName ? ensName : address}
               </Typography>
             )}
           </Button>
@@ -136,19 +122,13 @@ const Connect: FC<{
       ) : (
         <Button onClick={onClick}>{t("button_connect")}</Button>
       )}
-      <WalletModal
-        open={isOpen}
-        handleClose={handleModalClose}
-        handleMetamask={handleMetamask}
-        handleWalletConnect={handleWalletConnect}
-        handleCoinbaseConnect={handleCoinbaseConnect}
-      />
-      <WrongChainModal
+      <WalletModal open={isOpen} handleClose={handleModalClose} />
+      {/* <WrongChainModal
         chainName={currentChainName}
         open={isWrongNetwork}
         handleClose={handleChangeNetworkAbort}
         handleChangeNetwork={handleSwitchNetwork}
-      />
+      /> */}
       <ConnectedDropDownModal
         anchorEl={menuAnchorEl}
         handleClose={onMenuClose}

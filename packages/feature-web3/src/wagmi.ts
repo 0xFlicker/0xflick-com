@@ -1,4 +1,5 @@
-import { createClient, configureChains } from "wagmi";
+import "@wagmi/chains";
+import { createClient, configureChains, ChainProviderFn, Chain } from "wagmi";
 import { infuraProvider } from "wagmi/providers/infura";
 import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";
@@ -54,13 +55,13 @@ export const appConnectors = lazySingleton<TAppConnectors[]>(() => {
 });
 
 export function isMetamaskConnector(connector: TAppConnectors) {
-  return connector instanceof MetaMaskConnector;
+  return connector.id === "metaMask";
 }
 export const metamaskConnector = lazySingleton(function metamaskConnector() {
   return appConnectors.get().find(isMetamaskConnector);
 });
 export function isWalletConnector(connector: TAppConnectors) {
-  return connector instanceof WalletConnectConnector;
+  return connector.id === "walletConnect";
 }
 export const walletConnectConnector = lazySingleton(
   function walletConnectConnector() {
@@ -68,13 +69,13 @@ export const walletConnectConnector = lazySingleton(
   }
 );
 export function isCoinbaseWalletConnector(connector: TAppConnectors) {
-  return connector instanceof CoinbaseWalletConnector;
+  return connector.id === "coinbaseWallet";
 }
 export const coinbaseWalletConnector = lazySingleton(function coinbaseWallet() {
   return appConnectors.get().find(isCoinbaseWalletConnector);
 });
 export function isInjectedConnector(connector: TAppConnectors) {
-  return connector instanceof InjectedConnector;
+  return connector.id === "injected";
 }
 export const injectedConnector = lazySingleton(function injectedConnector() {
   return appConnectors.get().find(isInjectedConnector);

@@ -22,6 +22,7 @@ const discordTestChannelId = process.env.DISCORD_TESTING_CHANNEL_ID || "";
 const discordMessageTopicArn = process.env.DISCORD_MESSAGE_TOPIC_ARN || "";
 const snsRegion = process.env.SNS_REGION || "us-east-1";
 const chainConfig = JSON.parse(process.env.CHAIN_CONFIG || "{}");
+const openseaApiKey = process.env.OPENSEA_API_KEY || "";
 
 export function createConfig(providedConfig: Partial<IDeployConfig>) {
   const config = {
@@ -46,6 +47,7 @@ export function createConfig(providedConfig: Partial<IDeployConfig>) {
     sns: {
       region: snsRegion,
     },
+    openseaApiKey,
   };
 
   return config;

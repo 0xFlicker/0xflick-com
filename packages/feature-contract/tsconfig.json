@@ -1,4 +1,5 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "target": "ES2015",
     "lib": ["dom", "dom.iterable", "esnext"],
@@ -10,7 +11,7 @@
     "paths": {
       "@0xflick/models": ["../../packages/models/src/index"],
       "@0xflick/graphql": ["../../packages/backend/src/index"],
-      "@0xflick/feature-web3": ["../../packages/feature-web3/src/index"],
+      "@0xflick/contracts": ["../../packages/contracts/src/index"],
       "@0xflick/utils": ["../../packages/utils/src/index"]
     },
     "plugins": [
@@ -31,7 +32,7 @@
       "path": "../../packages/graphql"
     },
     {
-      "path": "../../packages/feature-web3"
+      "path": "../../packages/contracts"
     },
     {
       "path": "../../packages/utils"

@@ -24,30 +24,44 @@ const func: DeployFunction = async ({
     signer
   );
 
-  const offChainResolverDeployment = await deploy("OffchainResolver", {
+  const ensDeployment = await deploy("ENSRegistry", {
+    from: deployer,
+    args: [],
+    log: true,
+    waitConfirmations: 5,
+  });
+  if (ensDeployment.newlyDeployed) {
+    await run("verify:verify", {
+      address: ensDeployment.address,
+      constructorArguments: [],
+    });
+  }
+
+  const offChainResolverDeployment = await deploy("NameflickENSResolver", {
     from: deployer,
     args: [
+      ensDeployment.address,
       flickDeployment.address,
-      ens_gateway(network.name),
+      [ens_gateway(network.name)],
       [publicSignerAddress],
     ],
     waitConfirmations: 5,
     log: true,
   });
+
   if (offChainResolverDeployment.newlyDeployed) {
     await run("verify:verify", {
       address: offChainResolverDeployment.address,
-      constructorArguments: [
-        flickDeployment.address,
-        ens_gateway(network.name),
-        [publicSignerAddress],
-      ],
+      constructorArguments: offChainResolverDeployment.args,
     });
   }
   if (
     (await flickContract.resolverProxy()) !== offChainResolverDeployment.address
   ) {
-    await flickContract.setOffchainResolver(offChainResolverDeployment.address);
+    const tx = await flickContract.setOffchainResolver(
+      offChainResolverDeployment.address
+    );
+    await tx.wait();
   }
 };
 export default func;

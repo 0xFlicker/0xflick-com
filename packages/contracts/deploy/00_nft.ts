@@ -18,11 +18,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     nft_name(network.name),
     nft_symbol(network.name),
     metadata_url(network.name),
-    nft_mint_price(network.name),
     signer,
     [beneficiary],
     [1],
     beneficiary,
+    "0x0000000000000000000000000000000000000000",
   ];
 
   const deployed = await deploy("FlickENS", {

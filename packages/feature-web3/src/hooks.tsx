@@ -5,13 +5,15 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useState,
 } from "react";
 import {
   AppDispatch,
   useAppDispatch,
   useAppSelector,
 } from "@0xflick/app-store";
-import { useAccount, useConnect, Chain, allChains, Connector } from "wagmi";
+import { useAccount, useConnect, Chain, Connector, useNetwork } from "wagmi";
+import { defaultChain, supportedAppChains as allChains } from "@0xflick/utils";
 import {
   actions as web3Actions,
   selectors as web3Selectors,
@@ -25,6 +27,7 @@ import {
   isWalletConnector,
   TAppConnectors,
 } from "./wagmi";
+import { hexString } from "@0xflick/utils";
 
 export type TChain = Chain & {
   chainImageUrl: string;
@@ -45,50 +48,13 @@ export function decorateChainImageUrl(chain: Chain): TChain {
   };
 }
 
-function createOnConnectionChanged(
-  dispatch: AppDispatch,
-  connector: Connector
-) {
-  const c = connector as TAppConnectors;
-
-  if (isMetamaskConnector(c)) {
-    dispatch(web3Actions.walletConnected(WalletType.METAMASK));
-  } else if (isWalletConnector(c)) {
-    dispatch(web3Actions.walletConnected(WalletType.WALLET_CONNECT));
-  } else if (isCoinbaseWalletConnector(c)) {
-    dispatch(web3Actions.walletConnected(WalletType.COINBASE_WALLET));
-  } else if (isInjectedConnector(c)) {
-    dispatch(web3Actions.walletConnected(WalletType.INJECTED));
-  } else {
-    dispatch(web3Actions.connected());
-  }
-}
-
 export function useWeb3Context() {
   const dispatch = useAppDispatch();
-  const chainId = useAppSelector(web3Selectors.currentChainId);
-  const walletPendingType = useAppSelector(web3Selectors.pendingType);
-  const walletStatus = useAppSelector(web3Selectors.status);
-  const chain = useMemo<TChain | null>(() => {
-    const c = chainId && allChains.find((chain) => chain.id === chainId);
-    if (c) {
-      return decorateChainImageUrl(c);
-    }
-    return null;
-  }, [chainId]);
-  const {
-    connector: activeConnector,
-    isConnected,
-    address,
-  } = useAccount({
-    onConnect: ({ address, connector }) => {
-      createOnConnectionChanged(dispatch, connector);
-      dispatch(web3Actions.setAccounts([address]));
-    },
-    onDisconnect: () => {
-      dispatch(web3Actions.disconnected());
-    },
-  });
+  const { chain } = useNetwork();
+  const chainImageUrl = useMemo<TChain>(() => {
+    return decorateChainImageUrl(defaultChain.get());
+  }, []);
+  const { connector: activeConnector, isConnected, address } = useAccount({});
   const {
     connect,
     error,
@@ -98,54 +64,20 @@ export function useWeb3Context() {
     reset,
     data: provider,
   } = useConnect({
-    onSettled: ({ connector: c }) => {},
+    onSettled: () => {},
   });
+  // We don't want the address to be available on first load so that client render matches server render
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
   useEffect(() => {
-    if (pendingConnector && address) {
-      createOnConnectionChanged(dispatch, pendingConnector);
-      dispatch(web3Actions.setAccounts([address]));
+    if (isFirstLoad) {
+      setIsFirstLoad(false);
     }
-  }, [pendingConnector, address, dispatch]);
-  useEffect(() => {
-    if (walletStatus === WalletStatus.RESET) {
-      reset();
-    }
-  }, [walletStatus, reset]);
-  useEffect(() => {
-    if (connectors.length && walletPendingType) {
-      const connector = connectors.find((c) => {
-        switch (walletPendingType) {
-          case WalletType.METAMASK:
-            return isMetamaskConnector(c as TAppConnectors);
-          case WalletType.WALLET_CONNECT:
-            return isWalletConnector(c as TAppConnectors);
-          case WalletType.COINBASE_WALLET:
-            return isCoinbaseWalletConnector(c as TAppConnectors);
-          default:
-            return isInjectedConnector(c as TAppConnectors);
-        }
-      });
-      if (connector) {
-        connect({
-          connector,
-          chainId,
-        });
-      }
-    }
-  }, [connectors, connect, chainId, walletPendingType]);
-
-  useEffect(() => {
-    if (activeConnector) {
-      activeConnector.getChainId().then((chainId) => {
-        dispatch(web3Actions.setChainId(chainId));
-      });
-    }
-  }, [activeConnector, dispatch]);
+  }, [isFirstLoad]);
 
   const result = {
-    currentChain: chain,
+    currentChain: chainImageUrl,
     provider: provider?.provider,
-    selectedAddress: address,
+    selectedAddress: isFirstLoad ? undefined : address,
     connect,
     activeConnector,
     isConnected,

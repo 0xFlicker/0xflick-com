@@ -5,20 +5,18 @@ import {
   CheckCircle as CheckCircleIcon,
   Cancel as CancelIcon,
 } from "@mui/icons-material";
-import { useIsFollowingQuery } from "../api";
-import { useAuth } from "features/auth/hooks";
+import { useAuth } from "@0xflick/feature-auth/src/hooks";
+import { useIsFollowerQuery } from "../graphql/isFollowerQuery.generated";
 
 export const FollowStatus: FC = () => {
   const { t } = useLocale("common");
   const { isAuthenticated } = useAuth();
-  const { isError, isFetching, isLoading, isSuccess, data } =
-    useIsFollowingQuery();
-  const isFollowed =
-    isAuthenticated && isSuccess && "following" in data && data.following;
-  const needsLogin = isSuccess && "needsLogin" in data && data.needsLogin;
+  const { data, error: isError, loading: isLoading } = useIsFollowerQuery();
+  const isFollowed = isAuthenticated && !!data && data.self?.isTwitterFollower;
+  const needsLogin = !!isAuthenticated;
   const isNotFollowed =
-    !isAuthenticated || (isSuccess && "following" in data && !data.following);
-  const isCurrentlyLoading = isLoading || isFetching;
+    !isAuthenticated || (!!data && !data.self?.isTwitterFollower);
+  const isCurrentlyLoading = isLoading;
   return (
     <>
       <Box display="flex" flexDirection="row">

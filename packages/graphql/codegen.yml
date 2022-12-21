@@ -9,6 +9,7 @@ generates:
         Permission: "./models#TPermission"
         AffiliateMutation: "./models#TAffiliates"
         AffiliateQuery: "./models#TAffiliates"
+        OpenSeaCollection: "./models#TOpenSeaAssetContract"
     plugins:
       - typescript
       - typescript-resolvers
