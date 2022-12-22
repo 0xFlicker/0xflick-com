@@ -5,6 +5,7 @@ const withTM = require('next-transpile-modules')([
   '@0xflick/feature-auth',
   '@0xflick/feature-contract',
   '@0xflick/feature-locale',
+  '@0xflick/feature-theme',
   '@0xflick/feature-web3',
   '@0xflick/backend',
   '@0xflick/models',

@@ -5,8 +5,7 @@ import Typography from "@mui/material/Typography";
 import { useLocale } from "@0xflick/feature-locale";
 import { FC } from "react";
 import { Main } from "./Main";
-import { useSavedTheme } from "features/appbar/hooks";
-import { useAppSelector } from "@0xflick/app-store";
+import { useTheme } from "@0xflick/feature-theme";
 import { LinkCollection } from "@0xflick/components/src/LinkCollection";
 import { SiteMenu } from "features/appbar/components/SiteMenu";
 
@@ -31,7 +30,7 @@ const defaultGridBreakpoints = {
 
 export const Links: FC = () => {
   const { t } = useLocale(["common"]);
-  const { toggleTheme: handleThemeChange, isDarkMode } = useSavedTheme();
+  const { toggleTheme: handleThemeChange, isDarkMode } = useTheme();
   return (
     <Main
       menu={

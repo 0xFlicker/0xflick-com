@@ -30,7 +30,8 @@ import { FetchBaseQueryError, skipToken } from "@reduxjs/toolkit/query";
 import { SerializedError } from "@reduxjs/toolkit";
 import { useERC721 } from "features/nfts/hooks";
 import { utils } from "ethers";
-import { useSavedToken, useAuth } from "@0xflick/feature-auth/src/hooks";
+import { useAuth } from "@0xflick/feature-auth/src/hooks";
+import { useTheme } from "@0xflick/feature-theme";
 import { useAccount } from "wagmi";
 
 const MintPreSaleSubmitContent: FC<{

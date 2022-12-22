@@ -5,7 +5,7 @@ import InputIcon from "@mui/icons-material/Input";
 import { DarkModeSwitch } from "features/appbar/components/DarkModeSwitch";
 import { useLocale } from "@0xflick/feature-locale";
 import { FC } from "react";
-import { useSavedTheme } from "features/appbar/hooks";
+import { useTheme } from "@0xflick/feature-theme";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import { WrappedLink } from "@0xflick/components/src/WrappedLink";
 
@@ -17,7 +17,7 @@ export const SiteMenu: FC<{
   isSignup?: boolean;
 }> = ({ isDemo = false, isFaq = false, isLinks = false, isSignup = false }) => {
   const { t } = useLocale(["common"]);
-  const { toggleTheme: handleThemeChange, isDarkMode } = useSavedTheme();
+  const { toggleTheme: handleThemeChange, isDarkMode } = useTheme();
   return (
     <>
       <MenuItem component={WrappedLink} href="/demo" disabled={isDemo}>

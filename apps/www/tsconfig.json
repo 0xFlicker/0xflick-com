@@ -34,6 +34,7 @@
       "@0xflick/feature-contract": [
         "../../packages/feature-contract/src/index"
       ],
+      "@0xflick/feature-theme": ["../../packages/feature-theme/src/index"],
       "@0xflick/feature-web3": ["../../packages/feature-web3/src/index"],
       "@0xflick/utils": ["../../packages/utils/src/index"]
     },
@@ -74,6 +75,9 @@
     },
     {
       "path": "../../packages/feature-contract"
+    },
+    {
+      "path": "../../packages/feature-theme"
     },
     {
       "path": "../../packages/feature-web3"

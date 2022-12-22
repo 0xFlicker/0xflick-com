@@ -9,7 +9,7 @@ import {
 } from "react";
 import { Box, Toolbar } from "@mui/material";
 import { AppBar } from "features/appbar/components/appBar";
-import { useSavedTheme } from "features/appbar/hooks";
+import { useTheme } from "@0xflick/feature-theme";
 
 export const Main: FC<
   PropsWithChildren<{
@@ -20,13 +20,15 @@ export const Main: FC<
 > = ({ children, menu, title, onFlick }) => {
   const targetRef = useRef<HTMLDivElement>(null);
   const toolbarRef = useRef<HTMLDivElement>(null);
-  const { setDarkMode } = useSavedTheme();
-  useEffect(() => {
-    setDarkMode(
-      window.matchMedia &&
-        window.matchMedia("(prefers-color-scheme: dark)").matches
-    );
-  }, [setDarkMode]);
+  const { setTheme } = useTheme();
+  // useEffect(() => {
+  //   if (
+  //     window.matchMedia &&
+  //     window.matchMedia("(prefers-color-scheme: dark)").matches
+  //   ) {
+  //     setTheme("dark");
+  //   }
+  // }, [setTheme]);
   const [height, setSize] = useState<number>(0);
 
   useEffect(() => {

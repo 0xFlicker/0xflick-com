@@ -6,10 +6,10 @@ import MenuList from "@mui/material/MenuList";
 import Typography from "@mui/material/Typography";
 import { FC } from "react";
 import { Main } from "./Main";
-import { useSavedTheme } from "features/appbar/hooks";
+import { useTheme } from "@0xflick/feature-theme";
 import { useMint } from "features/mint/hooks";
-import { useHasAllowedAction } from "features/auth/hooks";
-import { canPreSaleMint } from "features/auth/matchers";
+import { useHasAllowedAction } from "@0xflick/feature-auth/src/hooks";
+import { canPreSaleMint } from "@0xflick/feature-auth/src/matchers";
 import { ApprovalCard } from "features/mint/components/ApprovalCard";
 import { PreSaleMintCard } from "features/mint";
 import { TokenDescription } from "../features/mint/components/TokenDescription";
@@ -21,7 +21,7 @@ export const PreSaleSignup: FC<{ affiliate?: string }> = ({ affiliate }) => {
   const { t } = useLocale(["common"]);
   const canPreSale = useHasAllowedAction(canPreSaleMint);
   useMint();
-  const { toggleTheme: handleThemeChange } = useSavedTheme();
+  const { toggleTheme: handleThemeChange } = useTheme();
   return (
     <Main
       menu={

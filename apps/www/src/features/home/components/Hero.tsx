@@ -18,7 +18,7 @@ import Box from "@mui/material/Box";
 import { useSpring, animated, config } from "react-spring";
 import { LinkCollection } from "@0xflick/components/src/LinkCollection";
 import { useAppSelector } from "@0xflick/app-store";
-import { useSavedTheme } from "features/appbar/hooks";
+import { useTheme } from "@0xflick/feature-theme";
 
 const SlideFromSide: FC<
   PropsWithChildren<{
@@ -181,7 +181,7 @@ export const Hero: FC = () => {
   //   event.preventDefault();
   // }, []);
   // Center the hero text vertically and horizontally.
-  const { isDarkMode } = useSavedTheme();
+  const { isDarkMode } = useTheme();
   const parallaxStyleCenter: CSSProperties = useMemo(
     () => ({
       display: "flex",
