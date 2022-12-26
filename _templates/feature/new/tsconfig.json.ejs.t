@@ -17,7 +17,7 @@ to: packages/feature-<%= name %>/tsconfig.json
       "@0xflick/utils": ["../../packages/utils/src/index"]
     },
     "plugins": [
-<% if(graphql){ -%>
+<% if(locals.graphql){ -%>
       {
         "name": "ts-graphql-plugin",
         "schema": "../../packages/graphql/schema.graphql",

@@ -1,5 +1,5 @@
 ---
-to: "<%= graphql ? `packages/feature-${name}/codegen.yml` : null %>"
+to: "<%= locals.graphql ? `packages/feature-${name}/codegen.yml` : null %>"
 ---
 overwrite: true
 schema: "../../packages/graphql/schema.graphql"

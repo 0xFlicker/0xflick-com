@@ -28,6 +28,14 @@ You'll need to build the contracts:
 yarn workspace @0xflick/contracts compile
 ```
 
+## New feature package
+
+From root:
+
+```
+yarn hygen generate feature new --name foo --description "foo does bar"
+```
+
 ## WWW
 
 See [apps/www](./apps/www)

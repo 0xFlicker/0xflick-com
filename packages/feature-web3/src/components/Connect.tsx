@@ -27,15 +27,10 @@ const Connect: FC<{
   // Used to lazy render the ENS name, to avoid hydration mismatch
   const [settleEnsName, setSettledEnsName] = useState<string | null>(null);
   const dispatch = useAppDispatch();
-  const {
-    isAuthenticated,
-    signIn,
-    signOut,
-    ensAvatar,
-    ensName,
-    ensNameIsLoading,
-  } = useAuth();
+  const { isAuthenticated, signIn, signOut, ensName, ensNameIsLoading } =
+    useAuth();
   const [menuAnchorEl, setMenuAnchorEl] = useState<Element | null>(null);
+  const { selectedAddress: address, reset } = useWeb3();
 
   const onClick = useCallback(() => {
     dispatch(web3Actions.openWalletSelectModal());
@@ -44,6 +39,7 @@ const Connect: FC<{
   const handleDisconnect = useCallback(() => {
     dispatch(web3Actions.reset());
     signOut();
+    reset();
     setMenuAnchorEl(null);
   }, [dispatch, signOut]);
 
@@ -53,7 +49,7 @@ const Connect: FC<{
   const handleMenu = useCallback((event: MouseEvent) => {
     setMenuAnchorEl(event.currentTarget);
   }, []);
-  const { selectedAddress: address } = useWeb3();
+
   // const chainName = chain?.name;
   const isOpen = useAppSelector(web3Selectors.isWalletSelectModalOpen);
   const isWrongNetwork = useAppSelector(web3Selectors.isWrongNetwork);
@@ -67,6 +63,7 @@ const Connect: FC<{
     setMenuAnchorEl(null);
     dispatch(web3Actions.reset());
     signOut();
+    reset();
   }, [dispatch, signOut]);
   const handleModalClose = useCallback(() => {
     dispatch(web3Actions.closeWalletSelectModal());

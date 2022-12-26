@@ -7,27 +7,9 @@ import {
   useMemo,
   useState,
 } from "react";
-import {
-  AppDispatch,
-  useAppDispatch,
-  useAppSelector,
-} from "@0xflick/app-store";
-import { useAccount, useConnect, Chain, Connector, useNetwork } from "wagmi";
-import { defaultChain, supportedAppChains as allChains } from "@0xflick/utils";
-import {
-  actions as web3Actions,
-  selectors as web3Selectors,
-  WalletStatus,
-  WalletType,
-} from "./redux";
-import {
-  isCoinbaseWalletConnector,
-  isInjectedConnector,
-  isMetamaskConnector,
-  isWalletConnector,
-  TAppConnectors,
-} from "./wagmi";
-import { hexString } from "@0xflick/utils";
+import { useAppDispatch } from "@0xflick/app-store";
+import { useAccount, useConnect, Chain, useNetwork } from "wagmi";
+import { defaultChain } from "@0xflick/utils";
 
 export type TChain = Chain & {
   chainImageUrl: string;
@@ -50,17 +32,13 @@ export function decorateChainImageUrl(chain: Chain): TChain {
 
 export function useWeb3Context() {
   const dispatch = useAppDispatch();
-  const { chain } = useNetwork();
   const chainImageUrl = useMemo<TChain>(() => {
     return decorateChainImageUrl(defaultChain.get());
   }, []);
   const { connector: activeConnector, isConnected, address } = useAccount({});
   const {
     connect,
-    error,
     isLoading,
-    pendingConnector,
-    connectors,
     reset,
     data: provider,
   } = useConnect({
@@ -79,6 +57,7 @@ export function useWeb3Context() {
     provider: provider?.provider,
     selectedAddress: isFirstLoad ? undefined : address,
     connect,
+    reset,
     activeConnector,
     isConnected,
     isLoading,

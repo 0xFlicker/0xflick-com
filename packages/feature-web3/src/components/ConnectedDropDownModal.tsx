@@ -1,7 +1,6 @@
 import { FC } from "react";
 import Backdrop from "@mui/material/Backdrop";
 import Box from "@mui/material/Box";
-import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Menu from "@mui/material/Menu";
@@ -13,7 +12,6 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import ProfileIcon from "@mui/icons-material/AccountCircle";
 import { useLocale } from "@0xflick/feature-locale";
 import { WrappedLink } from "@0xflick/components/src/WrappedLink";
-import { ListItem } from "@mui/material";
 
 interface IProps {
   anchorEl: Element;

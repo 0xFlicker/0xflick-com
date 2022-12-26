@@ -9,7 +9,7 @@ to: packages/feature-<%= name %>/package.json
   "author": "0xflick <github@0xflick.xyz>",
   "license": "MIT",
   "scripts": {
-<% if(graphql){ -%>
+<% if(locals.graphql){ -%>
     "generate": "yarn generate:schema && yarn generate:introspection && yarn generate:types",
     "generate:schema": "yarn --cwd ../../packages/graphql schema:build",
     "generate:introspection": "node scripts/possibleTypes.cjs",
@@ -17,18 +17,18 @@ to: packages/feature-<%= name %>/package.json
 <% } -%>
   },
   "dependencies": {
-<% if(graphql){ -%>
+<% if(locals.graphql){ -%>
     "@apollo/client": "^3.7.2",
 <% } -%>
     "@mui/material": "^5.11.0",
-<% if(graphql){ -%>
+<% if(locals.graphql){ -%>
     "graphql": "16.5.0",
     "graphql-tag": "^2.12.6",
 <% } -%>
     "react": "^18.2.0"
   },
   "devDependencies": {
-<% if(graphql){ -%>
+<% if(locals.graphql){ -%>
     "@graphql-codegen/cli": "2.11.6",
     "@graphql-codegen/near-operation-file-preset": "^2.4.1",
     "@graphql-codegen/typed-document-node": "^2.3.3",

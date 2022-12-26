@@ -7,10 +7,16 @@
     "outDir": "./dist",
     "composite": true,
     "jsx": "preserve",
-    "paths": {},
+    "paths": {
+      "@0xflick/feature-theme": ["../../packages/feature-theme/src/index"]
+    },
     "plugins": []
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["./node_modules"],
-  "references": []
+  "references": [
+    {
+      "path": "../../packages/feature-theme"
+    }
+  ]
 }

@@ -18,7 +18,7 @@ export const StatusField: FC<
     if (!checked) {
       return <CancelIcon />;
     }
-    return <CheckCircleIcon />;
+    return <CheckCircleIcon color="primary" />;
   })();
   return (
     <Box display="flex" flexDirection="row">

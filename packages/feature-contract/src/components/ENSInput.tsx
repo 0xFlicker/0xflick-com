@@ -1,23 +1,25 @@
 import { FC } from "react";
-import Image from "next/image";
 import TextField from "@mui/material/TextField";
 import { fieldToTextField, TextFieldProps } from "formik-mui";
-import { InputAdornment } from "@mui/material";
+import InputAdornment from "@mui/material/InputAdornment";
+import Image from "next/image";
+import SvgIcon from "@mui/material/SvgIcon";
 
-export const EthereumAddressInput: FC<TextFieldProps> = (props) => {
+export const ENSInput: FC<TextFieldProps> = (props) => {
   return (
     <TextField
       {...fieldToTextField(props)}
       margin="normal"
       fullWidth
       InputProps={{
+        ...props.InputProps,
         startAdornment: (
           <InputAdornment position="start">
             <Image
-              src={`/icons/ethereum-${isDarkMode ? "dark" : "light"}.svg`}
-              alt=""
+              src="/icons/ethereum-name-service-ens-logo.svg"
               width={32}
               height={32}
+              alt=""
             />
           </InputAdornment>
         ),

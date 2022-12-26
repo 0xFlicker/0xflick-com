@@ -27,6 +27,7 @@ export interface ApiProps extends cdk.StackProps {
   readonly jwk: string;
   readonly jwtPublicKey: string;
   readonly jwtClaimIssuer: string;
+  readonly openSeaApiKey: string;
   readonly rootDomain: string;
   readonly twitterOauthClientSecret: string;
   readonly twitterOauthClientId: string;
@@ -57,6 +58,7 @@ export class GraphqlStack extends cdk.Stack {
       jwtClaimIssuer,
       jwtPublicKey,
       rootDomain,
+      openSeaApiKey,
       twitterOauthClientSecret,
       twitterOauthClientId,
       twitterAppKey,
@@ -127,6 +129,7 @@ export class GraphqlStack extends cdk.Stack {
       SIWE_EXPIRATION_TIME_SECONDS: "604800",
       TWITTER_OAUTH_CLIENT_SECRET: twitterOauthClientSecret,
       NEXT_PUBLIC_TWITTER_OAUTH_CLIENT_ID: twitterOauthClientId,
+      OPENSEA_API_KEY: openSeaApiKey,
       TWITTER_APP_KEY: twitterAppKey,
       TWITTER_APP_SECRET: twitterAppSecret,
       TWITTER_FOLLOW_USER_ID: twitterFollowUserId,

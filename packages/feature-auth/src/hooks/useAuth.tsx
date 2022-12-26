@@ -27,7 +27,7 @@ import {
 import { useSignIn } from "./useSignIn";
 import { useSignOut } from "./useSignOut";
 import { useAllowedActions } from "./useAllowedActions";
-import { useEnsAvatar, useEnsName, useAccount } from "wagmi";
+import { useEnsAvatar, useEnsName } from "wagmi";
 
 export function useSavedToken(token?: string) {
   const [savedToken, setSavedToken] = useLocalStorage("token", "", {
@@ -57,8 +57,12 @@ export function useSavedToken(token?: string) {
 function useAuthContext() {
   const isAuthenticated = useAppSelector(authSelectors.isAuthenticated);
   const isAnonymous = useAppSelector(authSelectors.isAnonymous);
-  const isWeb3Connected = useAppSelector(web3Selectors.isConnected);
-  const { currentChain, activeConnector, selectedAddress: address } = useWeb3();
+  const {
+    currentChain,
+    activeConnector,
+    selectedAddress: address,
+    isConnected: isWeb3Connected,
+  } = useWeb3();
 
   const { data: ensName, isLoading: ensNameIsLoading } = useEnsName({
     address,

@@ -1,6 +1,5 @@
 import { createSelector, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { utils } from "ethers";
-import { defaultChain } from "@0xflick/utils/src/config";
 
 export enum WalletType {
   NONE = "NONE",

@@ -4,30 +4,30 @@ import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { FC } from "react";
 import { Main } from "./Main";
-import { FAQ } from "features/home/components/FAQ";
 import { SiteMenu } from "features/appbar/components/SiteMenu";
 import { useLocale } from "@0xflick/feature-locale";
+import { RegisterNameflickForm } from "@0xflick/feature-contract/src/components/RegisterNameflickForm";
 
-export const Faq: FC = () => {
+export const Register: FC = () => {
   const { t } = useLocale(["common"]);
   return (
     <Main
       menu={
         <>
           <MenuList dense disablePadding>
-            <SiteMenu isFaq />
+            <SiteMenu isRegister />
           </MenuList>
         </>
       }
       title={
         <Typography variant="h5" component="h1">
-          {t("title_faq")}
+          {t("title_register")}
         </Typography>
       }
     >
       <Container maxWidth="lg">
         <Box sx={{ mt: 4 }}>
-          <FAQ />
+          <RegisterNameflickForm />
         </Box>
       </Container>
     </Main>

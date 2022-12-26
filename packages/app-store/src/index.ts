@@ -1,7 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { useDispatch, useSelector } from "react-redux";
 
-import { reducer as web3Reducer } from "@0xflick/feature-web3";
+import { reducer as web3Reducer } from "@0xflick/feature-web3/src/redux";
 import { reducer as authReducer } from "@0xflick/feature-auth/src/redux";
 
 export const store = configureStore({

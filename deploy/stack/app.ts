@@ -63,6 +63,7 @@ const { api: graphqlApi } = new GraphqlStack(app, "Graphql", {
   jwk: jwtJson.JWK,
   jwtPublicKey: jwtJson.publicKey,
   jwtClaimIssuer: jwtJson.issuer,
+  openSeaApiKey: secretsJson.openSeaApiKey,
   rootDomain: deployment,
   twitterAppKey: twitterJson.TWITTER_APP_KEY,
   twitterAppSecret: twitterJson.TWITTER_APP_SECRET,
