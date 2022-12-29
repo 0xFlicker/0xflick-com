@@ -32,15 +32,15 @@ import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IExtendedResolver
 import "hardhat/console.sol";
 
 interface IExtendedResolverWithProof {
-  function resolve(bytes memory name, bytes memory data)
-    external
-    view
-    returns (bytes memory);
+  function resolve(
+    bytes memory name,
+    bytes memory data
+  ) external view returns (bytes memory, address);
 
-  function resolveWithProof(bytes calldata response, bytes calldata extraData)
-    external
-    view
-    returns (bytes memory);
+  function resolveWithProof(
+    bytes calldata response,
+    bytes calldata extraData
+  ) external view returns (bytes memory, address);
 }
 
 contract FlickENS is
@@ -128,22 +128,20 @@ contract FlickENS is
    * @param data The ABI encoded data for the underlying resolution function (Eg, addr(bytes32), text(bytes32,string), etc).
    * @return The return data, ABI encoded identically to the underlying function.
    */
-  function resolve(bytes calldata name, bytes calldata data)
-    external
-    view
-    returns (bytes memory)
-  {
+  function resolve(
+    bytes calldata name,
+    bytes calldata data
+  ) external view returns (bytes memory, address) {
     return resolverProxy.resolve(name, data);
   }
 
   /**
    * Callback used by CCIP read compatible clients to verify and parse the response.
    */
-  function resolveWithProof(bytes calldata response, bytes calldata extraData)
-    external
-    view
-    returns (bytes memory)
-  {
+  function resolveWithProof(
+    bytes calldata response,
+    bytes calldata extraData
+  ) external view returns (bytes memory, address) {
     return resolverProxy.resolveWithProof(response, extraData);
   }
 
@@ -214,10 +212,10 @@ contract FlickENS is
   }
 
   // admin minting
-  function gift(uint256[] calldata _mintAmount, address[] calldata recipient)
-    external
-    onlyOwner
-  {
+  function gift(
+    uint256[] calldata _mintAmount,
+    address[] calldata recipient
+  ) external onlyOwner {
     require(
       _mintAmount.length == recipient.length,
       "Provide equal mintAmount and recipients"
@@ -244,10 +242,9 @@ contract FlickENS is
     maxSupply = _newMaxSupply;
   }
 
-  function setPreSaleMaxMintPerAccount(uint256 _newPreSaleMaxMintPerAccount)
-    public
-    onlyOwner
-  {
+  function setPreSaleMaxMintPerAccount(
+    uint256 _newPreSaleMaxMintPerAccount
+  ) public onlyOwner {
     preSaleMaxMintPerAccount = _newPreSaleMaxMintPerAccount;
   }
 
@@ -266,9 +263,10 @@ contract FlickENS is
     return uint16(_getAux(to) & _OWNER_AUX_PRESALE_COMPLEMENT);
   }
 
-  function incrementPresaleCountAuxForAddress(address to, uint16 mintAmount)
-    internal
-  {
+  function incrementPresaleCountAuxForAddress(
+    address to,
+    uint16 mintAmount
+  ) internal {
     // Since the count is the last 8 bits, we can just add the mint amount to the aux
     _setAux(to, _getAux(to) + mintAmount);
   }
@@ -279,11 +277,10 @@ contract FlickENS is
     @dev In production we will never issue more than a single nonce per address,
     but this allows for testing with a single address.
      */
-  function alreadyMinted(address to, bytes32 nonce)
-    external
-    view
-    returns (bool)
-  {
+  function alreadyMinted(
+    address to,
+    bytes32 nonce
+  ) external view returns (bool) {
     return
       usedMessages[
         SignatureChecker.generateMessage(signaturePayload(to, nonce))
@@ -294,11 +291,10 @@ contract FlickENS is
     @dev Constructs the buffer that is hashed for validation with a minting
     signature.
      */
-  function signaturePayload(address to, bytes32 nonce)
-    internal
-    pure
-    returns (bytes memory)
-  {
+  function signaturePayload(
+    address to,
+    bytes32 nonce
+  ) internal pure returns (bytes memory) {
     return abi.encodePacked(to, nonce);
   }
 
@@ -322,10 +318,9 @@ contract FlickENS is
   /**
     @notice Sets the optional tokenURI override contract.
      */
-  function setRenderingContract(ITokenURIGenerator _contract)
-    external
-    onlyOwner
-  {
+  function setRenderingContract(
+    ITokenURIGenerator _contract
+  ) external onlyOwner {
     renderingContract = _contract;
   }
 
@@ -333,12 +328,9 @@ contract FlickENS is
     @notice If renderingContract is set then returns its tokenURI(tokenId)
     return value, otherwise returns the standard baseTokenURI + tokenId.
      */
-  function tokenURI(uint256 tokenId)
-    public
-    view
-    override(ERC721A, IERC721A)
-    returns (string memory)
-  {
+  function tokenURI(
+    uint256 tokenId
+  ) public view override(ERC721A, IERC721A) returns (string memory) {
     if (address(renderingContract) != address(0)) {
       return renderingContract.tokenURI(tokenId);
     }
@@ -348,19 +340,16 @@ contract FlickENS is
   /**
     @notice Sets the contract-wide royalty info.
      */
-  function setRoyaltyInfo(address receiver, uint96 feeBasisPoints)
-    external
-    onlyOwner
-  {
+  function setRoyaltyInfo(
+    address receiver,
+    uint96 feeBasisPoints
+  ) external onlyOwner {
     _setDefaultRoyalty(receiver, feeBasisPoints);
   }
 
-  function supportsInterface(bytes4 interfaceId)
-    public
-    view
-    override(ERC721A, IERC721A, ERC2981)
-    returns (bool)
-  {
+  function supportsInterface(
+    bytes4 interfaceId
+  ) public view override(ERC721A, IERC721A, ERC2981) returns (bool) {
     return
       interfaceId == type(IExtendedResolver).interfaceId ||
       super.supportsInterface(interfaceId);
@@ -418,10 +407,10 @@ contract FlickENS is
     vrfRequestConfirmations = _vrfRequestConfirmations;
   }
 
-  function configureChainlink(uint64 _vrfSubscriptionId, bytes32 _vrfKeyHash)
-    external
-    onlyOwner
-  {
+  function configureChainlink(
+    uint64 _vrfSubscriptionId,
+    bytes32 _vrfKeyHash
+  ) external onlyOwner {
     vrfSubscriptionId = _vrfSubscriptionId;
     vrfKeyHash = _vrfKeyHash;
   }
@@ -440,10 +429,10 @@ contract FlickENS is
     ] = revealEntropy.length - 1;
   }
 
-  function fulfillRandomWords(uint256 requestId, uint256[] memory randomWords)
-    internal
-    override
-  {
+  function fulfillRandomWords(
+    uint256 requestId,
+    uint256[] memory randomWords
+  ) internal override {
     uint256 revealIndex = entropyRequests[requestId];
     require(revealIndex == 0, "Already revealed");
     delete entropyRequests[requestId];
@@ -456,10 +445,10 @@ contract FlickENS is
   /**
    * @dev To bypass chainlink VRF for a broken channel or to save LINK in case of slow mint. Can not overwrite an existing reveal.
    */
-  function ownerRevealEntropy(uint24 seedIndex, uint256 entropy)
-    public
-    onlyOwner
-  {
+  function ownerRevealEntropy(
+    uint24 seedIndex,
+    uint256 entropy
+  ) public onlyOwner {
     require(revealEntropy[seedIndex] == 0, "Already revealed");
     revealEntropy[seedIndex] = entropy;
     // add a new slot for the next entropy
@@ -472,7 +461,7 @@ contract FlickENS is
    */
   function _extraData(
     address from,
-    address, /* to */
+    address /* to */,
     uint24 previousExtraData
   ) internal view override returns (uint24) {
     if (from != address(0)) {

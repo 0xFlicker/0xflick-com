@@ -26,6 +26,7 @@ export async function userMint(accounts: SignerWithAddress[]) {
     beneficiary.address,
     mockCoordinator.address
   );
+
   await mintContract.setPresaleActive(true);
   const nonceBytes = ethers.utils.hexZeroPad(utils.hexlify(0), 32);
   const message = ethers.utils.solidityPack(
@@ -53,7 +54,8 @@ export async function userMint(accounts: SignerWithAddress[]) {
     topics: transactionReceipt.logs[0].topics,
     data: transactionReceipt.logs[0].data,
   }).args[0];
-  await mintContract.configureChainlink(
+  await mockCoordinator.addConsumer(subscriptionId, mintContract.address);
+  await mintContract["configureChainlink(uint64,bytes32)"](
     subscriptionId,
     "0xd89b2bf150e3b9e13446986e571fb9cab24b13cea0a43ea20a6049a85cc807cc"
   );
@@ -77,8 +79,6 @@ export async function ensResolver(accounts: SignerWithAddress[]) {
   const nameflickResolverFactory = new NameflickENSResolver__factory(deployer);
   const nameflickResolver = await nameflickResolverFactory.deploy(
     registry.address,
-    // constants.AddressZero,
-    mintContract.address,
     mintContract.address,
     ["https://example.com/"],
     [signer.address]
