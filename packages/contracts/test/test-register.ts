@@ -1,21 +1,13 @@
 import { ethers, waffle } from "hardhat";
-import { EthersProviderWrapper } from "@nomiclabs/hardhat-ethers/internal/ethers-provider-wrapper";
 import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { userMint } from "./utils";
-import { BigNumber, utils, providers } from "ethers";
-import {
-  IResolverService__factory,
-  AddrResolver__factory,
-  ENSRegistry__factory,
-} from "../typechain";
-import { Web3Provider } from "@ethersproject/providers";
+import { BigNumber, utils, providers, constants } from "ethers";
+import { IResolverService__factory, AddrResolver__factory } from "../typechain";
 
 const formatter = new providers.Formatter();
 const resolverAddrInterface = AddrResolver__factory.createInterface();
 const resolverServiceInterface = IResolverService__factory.createInterface();
-const resolverBytesBytesEncoder =
-  resolverServiceInterface.getFunction("resolve");
 
 async function resolveResolver(
   registryAddress: string,
@@ -172,6 +164,8 @@ describe("Registry", function () {
 
     // register NFT contract on ENS
     const userNameFlickResolver = nameflickResolver.connect(user);
+
+    await nameflickResolver.setRequireContractOwnershipToRegister(true);
     await expect(
       userNameFlickResolver.registerContract(
         utils.namehash("example2.eth"),
@@ -179,8 +173,65 @@ describe("Registry", function () {
         [60]
       )
     ).to.revertedWith("Caller not owner of contract");
+    await nameflickResolver.setRequireContractOwnershipToRegister(false);
+    await userNameFlickResolver.registerContract(
+      utils.namehash("example2.eth"),
+      mintContract.address,
+      [60]
+    );
+
+    expect(
+      await nameflickResolver.nfts(utils.namehash("example2.eth"))
+    ).to.equal(mintContract.address);
   });
 
+  it("Must own the ENS", async () => {
+    const user = accounts[1];
+    const { mintContract, owner, mockCoordinator, subscriptionId } =
+      await userMint(accounts);
+
+    // deploy an ENS registry
+    const ENSRegistry = await ethers.getContractFactory("ENSRegistry", owner);
+    const registry = await ENSRegistry.deploy();
+    await registry.deployed();
+
+    // deploy root ETH node
+    await registry.setSubnodeOwner(
+      "0x0000000000000000000000000000000000000000000000000000000000000000",
+      utils.id("eth"),
+      owner.address
+    );
+
+    // deploy example.eth node
+    await registry.setSubnodeOwner(
+      utils.namehash("eth"),
+      utils.id("example2"),
+      user.address
+    );
+
+    // deploy NameFlickENSResolver
+    const NameFlickENSResolver = await ethers.getContractFactory(
+      "NameflickENSResolver",
+      owner
+    );
+    const nameflickResolver = await NameFlickENSResolver.deploy(
+      registry.address,
+      mintContract.address,
+      ["https://example.com/"],
+      [owner.address]
+    );
+
+    // register NFT contract on ENS
+    const userNameFlickResolver = nameflickResolver.connect(user);
+
+    await expect(
+      nameflickResolver.registerContract(
+        utils.namehash("example2.eth"),
+        mintContract.address,
+        [60]
+      )
+    ).to.revertedWith("nameflickResolver");
+  });
   it("Can resolve NFT ENS subdomain", async () => {
     const { mintContract, owner, user, mockCoordinator, subscriptionId } =
       await userMint(accounts);
@@ -327,5 +378,67 @@ describe("Registry", function () {
         owner.provider
       )
     ).to.be.reverted;
+  });
+
+  it("Can stand alone", async () => {
+    const { mintContract, owner, user } = await userMint(accounts);
+
+    // deploy an ENS registry
+    const ENSRegistry = await ethers.getContractFactory("ENSRegistry", owner);
+    const registry = await ENSRegistry.deploy();
+    await registry.deployed();
+
+    // deploy root ETH node
+    await registry.setSubnodeOwner(
+      "0x0000000000000000000000000000000000000000000000000000000000000000",
+      utils.id("eth"),
+      owner.address
+    );
+
+    // deploy example.eth node
+    await registry.setSubnodeOwner(
+      utils.namehash("eth"),
+      utils.id("example"),
+      owner.address
+    );
+
+    // deploy NameFlickENSResolver
+    const NameFlickENSResolver = await ethers.getContractFactory(
+      "NameflickENSResolver",
+      owner
+    );
+    const nameflickResolver = await NameFlickENSResolver.deploy(
+      registry.address,
+      constants.AddressZero,
+      ["https://example.com/"],
+      [owner.address]
+    );
+
+    // register NFT contract on ENS
+    await nameflickResolver.registerContract(
+      utils.namehash("example.eth"),
+      mintContract.address,
+      [60]
+    );
+
+    await registry.setResolver(
+      utils.namehash("example.eth"),
+      nameflickResolver.address
+    );
+
+    const resolverAddress = await resolveResolver(
+      registry.address,
+      "example.eth",
+      owner.provider
+    );
+
+    expect(
+      await resolveCoinAddress(
+        resolverAddress,
+        "1.example.eth",
+        BigNumber.from(60),
+        owner.provider
+      )
+    ).to.hexEqual(user.address);
   });
 });

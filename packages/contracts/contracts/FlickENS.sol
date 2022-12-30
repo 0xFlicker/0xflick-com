@@ -50,7 +50,9 @@ contract FlickENS is
   PaymentSplitter,
   ERC721AQueryable,
   VRFConsumerBaseV2,
-  INameflickNFT
+  INameflickNFT,
+  AccessControlEnumerable,
+  IExtendedResolver
 {
   using EnumerableSet for EnumerableSet.AddressSet;
   using SignatureChecker for EnumerableSet.AddressSet;
@@ -61,7 +63,7 @@ contract FlickENS is
   IExtendedResolverWithProof public resolverProxy;
 
   // Mapping of FlickENS tokens to ENS tokens
-  mapping(uint256 => uint256) public flickToEns;
+  mapping(uint256 => bytes32) public flickToEns;
 
   //sale settings
   uint256 public cost = 0;
@@ -100,6 +102,8 @@ contract FlickENS is
   uint32 vrfCallbackGasLimit = 100000;
   uint16 vrfRequestConfirmations = 3;
 
+  bytes32 private constant MINTER_ROLE = keccak256("MINTER_ROLE");
+
   constructor(
     string memory name,
     string memory symbol,
@@ -120,6 +124,7 @@ contract FlickENS is
     // The tip of revealEntropy is a zero block, which is used to indicate that the reveal seed is not yet set
     revealEntropy.push(0);
     COORDINATOR = VRFCoordinatorV2Interface(_vrfCoordinator);
+    _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
   }
 
   /**
@@ -191,25 +196,33 @@ contract FlickENS is
   }
 
   /**
+  @notice Mint token.
+  */
+  function mintAdmin(address to) external payable onlyRole(MINTER_ROLE) {
+    require(totalSupply() + 1 <= maxSupply, "Over supply");
+    _safeMint(to, 1);
+  }
+
+  /**
     @dev Emitted when a FlickENS token wraps an ENS token.
      */
   event Wrapped(uint256 flickTokenId, uint256 ensTokenId);
 
-  /**
-   @notice Sets the ENS token that the NFT will resolve to.
-   @param flickTokenId The FlickENS token id to set.
-   @param ensTokenId The tokenId of the ENS that the resolver will wrap. The ENS must be owned by the owner of this token.
-   */
-  function wrap(uint256 flickTokenId, uint256 ensTokenId) external {
-    IERC721 ensToken = IERC721(ensTokenAddress);
-    require(ownerOf(flickTokenId) == msg.sender, "Not owner");
-    require(
-      ensToken.ownerOf(ensTokenId) == msg.sender,
-      "ENS token must be owned by sender"
-    );
-    flickToEns[flickTokenId] = ensTokenId;
-    emit Wrapped(flickTokenId, ensTokenId);
-  }
+  // /**
+  //  @notice Sets the ENS token that the NFT will resolve to.
+  //  @param flickTokenId The FlickENS token id to set.
+  //  @param namehash The namehash of the ENS that the resolver will wrap.
+  //  */
+  // function wrap(uint256 flickTokenId, bytes32 namehash) external {
+  //   IERC721 ensToken = IERC721(ensTokenAddress);
+  //   require(ownerOf(flickTokenId) == msg.sender, "Not owner");
+  //   require(
+  //     ensToken.ownerOf(ensTokenId) == msg.sender,
+  //     "ENS token must be owned by sender"
+  //   );
+  //   flickToEns[flickTokenId] = ensTokenId;
+  //   emit Wrapped(flickTokenId, ensTokenId);
+  // }
 
   // admin minting
   function gift(
@@ -349,10 +362,17 @@ contract FlickENS is
 
   function supportsInterface(
     bytes4 interfaceId
-  ) public view override(ERC721A, IERC721A, ERC2981) returns (bool) {
+  )
+    public
+    view
+    override(ERC721A, IERC721A, ERC2981, AccessControlEnumerable)
+    returns (bool)
+  {
     return
       interfaceId == type(IExtendedResolver).interfaceId ||
-      super.supportsInterface(interfaceId);
+      ERC2981.supportsInterface(interfaceId) ||
+      ERC721A.supportsInterface(interfaceId) ||
+      AccessControlEnumerable.supportsInterface(interfaceId);
   }
 
   /**

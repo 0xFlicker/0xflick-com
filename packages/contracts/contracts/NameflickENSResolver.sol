@@ -72,6 +72,7 @@ contract NameflickENSResolver is IExtendedResolver, ERC165, Ownable {
   error ERC721_InvalidToken();
 
   event NewSigners(address[] signers);
+  event RegisterContract(bytes32 name, address contractAddress);
 
   error OffchainLookup(
     address sender,
@@ -130,6 +131,10 @@ contract NameflickENSResolver is IExtendedResolver, ERC165, Ownable {
     return nftOnCoin[keccak256(abi.encode(nftContract, uint256(coinId)))];
   }
 
+  function getParentContract() public view returns (address) {
+    return parentContract == address(0) ? address(this) : parentContract;
+  }
+
   function revertOffchainLookup(
     bytes calldata name,
     bytes calldata data
@@ -140,7 +145,7 @@ contract NameflickENSResolver is IExtendedResolver, ERC165, Ownable {
       data
     );
     revert OffchainLookup(
-      parentContract,
+      getParentContract(),
       urls,
       callData,
       NameflickENSResolver.resolveWithProof.selector,
@@ -201,64 +206,8 @@ contract NameflickENSResolver is IExtendedResolver, ERC165, Ownable {
       } else {
         revert ERC721_InvalidToken();
       }
-
-      // get the tokenID from the sub-domain label in name
-      // (bool success, uint256 tokenId) = name.getNodeString(0).toUint();
-      // if (!success) {
-      //   revertOffchainLookup(name, data);
-      // }
-
-      // address owner;
-      // (success, owner) = ownerOfNft(tokenId, nft);
-      // if (!success) {
-      //   revertOffchainLookup(name, data);
-      // }
-      // return (addressToBytes(owner), nft);
-
-      // Slice the data to get the function selector
-      // bytes4 selector = data.getBytes4(0);
-      // console.log("selector:");
-      // console.logBytes4(selector);
-      // if (selector == ADDR_ETH_INTERFACE_ID) {
-      //   uint256 tokenId = name.getENSSubDomainComponent(0);
-      //   console.log("tokenId", tokenId);
-      //   address owner = IERC721(nft).ownerOf(tokenId);
-      //   return (abi.encode(owner), nft);
-      // } else if (selector == ADDR_INTERFACE_ID) {
-      //   uint256 tokenId = data.getUint256(4);
-      //   address owner = IERC721(nft).ownerOf(tokenId);
-      //   return (abi.encode(owner), nft);
-      // }
     }
-    // if (nameflickContractResolver != address(0)) {
-    //   if (
-    //     IERC165(nameflickContractResolver).supportsInterface(
-    //       type(INameflickContractLookup).interfaceId
-    //     ) &&
-    //     INameflickContractLookup(nameflickContractResolver).isRegistered(
-    //       name
-    //     ) &&
-    //     IERC165(nameflickContractResolver).supportsInterface(
-    //       type(IExtendedResolver).interfaceId
-    //     )
-    //   ) {
-    //     // if so, resolve the address from the contract resolver
-    //     return IExtendedResolver(nameflickContractResolver).resolve(name, data);
-    //   }
-    // }
-
-    bytes memory callData = abi.encodeWithSelector(
-      IResolverService.resolve.selector,
-      name,
-      data
-    );
-    revert OffchainLookup(
-      parentContract,
-      urls,
-      callData,
-      NameflickENSResolver.resolveWithProof.selector,
-      callData
-    );
+    revertOffchainLookup(name, data);
   }
 
   /**
@@ -269,7 +218,7 @@ contract NameflickENSResolver is IExtendedResolver, ERC165, Ownable {
     bytes calldata extraData
   ) external view returns (bytes memory) {
     (address signer, bytes memory result) = SignatureVerifier.verify(
-      parentContract,
+      getParentContract(),
       extraData,
       response
     );
@@ -306,16 +255,27 @@ contract NameflickENSResolver is IExtendedResolver, ERC165, Ownable {
       ERC165(contractAddress).supportsInterface(type(IERC1155).interfaceId);
   }
 
+  bool private requireContractOwnership = false;
+
+  function setRequireContractOwnershipToRegister(
+    bool _requireContractOwnership
+  ) external onlyOwner {
+    requireContractOwnership = _requireContractOwnership;
+  }
+
   function registerContract(
     bytes32 namehash,
     address contractAddress,
     uint64[] calldata supportedCoinsFromEth
   ) external {
-    // If so, check if the caller is the owner
-    require(
-      Ownable(contractAddress).owner() == msg.sender,
-      "Caller not owner of contract"
-    );
+    if (requireContractOwnership) {
+      // If so, check if the caller is the owner
+      require(
+        Ownable(contractAddress).owner() == msg.sender,
+        "Caller not owner of contract"
+      );
+    }
+    require(ens.owner(namehash) == msg.sender, "nameflickResolver");
     nfts[namehash] = contractAddress;
     for (uint256 i = 0; i < supportedCoinsFromEth.length; i++) {
       nftOnCoin[
