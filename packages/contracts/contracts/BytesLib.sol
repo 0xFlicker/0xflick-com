@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.16;
 
+import "hardhat/console.sol";
+
 library BytesLib {
   function getBytes4(
     bytes memory b,
@@ -30,6 +32,20 @@ library BytesLib {
     assembly {
       result := mload(add(add(b, 0x20), index))
     }
+  }
+
+  function getString(
+    bytes memory b,
+    uint256 index
+  ) internal pure returns (string memory result) {
+    // first byte32 is the length of the string
+    uint256 length = getUint256(b, index);
+    require(b.length >= index + length + 32, "BytesLib: index out of bounds");
+    bytes memory temp = new bytes(length);
+    for (uint256 i = 0; i < length; i++) {
+      temp[i] = b[index + i + 4];
+    }
+    result = string(temp);
   }
 
   function getNodeString(

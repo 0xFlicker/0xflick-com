@@ -159,11 +159,4 @@ describe("ENS test", function () {
       decodeDnsName(Buffer.from(offchainEncodedName.slice(2), "hex"))
     ).to.equal("example.eth");
   });
-
-  it("check string", async () => {
-    const { nameflickResolver } = await ensResolver(accounts);
-    expect(await nameflickResolver.stringToUint("12345")).to.equal(
-      BigNumber.from("12345")
-    );
-  });
 });
