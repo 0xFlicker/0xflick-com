@@ -1,5 +1,5 @@
 import { utils } from "ethers";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import {
   useAccount,
   useContractRead,
@@ -94,7 +94,14 @@ const ENS_ABI = [
 ] as const;
 
 export function useEnsAccountIsApproved(ensName: string) {
-  const node = useMemo(() => hexString(utils.dnsEncode(ensName)), [ensName]);
+  const node = useMemo(() => {
+    try {
+      return hexString(utils.namehash(ensName));
+    } catch (e) {
+      // Ignore, but return undefined
+      return undefined;
+    }
+  }, [ensName]);
   const { chain } = useNetwork();
   const { selectedAddress: address, isConnected } = useWeb3();
   const ensAddress = chain?.contracts?.ensRegistry?.address;
@@ -103,22 +110,23 @@ export function useEnsAccountIsApproved(ensName: string) {
     error: existentialError,
     isLoading: existentialLoading,
     isFetched: existentialFetched,
+    refetch: refetchExistential,
   } = useContractReads({
     contracts: [
       {
         functionName: "recordExists",
-        args: [node],
+        args: [node ?? "0x0"],
         abi: ENS_ABI,
         address: ensAddress,
       },
       {
         functionName: "owner",
-        args: [node],
+        args: [node ?? "0x0"],
         abi: ENS_ABI,
         address: ensAddress,
       },
     ],
-    enabled: isConnected,
+    enabled: isConnected && !!ensAddress,
   });
 
   const [recordExists, owner] = existentialData ?? [];
@@ -129,16 +137,20 @@ export function useEnsAccountIsApproved(ensName: string) {
     error: isApprovedForAllError,
     isLoading: isApprovedForAllLoading,
     isFetched: isApprovedForAllFetched,
+    refetch: refetchIsApprovedForAll,
   } = useContractRead({
     functionName: "isApprovedForAll",
     args: owner && address ? [owner, address] : ["0x", "0x"],
     abi: ENS_ABI,
     address: ensAddress,
-    enabled: isApprovedForAllFetchEnabled,
+    enabled: isApprovedForAllFetchEnabled && isConnected && !!ensAddress,
   });
-
+  const refetch = useCallback(() => {
+    refetchExistential();
+  }, [refetchExistential]);
   return {
-    recordExists,
+    refetch,
+    recordExists: ensName.length > 0 && existentialFetched && recordExists,
     isApprovedOrOwner: isOwner || isApprovedForAll,
     isFetching: existentialLoading || isApprovedForAllLoading,
     isFetched:

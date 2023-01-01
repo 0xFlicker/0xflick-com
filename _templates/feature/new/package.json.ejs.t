@@ -32,8 +32,8 @@ to: packages/feature-<%= name %>/package.json
     "@graphql-codegen/cli": "2.11.6",
     "@graphql-codegen/near-operation-file-preset": "^2.4.1",
     "@graphql-codegen/typed-document-node": "^2.3.3",
-    "@graphql-codegen/typescript": "2.7.3",
-    "@graphql-codegen/typescript-operations": "2.5.3",
+    "@graphql-codegen/typescript": "^2.7.3",
+    "@graphql-codegen/typescript-operations": "^2.5.3",
     "@graphql-codegen/typescript-react-apollo": "^3.3.3",
 <% } -%>
     "typescript": "^4.9.4"

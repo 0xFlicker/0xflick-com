@@ -3,6 +3,12 @@
   "version": "1.0.0",
   "main": "src/index.ts",
   "license": "MIT",
+  "scripts": {
+    "generate": "yarn generate:schema && yarn generate:introspection && yarn generate:types",
+    "generate:schema": "yarn --cwd ../../packages/graphql schema:build",
+    "generate:introspection": "node scripts/possibleTypes.cjs",
+    "generate:types": "graphql-codegen --config codegen.yml"
+  },
   "dependencies": {
     "@apollo/client": "^3.7.2",
     "@mui/material": "^5.11.0",
@@ -10,6 +16,15 @@
     "graphql": "^16.6.0",
     "react": "^18.2.0",
     "use-local-storage": "^2.3.6",
-    "wagmi": "^0.9.5"
+    "wagmi": "^0.10.1"
+  },
+  "devDependencies": {
+    "@graphql-codegen/cli": "^2.16.2",
+    "@graphql-codegen/near-operation-file-preset": "^2.4.1",
+    "@graphql-codegen/typed-document-node": "^2.3.3",
+    "@graphql-codegen/typescript": "^2.7.3",
+    "@graphql-codegen/typescript-operations": "^2.5.3",
+    "@graphql-codegen/typescript-react-apollo": "^3.3.3",
+    "typescript": "^4.9.4"
   }
 }

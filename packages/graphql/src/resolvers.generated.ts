@@ -423,6 +423,7 @@ export type Web3User = {
   isTwitterFollower: Scalars['Boolean'];
   nonce: Scalars['Int'];
   roles: Array<Role>;
+  token: Scalars['String'];
 };
 
 
@@ -787,6 +788,7 @@ export type Web3UserResolvers<ContextType = any, ParentType extends ResolversPar
   isTwitterFollower?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   nonce?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   roles?: Resolver<Array<ResolversTypes['Role']>, ParentType, ContextType>;
+  token?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 

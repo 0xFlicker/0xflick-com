@@ -11,7 +11,7 @@
   "dependencies": {
     "apollo-server": "^3.10.0",
     "apollo-server-core": "^3.10.0",
-    "graphql": "16.5.0"
+    "graphql": "^16.6.0"
   },
   "devDependencies": {
     "@types/dotenv": "^8.2.0",

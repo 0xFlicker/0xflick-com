@@ -24,6 +24,7 @@ export const typeSchema = gql`
     allowedActions: [Permission!]!
     bindToRole(roleId: String!): Web3User!
     isTwitterFollower: Boolean!
+    token: String!
   }
 
   type Web3LoginUser {
@@ -112,6 +113,9 @@ export const resolvers: Resolvers<TContext> = {
     },
     isTwitterFollower: async (user, _, context) => {
       return await isTwitterFollowing(context, user);
+    },
+    token: (_, __, { getToken }) => {
+      return getToken();
     },
   },
 };

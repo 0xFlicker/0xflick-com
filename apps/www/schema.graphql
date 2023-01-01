@@ -76,6 +76,7 @@ type Web3User {
   allowedActions: [Permission!]!
   bindToRole(roleId: String!): Web3User!
   isTwitterFollower: Boolean!
+  token: String!
 }
 
 type Web3LoginUser {

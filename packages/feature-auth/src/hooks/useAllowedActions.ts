@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { graphQlAllowedActionToPermission } from "graphql/transforms/allowedActions";
+import { graphQlAllowedActionToPermission } from "../transforms/allowedActions";
 import { useGetSelfPermissionsQuery } from "./getSelfPermissions.generated";
 
 export const useAllowedActions = ({ skip }: { skip?: boolean }) => {

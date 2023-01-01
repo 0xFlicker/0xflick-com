@@ -89,15 +89,15 @@ export const ContractAddressInput: FC<
               <DocumentScannerOutlined />
             </InputAdornment>
           ),
-          // endAdornment: (
-          //   <InputAdornment ref={adornmentRef} position="end">
-          //     {verified && (
-          //       <IconButton onClick={onClick} aria-details="contract details">
-          //         <CheckCircle color="primary" />
-          //       </IconButton>
-          //     )}
-          //   </InputAdornment>
-          // ),
+          endAdornment: (
+            <InputAdornment ref={adornmentRef} position="end">
+              {verified && (
+                <IconButton onClick={onClick} aria-details="contract details">
+                  <CheckCircle color="primary" />
+                </IconButton>
+              )}
+            </InputAdornment>
+          ),
         }}
       />
       {adornmentRef.current && (

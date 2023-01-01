@@ -5,6 +5,6 @@
   "license": "MIT",
   "dependencies": {
     "@wagmi/chains": "^0.1.4",
-    "wagmi": "^0.9.5"
+    "wagmi": "^0.10.1"
   }
 }

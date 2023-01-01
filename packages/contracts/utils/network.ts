@@ -28,6 +28,17 @@ export function ens_gateway(networkName: string): string {
   return "TEST";
 }
 
+export function ens_contract(networkName: string): string | undefined {
+  switch (networkName) {
+    case "mainnet":
+      return "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e";
+    case "goerli":
+      return "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e";
+    default:
+      return undefined;
+  }
+}
+
 export function nft_name(networkName: string): string {
   if (networkName) {
     const name = process.env[`NFT_NAME_${networkName.toUpperCase()}`];

@@ -4,7 +4,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { userMint } from "./utils";
 import { BigNumber, utils, providers, constants } from "ethers";
 import {
-  IResolverService__factory,
+  NameflickENSResolver__factory,
   AddrResolver__factory,
   TextResolver__factory,
 } from "../typechain";
@@ -12,7 +12,8 @@ import {
 const formatter = new providers.Formatter();
 const resolverAddrInterface = AddrResolver__factory.createInterface();
 const resolverTextInterface = TextResolver__factory.createInterface();
-const resolverServiceInterface = IResolverService__factory.createInterface();
+const resolverServiceInterface =
+  NameflickENSResolver__factory.createInterface();
 
 function parseBytes(result: string, start: number): null | string {
   if (result === "0x") {
@@ -555,6 +556,7 @@ describe("Registry", function () {
       "example.eth",
       owner.provider
     );
+    expect(resolverAddress).to.equal(nameflickResolver.address);
 
     expect(
       await resolveCoinAddress(

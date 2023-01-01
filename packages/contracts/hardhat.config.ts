@@ -19,7 +19,7 @@ const config: HardhatUserConfig = {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 10,
+        runs: 2000,
       },
     },
   },
@@ -64,7 +64,7 @@ const config: HardhatUserConfig = {
     mainnet: {
       url: node_url("mainnet"),
       accounts: accounts("mainnet"),
-      gasPrice: utils.parseUnits("4", "gwei").toNumber(),
+      gasPrice: utils.parseUnits("16.1", "gwei").toNumber(),
     },
     kovan: {
       url: node_url("kovan"),

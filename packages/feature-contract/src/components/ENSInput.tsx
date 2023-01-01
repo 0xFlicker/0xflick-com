@@ -1,11 +1,15 @@
 import { FC } from "react";
 import TextField from "@mui/material/TextField";
 import { fieldToTextField, TextFieldProps } from "formik-mui";
+import CheckCircle from "@mui/icons-material/CheckCircle";
 import InputAdornment from "@mui/material/InputAdornment";
 import Image from "next/image";
-import SvgIcon from "@mui/material/SvgIcon";
 
-export const ENSInput: FC<TextFieldProps> = (props) => {
+export const ENSInput: FC<
+  TextFieldProps & {
+    verified: boolean;
+  }
+> = ({ verified, ...props }) => {
   return (
     <TextField
       {...fieldToTextField(props)}
@@ -21,6 +25,11 @@ export const ENSInput: FC<TextFieldProps> = (props) => {
               height={32}
               alt=""
             />
+          </InputAdornment>
+        ),
+        endAdornment: (
+          <InputAdornment position="end">
+            {verified && <CheckCircle color="primary" />}
           </InputAdornment>
         ),
       }}

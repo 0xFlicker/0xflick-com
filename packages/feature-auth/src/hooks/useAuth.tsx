@@ -28,31 +28,7 @@ import { useSignIn } from "./useSignIn";
 import { useSignOut } from "./useSignOut";
 import { useAllowedActions } from "./useAllowedActions";
 import { useEnsAvatar, useEnsName } from "wagmi";
-
-export function useSavedToken(token?: string) {
-  const [savedToken, setSavedToken] = useLocalStorage("token", "", {
-    syncData: true,
-  });
-  const user = useMemo(
-    () => (savedToken && decodeJwtToken(savedToken)) || null,
-    [savedToken]
-  );
-
-  useEffect(() => {
-    if (token) {
-      setSavedToken(token);
-    }
-  }, [token, setSavedToken]);
-
-  return {
-    user,
-    savedToken,
-    setSavedToken,
-    clearToken: useCallback(() => {
-      setSavedToken("");
-    }, [setSavedToken]),
-  };
-}
+import { useSelf } from "./useSelf";
 
 function useAuthContext() {
   const isAuthenticated = useAppSelector(authSelectors.isAuthenticated);
@@ -102,9 +78,7 @@ function useAuthContext() {
   ] = useSignIn();
   const tokenIsSuccess = !!tokenData;
   const tokenIsError = !!tokenError;
-  const { user, savedToken, clearToken, setSavedToken } = useSavedToken(
-    tokenData?.signIn.token
-  );
+  const { data: user, isLoggedIn: userIsLoggedInToGraphql } = useSelf();
   const dispatch = useAppDispatch();
   const signIn = useCallback(() => {
     if (!isWeb3Connected) {
@@ -115,15 +89,15 @@ function useAuthContext() {
   }, [dispatch, isWeb3Connected]);
 
   const signOut = useCallback(() => {
-    clearToken();
     tokenReset();
     nonceReset();
     requestSignOut();
     dispatch(authActions.userSignOut());
-  }, [clearToken, tokenReset, nonceReset, requestSignOut, dispatch]);
+  }, [tokenReset, nonceReset, requestSignOut, dispatch]);
 
   useEffect(() => {
     if (isWeb3Connected && user && user.address !== address) {
+      console.log("User is authenticated, but address has changed");
       signOut();
     }
   }, [user, address, signOut, isWeb3Connected]);
@@ -135,11 +109,11 @@ function useAuthContext() {
       dispatch(
         authActions.userSignInSuccess({
           roles: user.roleIds,
-          token: savedToken,
+          token: user.token,
         })
       );
     }
-  }, [isAuthenticated, savedToken, dispatch, user, address]);
+  }, [isAuthenticated, dispatch, user, address]);
 
   useEffect(() => {
     if (address && isUserRequestingSignIn) {
@@ -166,9 +140,9 @@ function useAuthContext() {
       const now = Date.now();
       const message = authMessage({
         address,
-        nonce: nonceData.nonceForAddress.nonce.toString(),
+        nonce: nonceData.nonceForAddress?.nonce.toString() || "0",
         chainId,
-        domain: process.env.NEXT_PUBLIC_APP_NAME,
+        domain: process.env.NEXT_PUBLIC_APP_NAME ?? "",
         expirationTime:
           now + Number(process.env.SIWE_EXPIRATION_TIME_SECONDS) * 1000,
         issuedAt: now,
@@ -179,7 +153,7 @@ function useAuthContext() {
         signer.signMessage(message).then(
           (signature: string) => {
             dispatch(authActions.userMessageSigned(signature));
-            createJweRequest(signature, nonceData.nonceForAddress.nonce)
+            createJweRequest(signature, nonceData.nonceForAddress?.nonce || 0)
               .then((jwe) => {
                 return fetchToken({
                   variables: {
@@ -195,7 +169,7 @@ function useAuthContext() {
                 dispatch(authActions.userSignOut());
               });
           },
-          (err) => {
+          (err: Error) => {
             console.error(err);
             // FIXME: figure out rejection vs error vs wallet type
             dispatch(authActions.userSignatureError());
@@ -211,15 +185,17 @@ function useAuthContext() {
     activeConnector,
     address,
     fetchToken,
-    savedToken,
     chainId,
   ]);
 
   useEffect(() => {
     if (nonceIsSuccess && nonceData && tokenIsSuccess && tokenData && address) {
-      const {
-        signIn: { token },
-      } = tokenData;
+      const token = tokenData.signIn?.token;
+      if (!token) {
+        console.warn("No token returned from server");
+        dispatch(authActions.userSignInError());
+        return;
+      }
       try {
         const authUser = decodeJwtToken(token);
         if (authUser && authUser.address === address) {
@@ -243,13 +219,6 @@ function useAuthContext() {
     }
   }, [address, dispatch, nonceData, nonceIsSuccess, tokenData, tokenIsSuccess]);
 
-  const { allowedActions, refetch: allowedActionsRefetch } = useAllowedActions({
-    skip: !savedToken || !user?.roleIds || user.roleIds.length === 0,
-  });
-  useEffect(() => {
-    allowedActionsRefetch();
-  }, [allowedActionsRefetch, user?.roleIds]);
-
   return {
     isAuthenticated,
     isAnonymous,
@@ -257,13 +226,11 @@ function useAuthContext() {
     isUserSigningMessage,
     isUserWaiting: nonceIsLoading || tokenIsLoading,
     isUserSigningOut,
-    token: tokenData?.signIn.token ?? savedToken,
+    token: tokenData?.signIn?.token || user?.token || undefined,
     user,
-    allowedActions,
+    allowedActions: user?.allowedActions ?? [],
     signIn,
     signOut,
-    savedToken,
-    setSavedToken,
     ensName,
     ensNameIsLoading,
     ensAvatar,

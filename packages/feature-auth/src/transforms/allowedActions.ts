@@ -1,5 +1,9 @@
 import { TAllowedAction, EActions, EResource } from "@0xflick/models";
-import { PermissionAction, PermissionResource, Permission } from "../types";
+import {
+  PermissionAction,
+  PermissionResource,
+  Permission,
+} from "../graphql/types";
 
 export function graphqlActionToEAction(action: PermissionAction): EActions {
   switch (action) {
