@@ -33,12 +33,12 @@ const func: DeployFunction = async ({
     log: true,
   });
 
-  // if (offChainResolverDeployment.newlyDeployed) {
-  await run("verify:verify", {
-    address: offChainResolverDeployment.address,
-    constructorArguments: offChainResolverDeployment.args,
-  });
-  // }
+  if (offChainResolverDeployment.newlyDeployed) {
+    await run("verify:verify", {
+      address: offChainResolverDeployment.address,
+      constructorArguments: offChainResolverDeployment.args,
+    });
+  }
 };
 export default func;
 func.tags = ["offchain_resolver_only"];

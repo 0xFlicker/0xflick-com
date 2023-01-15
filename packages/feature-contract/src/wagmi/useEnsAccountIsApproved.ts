@@ -1,11 +1,6 @@
 import { utils } from "ethers";
 import { useCallback, useMemo } from "react";
-import {
-  useAccount,
-  useContractRead,
-  useNetwork,
-  useContractReads,
-} from "wagmi";
+import { useContractRead, useNetwork, useContractReads } from "wagmi";
 import { hexString } from "@0xflick/utils";
 import { useWeb3 } from "@0xflick/feature-web3";
 
@@ -102,6 +97,7 @@ export function useEnsAccountIsApproved(ensName: string) {
       return undefined;
     }
   }, [ensName]);
+
   const { chain } = useNetwork();
   const { selectedAddress: address, isConnected } = useWeb3();
   const ensAddress = chain?.contracts?.ensRegistry?.address;
@@ -152,6 +148,8 @@ export function useEnsAccountIsApproved(ensName: string) {
     refetch,
     recordExists: ensName.length > 0 && existentialFetched && recordExists,
     isApprovedOrOwner: isOwner || isApprovedForAll,
+    isOwner,
+    isApprovedForAll,
     isFetching: existentialLoading || isApprovedForAllLoading,
     isFetched:
       existentialFetched &&

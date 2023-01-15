@@ -7,7 +7,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 export const StatusField: FC<
   PropsWithChildren<{
-    currentlyLoading: boolean;
+    currentlyLoading?: boolean;
     checked: boolean;
   }>
 > = ({ currentlyLoading, checked, children }) => {

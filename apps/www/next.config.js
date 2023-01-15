@@ -78,6 +78,11 @@ if (!process.env.ENS_RPC_URL) {
 }
 const ENS_RPC_URL = process.env.ENS_RPC_URL;
 
+const nameflickResolver = {
+  "homestead": secretsJson.chains["1"].nameflickResolver,
+  "goerli": secretsJson.chains["5"].nameflickResolver,
+}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = withTM({
   reactStrictMode: true,
@@ -110,6 +115,7 @@ const nextConfig = withTM({
     NEXT_PUBLIC_ALCHEMY_KEY: process.env.ALCHEMY_KEY,
     FLICK_ENS_DOMAIN: process.env.FLICK_ENS_DOMAIN,
     NEXT_PUBLIC_JWT_PUBLIC_KEY: jwtJson.publicKey,
+    NEXT_PUBLIC_NAMEFLICK_RESOLVERS: JSON.stringify(nameflickResolver),
     NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME ?? "https://0xflick.com",
     NEXT_PUBLIC_IMAGE_RESIZER: process.env.NEXT_PUBLIC_IMAGE_RESIZER ?? "https://image.0xflick.com",
     NEXT_PUBLIC_IPFS: process.env.NEXT_PUBLIC_IPFS ?? "https://ipfs.0xflick.com",

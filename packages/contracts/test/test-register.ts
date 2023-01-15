@@ -122,6 +122,31 @@ describe("Registry", function () {
     accounts = await ethers.getSigners();
   });
 
+  it("Supports eip-2544 interface", async () => {
+    const owner = accounts[0];
+    // deploy NameFlickENSResolver
+    const NameFlickENSResolver = await ethers.getContractFactory(
+      "NameflickENSResolver",
+      owner
+    );
+    const nameflickResolver = await NameFlickENSResolver.deploy(
+      constants.AddressZero,
+      constants.AddressZero,
+      ["https://example.com/"],
+      [owner.address]
+    );
+    //selector("resolve(bytes,bytes)"))
+    const eip2544ResolverSelector = resolverServiceInterface.getSighash(
+      "resolve(bytes,bytes)"
+    );
+    console.log(
+      "addr(bytes32,uint256)",
+      resolverAddrInterface.getSighash("addr(bytes32,uint256)")
+    );
+    console.log("resolve(bytes,bytes):", eip2544ResolverSelector);
+    expect(await nameflickResolver.supportsInterface(eip2544ResolverSelector))
+      .to.be.true;
+  });
   it("Can register NFT", async () => {
     const { mintContract, owner, mockCoordinator, subscriptionId } =
       await userMint(accounts);

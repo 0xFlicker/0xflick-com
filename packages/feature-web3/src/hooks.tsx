@@ -23,6 +23,9 @@ export function decorateChainImageUrl(chain: Chain): TChain {
     case 111_55_111:
       chainImageUrl = "/chains/sepolia.png";
       break;
+    case 5:
+      chainImageUrl = "/chains/goerli.png";
+      break;
   }
   return {
     ...chain,

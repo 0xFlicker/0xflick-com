@@ -73,7 +73,6 @@ const config: HardhatUserConfig = {
     goerli: {
       url: node_url("goerli"),
       accounts: accounts("goerli"),
-      deploy: ["deploy-l1"],
     },
     maticmum: {
       url: node_url("maticmum"),

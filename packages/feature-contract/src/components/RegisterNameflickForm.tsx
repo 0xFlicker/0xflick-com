@@ -15,6 +15,7 @@ import {
 import { ENSCard } from "./ENSCard";
 import { SnackbarQueue } from "@0xflick/components/src/SnackbarQueue";
 import { useEnsAccountIsApproved } from "../wagmi/useEnsAccountIsApproved";
+import { Submit } from "./Submit";
 
 export const ERROR_CONTRACT_NOT_ERC721 = "Contract is not ERC721";
 export const ERROR_CONTRACT_NOT_ADDRESS = "Invalid contract address";
@@ -42,7 +43,7 @@ export const RegisterNameflickForm: FC = () => {
 
   const [isERC721CurrentlyLoading, setIsERC721CurrentlyLoading] =
     useState(false);
-  const [isERC721, setIsERC721] = useState<false | string>(false);
+  const [isERC721, setIsERC721] = useState<undefined | true | string>();
 
   const [fetchOpenSeaCollection, { data, error }] =
     useFetchOpenSeaCollectionByAddressLazyQuery({});
@@ -70,6 +71,8 @@ export const RegisterNameflickForm: FC = () => {
       }
       if (errors.contractAddress === ERROR_CONTRACT_NOT_ERC721) {
         setIsERC721(ERROR_CONTRACT_NOT_ERC721);
+      } else {
+        setIsERC721(true);
       }
     },
     [fetchOpenSeaCollection]
@@ -164,6 +167,23 @@ export const RegisterNameflickForm: FC = () => {
         }}
       >
         <Grid2 container spacing={1} alignItems={"stretch"}>
+          <Grid2
+            {...{
+              xs: 12,
+              sm: 12,
+              md: 12,
+              lg: 12,
+              xl: 12,
+            }}
+          >
+            <Submit
+              isERC721={
+                isERC721 == true || data?.openSeaCollectionByAddress
+                  ? true
+                  : false
+              }
+            />
+          </Grid2>
           <Grid2 {...defaultGridBreakpoints}>
             <ENSCard pushToast={pushToast} />
           </Grid2>
@@ -172,7 +192,9 @@ export const RegisterNameflickForm: FC = () => {
               collection={data?.openSeaCollectionByAddress ?? undefined}
               collectionError={error}
               isERC721={
-                !!isERC721 || data?.openSeaCollectionByAddress ? true : false
+                isERC721 == true || data?.openSeaCollectionByAddress
+                  ? true
+                  : false
               }
               isERC721CurrentlyLoading={isERC721CurrentlyLoading}
               erc721Error={isERC721 ? undefined : (isERC721 as string)}

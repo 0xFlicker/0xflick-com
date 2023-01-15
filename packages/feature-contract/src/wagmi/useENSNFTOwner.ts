@@ -1,6 +1,6 @@
 import { BigNumber, constants, utils } from "ethers";
 import { useMemo } from "react";
-import { useContractRead } from "wagmi";
+import { useAccount, useContractRead } from "wagmi";
 
 const OWNER_OF_ABI = [
   {
@@ -27,6 +27,7 @@ const OWNER_OF_ABI = [
 const ensBaseRegistrar = "0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85";
 
 export function useENSNFTOwner(ensName: string) {
+  const { address } = useAccount();
   const tokenId = useMemo<BigNumber>(() => {
     try {
       return BigNumber.from(
@@ -44,6 +45,7 @@ export function useENSNFTOwner(ensName: string) {
   });
 
   return {
+    isOwner: data === address,
     data,
     error,
     isLoading,

@@ -101,7 +101,9 @@ export const ChainSelector: FC = () => {
   const handleSwitch = useCallback(
     (chain: TChain) => {
       onMenuClose();
-      switchNetwork(chain.id);
+      if (switchNetwork && chain?.id) {
+        switchNetwork(chain.id);
+      }
     },
     [onMenuClose, switchNetwork]
   );

@@ -145,3 +145,15 @@ export const defaultChain = lazySingleton(() => {
   );
   return wagmiChain || mainnet;
 });
+
+export const nameflickResolvers = {
+  get() {
+    if (!process.env.NEXT_PUBLIC_NAMEFLICK_RESOLVERS) {
+      throw new Error("NEXT_PUBLIC_NAMEFLICK_RESOLVERS is not set");
+    }
+    return JSON.parse(process.env.NEXT_PUBLIC_NAMEFLICK_RESOLVERS) as Record<
+      string,
+      `0x${string}`
+    >;
+  },
+};
