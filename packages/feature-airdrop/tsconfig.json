@@ -1,0 +1,45 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ES2015",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "module": "NodeNext",
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "composite": true,
+    "jsx": "preserve",
+    "paths": {
+      "@0xflick/models": ["../../packages/models/src/index"],
+      "@0xflick/graphql": ["../../packages/backend/src/index"],
+      "@0xflick/contracts": ["../../packages/contracts/src/index"],
+      "0xflick/feature-contract": ["../../packages/feature-contract/src/index"],
+      "@0xflick/utils": ["../../packages/utils/src/index"]
+    },
+    "plugins": [
+      {
+        "name": "ts-graphql-plugin",
+        "schema": "../../packages/graphql/schema.graphql",
+        "tag": "gql"
+      }
+    ]
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["./node_modules"],
+  "references": [
+    {
+      "path": "../../packages/models"
+    },
+    {
+      "path": "../../packages/graphql"
+    },
+    {
+      "path": "../../packages/contracts"
+    },
+    {
+      "path": "../../packages/utils"
+    },
+    {
+      "path": "../../packages/feature-contract"
+    }
+  ]
+}

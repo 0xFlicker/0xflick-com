@@ -201,6 +201,12 @@ export class DynamoDB extends cdk.Stack {
       value: urlShortenerTable.tableName,
     });
 
+    new ssm.StringParameter(this, "Drinker_TableArn", {
+      parameterName: "DrinkerTable_TableArn",
+      description: "The ARN of the Drinker table",
+      stringValue: drinkerTable.tableArn,
+    });
+
     new ssm.StringParameter(this, "AffiliateTable_TableArn", {
       parameterName: "AffiliateTable_TableArn",
       description: "The ARN of the AffiliateTable table",

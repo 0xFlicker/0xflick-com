@@ -7,6 +7,7 @@
   "scripts": {
     "build": "yarn nameflick-image:build && yarn nameflick:build && yarn graphql:build && yarn image:build && yarn ipfs:origin:build && yarn axolotl:origin:build && yarn discord:build",
     "nameflick:build": "esbuild src/lambda/nameflick/rest.ts --platform=node --target=node16.14 --bundle --outfile=../../deploy/.layers/nameflick/index.cjs",
+    "faucet:build": "esbuild src/lambda/faucet/index.ts --platform=node --target=node16.14 --bundle --outfile=../../deploy/.layers/faucet/index.cjs",
     "image:accept:build": "esbuild src/lambda/image/accept.ts --platform=node --target=node14.19 --bundle --outfile=../../deploy/.layers/image/accept/index.cjs",
     "image:origin:build": "esbuild src/lambda/image/origin.ts --banner:js=\"import { createRequire } from 'module';const require = createRequire(import.meta.url);\" --platform=node --format=esm --target=node14.19 --bundle --external:sharp --external:ipfs-http-client --outfile=../../deploy/.layers/image/origin/index.mjs",
     "image:build": "yarn image:origin:build && yarn image:accept:build && cd ../../deploy && yarn build:layer:sharp",

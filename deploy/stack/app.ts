@@ -11,6 +11,7 @@ import { AssetStack } from "./assets.js";
 import { GraphqlStack } from "./graphql.js";
 import { DynamoDB } from "./dynamodb.js";
 import { NameflickStack } from "./nameflick.js";
+import { FaucetStack } from "./faucet.js";
 import { DiscordStack } from "./discord.js";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -25,6 +26,7 @@ const secretsJson = jsonFromSecret(`${deployment}/deploy-secrets.json`);
 const jwtJson = jsonFromSecret(`${deployment}/jwt-secret.json`);
 const twitterJson = jsonFromSecret(`${deployment}/twitter-secrets.json`);
 const discordJson = jsonFromSecret(`${deployment}/discord-secrets.json`);
+const faucetJson = jsonFromSecret(`${deployment}/faucet-secrets.json`);
 
 const app = new cdk.App();
 
@@ -105,6 +107,17 @@ new NameflickStack(app, "NameflickBeta", {
   domain: ["nameflick-beta", deployment],
   privateKey: secretsJson.privateKey,
   web3RpcUrl: secretsJson.chains["1"].rpc,
+  env: {
+    account: process.env.CDK_DEFAULT_ACCOUNT,
+    region: process.env.CDK_DEFAULT_REGION,
+  },
+});
+new FaucetStack(app, "Faucet", {
+  domain: ["faucet", deployment],
+  privateKey: faucetJson.privateKey,
+  web3RpcUrl: faucetJson.webRpc,
+  faucetValue: "0.042",
+  recaptchaSecret: faucetJson.recaptchaSecret,
   env: {
     account: process.env.CDK_DEFAULT_ACCOUNT,
     region: process.env.CDK_DEFAULT_REGION,

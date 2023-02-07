@@ -11,7 +11,7 @@
   },
   "devDependencies": {
     "@0xflick/models": "1.0.0",
-    "@shelf/jest-dynamodb": "^3.3.0",
+    "@shelf/jest-dynamodb": "^3.3.1",
     "@types/bunyan": "^1.8.8",
     "@types/cookie": "^0.5.1",
     "@types/jest": "^28.1.6",

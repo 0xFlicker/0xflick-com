@@ -31,6 +31,7 @@
       "@0xflick/contracts": ["../../packages/contracts/index"],
       "@0xflick/assets": ["../../packages/assets/src/index"],
       "@0xflick/feature-auth": ["../../packages/feature-auth/src/index"],
+      "@0xflick/feature-airdrop": ["../../packages/feature-airdrop/src/index"],
       "@0xflick/feature-contract": [
         "../../packages/feature-contract/src/index"
       ],
@@ -72,6 +73,9 @@
     },
     {
       "path": "../../packages/feature-auth"
+    },
+    {
+      "path": "../../packages/feature-airdrop"
     },
     {
       "path": "../../packages/feature-contract"

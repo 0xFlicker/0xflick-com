@@ -1,0 +1,12 @@
+query FetchOpenSeaCollectionByAddress($address: String!) {
+  openSeaCollectionByAddress(address: $address) {
+    id
+    name
+    slug
+    externalUrl
+    twitterUsername
+    description
+    imageUrl
+    editors
+  }
+}
