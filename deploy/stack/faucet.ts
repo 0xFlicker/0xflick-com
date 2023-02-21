@@ -6,6 +6,7 @@ import * as route53 from "aws-cdk-lib/aws-route53";
 import * as acm from "aws-cdk-lib/aws-certificatemanager";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import { Cors } from "aws-cdk-lib/aws-apigateway";
+import * as targets from "aws-cdk-lib/aws-route53-targets";
 import { getTable, getTableNameParam } from "./utils/tables.js";
 
 export interface ApiProps extends cdk.StackProps {
@@ -14,6 +15,7 @@ export interface ApiProps extends cdk.StackProps {
   readonly privateKey: string;
   readonly recaptchaSecret: string;
   readonly faucetValue: string;
+  readonly allowedOrigins: string[];
 }
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -26,6 +28,7 @@ export class FaucetStack extends cdk.Stack {
       privateKey,
       recaptchaSecret,
       faucetValue,
+      allowedOrigins,
       ...rest
     } = props;
     super(scope, id, rest);
@@ -64,6 +67,7 @@ export class FaucetStack extends cdk.Stack {
         SSM_REGION: "us-east-1",
         RECAPTCHA_SECRET: recaptchaSecret,
         VALUE: faucetValue,
+        ALLOWED_ORIGINS: allowedOrigins.join(","),
       },
     });
     drinkerTable.grantReadWriteData(faucetHandler);
@@ -77,9 +81,20 @@ export class FaucetStack extends cdk.Stack {
 
     const resource = httpApi.root;
     resource.addMethod("POST", new apigateway.LambdaIntegration(faucetHandler));
-    resource.addCorsPreflight({
-      allowOrigins: Cors.ALL_ORIGINS,
-      allowMethods: Cors.ALL_METHODS,
+    resource.addMethod(
+      "OPTIONS",
+      new apigateway.LambdaIntegration(faucetHandler)
+    );
+
+    new route53.ARecord(this, "ipv4-record", {
+      zone: hostedZone,
+      recordName: domainName,
+      target: route53.RecordTarget.fromAlias(new targets.ApiGateway(httpApi)),
+    });
+    new route53.AaaaRecord(this, "ipv6-record", {
+      zone: hostedZone,
+      recordName: domainName,
+      target: route53.RecordTarget.fromAlias(new targets.ApiGateway(httpApi)),
     });
 
     new cdk.CfnOutput(this, "httpApi", {

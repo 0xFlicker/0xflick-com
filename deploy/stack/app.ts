@@ -118,6 +118,7 @@ new FaucetStack(app, "Faucet", {
   web3RpcUrl: faucetJson.webRpc,
   faucetValue: "0.042",
   recaptchaSecret: faucetJson.recaptchaSecret,
+  allowedOrigins: faucetJson.allowedOrigins,
   env: {
     account: process.env.CDK_DEFAULT_ACCOUNT,
     region: process.env.CDK_DEFAULT_REGION,
