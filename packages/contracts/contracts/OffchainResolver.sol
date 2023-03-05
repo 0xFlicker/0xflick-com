@@ -8,14 +8,13 @@ import "@ensdomains/ens-contracts/contracts/resolvers/profiles/IExtendedResolver
 import "./SignatureVerifier.sol";
 
 interface IResolverService {
-  function resolve(bytes calldata name, bytes calldata data)
+  function resolve(
+    bytes calldata name,
+    bytes calldata data
+  )
     external
     view
-    returns (
-      bytes memory result,
-      uint64 expires,
-      bytes memory sig
-    );
+    returns (bytes memory result, uint64 expires, bytes memory sig);
 }
 
 /**
@@ -70,12 +69,10 @@ contract OffchainResolver is IExtendedResolver, ERC165, Ownable {
    * @param data The ABI encoded data for the underlying resolution function (Eg, addr(bytes32), text(bytes32,string), etc).
    * @return The return data, ABI encoded identically to the underlying function.
    */
-  function resolve(bytes calldata name, bytes calldata data)
-    external
-    view
-    override
-    returns (bytes memory, address)
-  {
+  function resolve(
+    bytes calldata name,
+    bytes calldata data
+  ) external view override returns (bytes memory, address) {
     bytes memory callData = abi.encodeWithSelector(
       IResolverService.resolve.selector,
       name,
@@ -95,11 +92,10 @@ contract OffchainResolver is IExtendedResolver, ERC165, Ownable {
   /**
    * Callback used by CCIP read compatible clients to verify and parse the response.
    */
-  function resolveWithProof(bytes calldata response, bytes calldata extraData)
-    external
-    view
-    returns (bytes memory)
-  {
+  function resolveWithProof(
+    bytes calldata response,
+    bytes calldata extraData
+  ) external view returns (bytes memory) {
     (address signer, bytes memory result) = SignatureVerifier.verify(
       parentContract,
       extraData,
@@ -109,12 +105,9 @@ contract OffchainResolver is IExtendedResolver, ERC165, Ownable {
     return result;
   }
 
-  function supportsInterface(bytes4 interfaceID)
-    public
-    view
-    override
-    returns (bool)
-  {
+  function supportsInterface(
+    bytes4 interfaceID
+  ) public view override returns (bool) {
     return
       interfaceID == type(IExtendedResolver).interfaceId ||
       super.supportsInterface(interfaceID);

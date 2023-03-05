@@ -44,6 +44,7 @@ export function useNameflickContractIsRegistered({
     address: nameflickResolver,
     functionName: "nfts",
     args: [namehash ?? "0x0"],
+    cacheTime: 0,
     enabled,
   });
 

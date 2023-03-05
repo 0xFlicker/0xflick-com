@@ -10,7 +10,7 @@ const FaqPage: NextPage<IStaticProps> = ({ i18n, theme }) => {
   return (
     <DefaultProvider i18n={i18n} initialTheme={theme}>
       <Head>
-        <title>Nameflick FAQ</title>
+        <title>Nameflick register</title>
         <meta name="viewport" content="initial-scale=1.0, width=device-width" />
       </Head>
       <Register />

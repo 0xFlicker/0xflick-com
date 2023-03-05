@@ -218,7 +218,24 @@ function useAuthContext() {
       }
     }
   }, [address, dispatch, nonceData, nonceIsSuccess, tokenData, tokenIsSuccess]);
-
+  const setToken = useCallback(
+    (token: string) => {
+      // decode token
+      const authUser = decodeJwtToken(token);
+      if (authUser && authUser.address === address) {
+        dispatch(
+          authActions.userSignInSuccess({
+            token,
+            roles: authUser.roleIds,
+          })
+        );
+      } else {
+        console.warn(`Unable to parse token for ${address}`);
+        dispatch(authActions.userSignInError());
+      }
+    },
+    [address]
+  );
   return {
     isAuthenticated,
     isAnonymous,
@@ -235,6 +252,7 @@ function useAuthContext() {
     ensNameIsLoading,
     ensAvatar,
     ensAvatarIsLoading,
+    setToken,
   };
 }
 

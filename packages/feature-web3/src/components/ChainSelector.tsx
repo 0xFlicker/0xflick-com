@@ -13,15 +13,14 @@ import CheckIcon from "@mui/icons-material/CheckCircle";
 import { useLocale } from "@0xflick/feature-locale";
 import { IconButton, ListItem } from "@mui/material";
 import { decorateChainImageUrl, TChain, useWeb3 } from "../hooks";
-import { supportedChains } from "utils/config";
-import { useNetwork, useSwitchNetwork } from "wagmi";
+import { Chain, useNetwork, useSwitchNetwork } from "wagmi";
 
 export const ConnectedDropDownModal: FC<{
-  anchorEl: Element;
-  chains: TChain[];
+  anchorEl: Element | null;
+  chains: Chain[];
   handleClose: () => void;
-  handleSwitch: (chain: TChain) => void;
-  currentChain: TChain;
+  handleSwitch: (chain: Chain) => void;
+  currentChain?: Chain;
 }> = ({ anchorEl, handleClose, handleSwitch, chains, currentChain }) => {
   const { t } = useLocale("common");
   const open = Boolean(anchorEl);
@@ -49,12 +48,12 @@ export const ConnectedDropDownModal: FC<{
           {chains.map((chain) => (
             <MenuItem key={chain.id} onClick={() => handleSwitch(chain)}>
               <ListItemIcon>
-                {currentChain.id === chain.id ? (
+                {currentChain?.id === chain.id ? (
                   // large CheckIcon
                   <CheckIcon sx={{ fontSize: 40 }} />
                 ) : (
                   <Image
-                    src={chain.chainImageUrl}
+                    src={decorateChainImageUrl(chain)}
                     alt=""
                     width={40}
                     height={40}
@@ -76,22 +75,10 @@ export const ConnectedDropDownModal: FC<{
 export const ChainSelector: FC = () => {
   const [menuAnchorEl, setMenuAnchorEl] = useState<Element | null>(null);
 
-  const { chain: networkChain } = useNetwork();
-  const chain = useMemo(
-    () => decorateChainImageUrl(networkChain),
-    [networkChain]
-  );
-  const {
-    chains: wagmiChains,
-    error,
-    isLoading,
-    pendingChainId,
-    switchNetwork,
-  } = useSwitchNetwork();
-  const chains = useMemo(
-    () => wagmiChains.filter((a) => !!a).map(decorateChainImageUrl),
-    [wagmiChains]
-  );
+  const { chain } = useNetwork();
+
+  const { chains, error, isLoading, pendingChainId, switchNetwork } =
+    useSwitchNetwork();
   const handleMenu = useCallback((event: MouseEvent) => {
     setMenuAnchorEl(event.currentTarget);
   }, []);
@@ -99,7 +86,7 @@ export const ChainSelector: FC = () => {
     setMenuAnchorEl(null);
   }, []);
   const handleSwitch = useCallback(
-    (chain: TChain) => {
+    (chain: Chain) => {
       onMenuClose();
       if (switchNetwork && chain?.id) {
         switchNetwork(chain.id);
@@ -110,7 +97,12 @@ export const ChainSelector: FC = () => {
   return (
     <>
       <IconButton onClick={handleMenu} size="small">
-        <Image src={chain.chainImageUrl} alt="" width={40} height={40} />
+        <Image
+          src={decorateChainImageUrl(chain)}
+          alt=""
+          width={40}
+          height={40}
+        />
         {isLoading && (
           <CircularProgress
             variant="indeterminate"
@@ -123,7 +115,7 @@ export const ChainSelector: FC = () => {
         )}
       </IconButton>
       <ConnectedDropDownModal
-        anchorEl={menuAnchorEl}
+        anchorEl={menuAnchorEl as any}
         handleClose={onMenuClose}
         handleSwitch={handleSwitch}
         chains={chains}

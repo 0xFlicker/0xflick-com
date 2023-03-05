@@ -22,7 +22,7 @@ export function authMessage({
   return `${domain} wants you to sign in with your Ethereum account:
 ${address}
 
-This operation costs no gas and is only used to verify that you are the owner of the private key for this address.
+This operation costs no gas and is only used to verify that you own this address.
 
 URI: ${uri}
 Version: ${version}

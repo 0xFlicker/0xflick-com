@@ -52,9 +52,6 @@ const Connect: FC<{
 
   // const chainName = chain?.name;
   const isOpen = useAppSelector(web3Selectors.isWalletSelectModalOpen);
-  const isWrongNetwork = useAppSelector(web3Selectors.isWrongNetwork);
-
-  const currentChainName = defaultChain.get().name;
   const handleLogin = useCallback(() => {
     setMenuAnchorEl(null);
     signIn();
@@ -120,12 +117,6 @@ const Connect: FC<{
         <Button onClick={onClick}>{t("button_connect")}</Button>
       )}
       <WalletModal open={isOpen} handleClose={handleModalClose} />
-      {/* <WrongChainModal
-        chainName={currentChainName}
-        open={isWrongNetwork}
-        handleClose={handleChangeNetworkAbort}
-        handleChangeNetwork={handleSwitchNetwork}
-      /> */}
       <ConnectedDropDownModal
         anchorEl={menuAnchorEl}
         handleClose={onMenuClose}

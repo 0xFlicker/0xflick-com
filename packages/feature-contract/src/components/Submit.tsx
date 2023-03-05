@@ -1,4 +1,4 @@
-import { FC, useCallback, useMemo } from "react";
+import { FC, useCallback, useEffect, useMemo } from "react";
 import { useFormikContext } from "formik";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
@@ -15,6 +15,7 @@ import { useEnsAccountIsApproved } from "../wagmi/useEnsAccountIsApproved";
 import { useENSNFTOwner } from "../wagmi/useENSNFTOwner";
 import { useNameflickContractIsRegistered } from "../wagmi/useNameflickContractIsRegistered";
 import { useENSSetResolver } from "../wagmi/useENSSetResolver";
+import { useAuth } from "@0xflick/feature-auth/src/hooks";
 
 export const Submit: FC<{
   isERC721?: boolean;
@@ -46,30 +47,43 @@ export const Submit: FC<{
   }, [values.contractAddress]);
   let { isOwner, isSuccess: ensNftOwnerIsSuccess } = useENSNFTOwner(ensName);
   isOwner = isOwner && ensNftOwnerIsSuccess;
-  const { data: isRegistered } = useNameflickContractIsRegistered({
-    namehash,
-    contractAddress,
-  });
+  const { data: isRegistered, refetch: refetchIsRegistered } =
+    useNameflickContractIsRegistered({
+      namehash,
+      contractAddress,
+    });
+  const { isAnonymous, isAuthenticated, signIn } = useAuth();
   const { write, isLoading, isSuccess, isError, error, data } =
     useNameflickRegisterContract({
       namehash,
       contractAddress,
-      enabled:
-        !!namehash &&
-        !!contractAddress &&
-        !!isOwner &&
-        !!isApprovedOrOwner &&
-        !!recordExists &&
-        !!isERC721 &&
-        !isRegistered,
     });
+  useEffect(() => {
+    if (isSuccess) {
+      refetchIsRegistered();
+    }
+  }, [isSuccess, refetchIsRegistered]);
   const [
-    isResolverSet,
-    { write: writeResolver, isLoading: isLoadingResolving },
+    { isResolverSet, refetch: refetchIsSetAsResolver },
+    {
+      write: writeResolver,
+      isLoading: isLoadingResolving,
+      isSuccess: isSuccessResolving,
+    },
   ] = useENSSetResolver(namehash);
+  useEffect(() => {
+    if (isSuccessResolving) {
+      refetchIsRegistered();
+    }
+  }, [isSuccessResolving, refetchIsRegistered]);
   const onSubmit = useCallback(() => {
     write?.();
   }, [write]);
+  const onRefresh = useCallback(() => {
+    refetch?.();
+    refetchIsRegistered?.();
+    refetchIsSetAsResolver?.();
+  }, [refetch, refetchIsRegistered, refetchIsSetAsResolver]);
   return (
     <Card
       sx={{
@@ -92,6 +106,11 @@ export const Submit: FC<{
         </StatusField>
       </CardContent>
       <CardActions>
+        {isAnonymous && !isAuthenticated && (
+          <Button variant="contained" onClick={signIn}>
+            Login
+          </Button>
+        )}
         {!isRegistered && (
           <Button
             variant="contained"
@@ -119,6 +138,9 @@ export const Submit: FC<{
             Set Resolver
           </Button>
         )}
+        <Button variant="contained" onClick={onRefresh}>
+          Refresh
+        </Button>
       </CardActions>
     </Card>
   );

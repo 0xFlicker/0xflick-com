@@ -33,11 +33,13 @@ const func: DeployFunction = async ({
     log: true,
   });
 
-  if (offChainResolverDeployment.newlyDeployed) {
+  try {
     await run("verify:verify", {
       address: offChainResolverDeployment.address,
       constructorArguments: offChainResolverDeployment.args,
     });
+  } catch (e) {
+    console.error(e);
   }
 };
 export default func;

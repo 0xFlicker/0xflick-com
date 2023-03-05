@@ -14,7 +14,7 @@ import { useLocale } from "@0xflick/feature-locale";
 import { WrappedLink } from "@0xflick/components/src/WrappedLink";
 
 interface IProps {
-  anchorEl: Element;
+  anchorEl: Element | null;
   handleClose: () => void;
   handleDisconnect: () => void;
   handleLogin: () => void;

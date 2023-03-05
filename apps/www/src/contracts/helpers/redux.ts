@@ -27,14 +27,14 @@ export function readContractRedux<T, I extends unknown = unknown>(
       },
       fetchSuccess(state, action: PayloadAction<T>) {
         state.fetching = false;
-        state.value = action.payload as Draft<T>;
+        state.value = action.payload as T extends object ? Draft<T> : T;
       },
       fetchError(state, action: PayloadAction<string>) {
         state.fetching = false;
         state.error = action.payload;
       },
       input(state, action: PayloadAction<I>) {
-        state.input = action.payload as Draft<I>;
+        state.input = action.payload as I extends object ? Draft<I> : I;
       },
     },
   });
@@ -67,7 +67,7 @@ export function createReadInputRedux<T, I extends unknown = unknown>(
         state[key] = {
           fetching: true,
           error: null,
-          input: action.payload as Draft<I>,
+          input: action.payload as I extends object ? Draft<I> : I,
         };
       },
       fetchSuccess(
@@ -81,7 +81,7 @@ export function createReadInputRedux<T, I extends unknown = unknown>(
         state[key] = {
           fetching: false,
           error: null,
-          value: action.payload.value as Draft<T>,
+          value: action.payload.value as T extends object ? Draft<T> : T,
         };
       },
       fetchError(

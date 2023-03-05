@@ -122,11 +122,11 @@ export function useEnsAccountIsApproved(ensName: string) {
         address: ensAddress,
       },
     ],
-    enabled: isConnected && !!ensAddress,
+    enabled: !!ensName && isConnected && !!ensAddress,
   });
 
   const [recordExists, owner] = existentialData ?? [];
-  const isOwner = address === owner;
+  const isOwner = address && owner && address === owner;
   const isApprovedForAllFetchEnabled = existentialFetched && !isOwner;
   const {
     data: isApprovedForAll,
@@ -139,7 +139,8 @@ export function useEnsAccountIsApproved(ensName: string) {
     args: owner && address ? [owner, address] : ["0x", "0x"],
     abi: ENS_ABI,
     address: ensAddress,
-    enabled: isApprovedForAllFetchEnabled && isConnected && !!ensAddress,
+    enabled:
+      !!ensName && isApprovedForAllFetchEnabled && isConnected && !!ensAddress,
   });
   const refetch = useCallback(() => {
     refetchExistential();

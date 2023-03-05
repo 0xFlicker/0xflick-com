@@ -38,7 +38,7 @@ const UserLoginCard: FC = () => {
     isUserSigningMessage,
     signIn,
     signOut,
-    savedToken,
+    token: savedToken,
   } = useAuth();
   return (
     <Card

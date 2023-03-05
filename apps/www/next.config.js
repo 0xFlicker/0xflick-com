@@ -80,8 +80,8 @@ if (!process.env.ENS_RPC_URL) {
 const ENS_RPC_URL = process.env.ENS_RPC_URL;
 
 const nameflickResolver = {
-  "homestead": secretsJson.chains["1"].nameflickResolver,
-  "goerli": secretsJson.chains["5"].nameflickResolver,
+  "Ethereum": secretsJson.chains["1"].nameflickResolver,
+  "Goerli": secretsJson.chains["5"].nameflickResolver,
 }
 
 /** @type {import('next').NextConfig} */

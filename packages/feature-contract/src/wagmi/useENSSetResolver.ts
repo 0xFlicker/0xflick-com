@@ -52,16 +52,20 @@ export function useENSSetResolver(namehash?: `0x${string}`) {
     ? nameflickResolvers.get()[chain.name]
     : undefined;
   const ensAddress = chain?.contracts?.ensRegistry?.address;
-  const { data: resolverData, isSuccess: isResolverSuccess } = useContractRead({
+  const {
+    data: resolverData,
+    isSuccess: isResolverSuccess,
+    refetch,
+  } = useContractRead({
     abi: ENS_SET_RESOLVER_ABI,
     address: ensAddress,
     functionName: "resolver",
     args: [namehash ?? "0x0"],
-    enabled: typeof namehash !== "undefined",
+    cacheTime: 0,
   });
   const isResolverSet =
     typeof resolverData !== "undefined" &&
-    hexString(resolverData).toLowerCase() === nameflickResolver;
+    hexString(resolverData).toLowerCase() === nameflickResolver?.toLowerCase();
   const { config } = usePrepareContractWrite({
     abi: ENS_SET_RESOLVER_ABI,
     address: ensAddress,
@@ -69,5 +73,5 @@ export function useENSSetResolver(namehash?: `0x${string}`) {
     args: [namehash ?? "0x0", nameflickResolver ?? "0x0"],
     enabled: isResolverSuccess,
   });
-  return [isResolverSet, useContractWrite(config)] as const;
+  return [{ isResolverSet, refetch }, useContractWrite(config)] as const;
 }

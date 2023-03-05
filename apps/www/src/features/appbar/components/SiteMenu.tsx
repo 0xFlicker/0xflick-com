@@ -12,17 +12,9 @@ import { WrappedLink } from "@0xflick/components/src/WrappedLink";
 export const SiteMenu: FC<{
   // Yeah need to do a real sitemap and route stuff...
   isRegister?: boolean;
-  isDemo?: boolean;
   isFaq?: boolean;
   isLinks?: boolean;
-  isSignup?: boolean;
-}> = ({
-  isRegister = false,
-  isDemo = false,
-  isFaq = false,
-  isLinks = false,
-  isSignup = false,
-}) => {
+}> = ({ isRegister = false, isFaq = false, isLinks = false }) => {
   const { t } = useLocale(["common"]);
   const { toggleTheme: handleThemeChange, isDarkMode } = useTheme();
   return (
@@ -35,14 +27,6 @@ export const SiteMenu: FC<{
           primary={
             <Typography textAlign="right">{t("menu_register")}</Typography>
           }
-        />
-      </MenuItem>
-      <MenuItem component={WrappedLink} href="/demo" disabled={isDemo}>
-        <ListItemIcon>
-          <InputIcon />
-        </ListItemIcon>
-        <ListItemText
-          primary={<Typography textAlign="right">{t("menu_demo")}</Typography>}
         />
       </MenuItem>
       <MenuItem component={WrappedLink} href="/faq" disabled={isFaq}>

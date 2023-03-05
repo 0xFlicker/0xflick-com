@@ -64,7 +64,7 @@ const config: HardhatUserConfig = {
     mainnet: {
       url: node_url("mainnet"),
       accounts: accounts("mainnet"),
-      gasPrice: utils.parseUnits("16.1", "gwei").toNumber(),
+      gasPrice: utils.parseUnits("22.1", "gwei").toNumber(),
     },
     kovan: {
       url: node_url("kovan"),

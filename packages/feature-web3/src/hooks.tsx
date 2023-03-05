@@ -14,7 +14,7 @@ import { defaultChain } from "@0xflick/utils";
 export type TChain = Chain & {
   chainImageUrl: string;
 };
-export function decorateChainImageUrl(chain: Chain): TChain {
+export function decorateChainImageUrl(chain?: Chain): string {
   let chainImageUrl = "/chains/unknown.png";
   switch (chain?.id) {
     case 1:
@@ -27,17 +27,10 @@ export function decorateChainImageUrl(chain: Chain): TChain {
       chainImageUrl = "/chains/goerli.png";
       break;
   }
-  return {
-    ...chain,
-    chainImageUrl,
-  };
+  return chainImageUrl;
 }
 
 export function useWeb3Context() {
-  const dispatch = useAppDispatch();
-  const chainImageUrl = useMemo<TChain>(() => {
-    return decorateChainImageUrl(defaultChain.get());
-  }, []);
   const { connector: activeConnector, isConnected, address } = useAccount({});
   const {
     connect,
@@ -54,9 +47,10 @@ export function useWeb3Context() {
       setIsFirstLoad(false);
     }
   }, [isFirstLoad]);
+  const { chain } = useNetwork();
 
   const result = {
-    currentChain: chainImageUrl,
+    currentChain: chain ?? defaultChain.get(),
     provider: provider?.provider,
     selectedAddress: isFirstLoad ? undefined : address,
     connect,

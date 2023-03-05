@@ -30,7 +30,7 @@ export const LinkCollection: FC<{
   const { t } = useLocale(["common"]);
   return (
     <Grid2 container spacing={4}>
-      <Grid2 {...defaultGridBreakpoints}>
+      {/* <Grid2 {...defaultGridBreakpoints}>
         <LinkCard
           headerTitle="demo"
           content={
@@ -44,7 +44,7 @@ export const LinkCollection: FC<{
           }}
           to="/demo"
         />
-      </Grid2>
+      </Grid2> */}
       {/* <Grid2 {...defaultGridBreakpoints}>
         <LinkCard
           headerTitle="signup for nameflick"

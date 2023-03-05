@@ -122,10 +122,7 @@ const selectPendingWalletType = createSelector(
   (state) => state.pendingWalletType
 );
 const selectWalletStatus = createSelector(selectRoot, (state) => state.status);
-const selectIsWrongNetwork = createSelector(
-  selectWalletStatus,
-  (state) => state === WalletStatus.WRONG_NETWORK
-);
+
 const selectIsConnected = createSelector(
   selectWalletStatus,
   (state) => state === WalletStatus.CONNECTED
@@ -142,7 +139,6 @@ const selectAddress = createSelector(
 
 export const selectors = {
   isWalletSelectModalOpen: selectIsWalletSelectModalOpen,
-  isWrongNetwork: selectIsWrongNetwork,
   isConnected: selectIsConnected,
   type: selectWalletType,
   pendingType: selectPendingWalletType,

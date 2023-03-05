@@ -190,14 +190,15 @@ contract NameflickENSResolver is IExtendedResolver, ERC165, Ownable {
   }
 
   /**
-   * @dev Converts an address to a bytes array
+   * @dev Converts an address to a bytes array, but aligned to 32 bytes
    * @param a the address to convert
    * @return b the bytes array
    */
   function addressToBytes(address a) internal pure returns (bytes memory b) {
-    b = new bytes(20);
+    b = new bytes(32);
     assembly {
-      mstore(add(b, 32), mul(a, exp(256, 12)))
+      // store the address at the end of the bytes array
+      mstore(add(b, 32), a)
     }
   }
 
@@ -353,13 +354,17 @@ contract NameflickENSResolver is IExtendedResolver, ERC165, Ownable {
           if (!success) {
             revertOffchainLookup(name, data);
           }
-          bytes memory record = abi.encodePacked(
-            "eip155:1/erc721:",
-            Strings.toHexString(uint256(uint160(nft))),
-            "/",
-            subdomain
-          );
-          return record;
+          return
+            bytes(
+              string(
+                abi.encodePacked(
+                  "eip155:1/erc721:",
+                  Strings.toHexString(uint256(uint160(nft))),
+                  "/",
+                  subdomain
+                )
+              )
+            );
         }
       }
     }
