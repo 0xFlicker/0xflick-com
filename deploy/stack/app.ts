@@ -116,7 +116,7 @@ new FaucetStack(app, "Faucet", {
   domain: ["faucet", deployment],
   privateKey: faucetJson.privateKey,
   web3RpcUrl: faucetJson.webRpc,
-  faucetValue: "0.042",
+  faucetValue: "0.05",
   recaptchaSecret: faucetJson.recaptchaSecret,
   allowedOrigins: faucetJson.allowedOrigins,
   env: {

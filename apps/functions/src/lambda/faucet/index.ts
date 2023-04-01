@@ -1,6 +1,6 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import axios from "axios";
-import { providers, Wallet, utils } from "ethers";
+import { providers, Wallet, utils, BigNumber } from "ethers";
 import {
   createLogger,
   DrinkerDAO,
@@ -32,8 +32,8 @@ if (!process.env.RECAPTCHA_SECRET) {
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(",") ?? [];
 
-const RATE_LIMIT_ADDRESS = Number(process.env.RATE_LIMIT_ADDRESS ?? 2);
-const RATE_LIMIT_IP = Number(process.env.RATE_LIMIT_IP ?? 10);
+const RATE_LIMIT_ADDRESS = Number(process.env.RATE_LIMIT_ADDRESS ?? 1);
+const RATE_LIMIT_IP = Number(process.env.RATE_LIMIT_IP ?? 1);
 
 const provider = new providers.JsonRpcProvider(process.env.RPC_URL);
 const wallet = new Wallet(process.env.PRIVATE_KEY, provider);
@@ -70,6 +70,15 @@ const promiseDao = Promise.resolve().then(async () => {
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
+  logger.info(
+    {
+      method: event.httpMethod,
+      path: event.path,
+      headers: event.headers,
+      body: event.body,
+    },
+    "Received request"
+  );
   // Check OPTIONS preflight
   if (event.httpMethod === "OPTIONS") {
     const origin = event.headers.origin;
@@ -89,13 +98,36 @@ export const handler = async (
       statusCode: 200,
       headers: addCorsHeaders(
         {
-          "Access-Control-Allow-Methods": "POST",
+          "Access-Control-Allow-Methods": "POST, GET",
           "Access-Control-Allow-Headers": "Content-Type",
           "Access-Control-Max-Age": "86400",
         },
         origin
       ),
       body: "",
+    };
+  }
+  // for GET, return faucet details about price and rate limit
+  if (event.httpMethod === "GET") {
+    // Get the remaining balance of the faucet
+    const balance = await wallet.getBalance();
+    const ether = utils.formatEther(balance);
+    const etherRound = Math.round(parseFloat(ether));
+    logger.info(`Faucet balance: ${ether} SEP`);
+    return {
+      statusCode: 200,
+      headers: addCorsHeaders(
+        {
+          "Content-Type": "application/json",
+        },
+        event.headers.origin
+      ),
+      body: JSON.stringify({
+        remainingBalance: `${etherRound} SEP`,
+        value: `${process.env.VALUE} SEP`,
+        rateLimitAddress: RATE_LIMIT_ADDRESS,
+        rateLimitIp: RATE_LIMIT_IP,
+      }),
     };
   }
   const drinkerDao = await promiseDao;
@@ -111,6 +143,21 @@ export const handler = async (
       return {
         statusCode: 400,
         body: JSON.stringify({ error: "Invalid address" }),
+        headers: addCorsHeaders(
+          {
+            "Content-Type": "application/json",
+          },
+          event.headers.origin
+        ),
+      };
+    }
+    // Check if address is an EOA
+    const code = await provider.getCode(body.to);
+    if (code !== "0x") {
+      logger.error(`Address ${body.to} is a contract`);
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "Contract addresses not supported" }),
         headers: addCorsHeaders(
           {
             "Content-Type": "application/json",

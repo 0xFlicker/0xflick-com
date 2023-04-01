@@ -81,6 +81,7 @@ export class FaucetStack extends cdk.Stack {
 
     const resource = httpApi.root;
     resource.addMethod("POST", new apigateway.LambdaIntegration(faucetHandler));
+    resource.addMethod("GET", new apigateway.LambdaIntegration(faucetHandler));
     resource.addMethod(
       "OPTIONS",
       new apigateway.LambdaIntegration(faucetHandler)
