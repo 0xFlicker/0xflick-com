@@ -9,7 +9,7 @@
     "composite": true,
     "jsx": "preserve",
     "paths": {
-      "0xflick/app-store": ["../../packages/app-store/src/index"],
+      "@0xflick/feature-auth": ["../../packages/feature-auth/src/index"],
       "@0xflick/components": ["../../packages/components/src/index"],
       "@0xflick/utils": ["../../packages/utils/src/index"]
     },
@@ -19,7 +19,7 @@
   "exclude": ["./node_modules"],
   "references": [
     {
-      "path": "../../packages/app-store"
+      "path": "../../packages/feature-auth"
     },
     {
       "path": "../../packages/components"

@@ -1,47 +1,35 @@
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import Button, { ButtonProps } from "@mui/material/Button";
-import { useAppDispatch, useAppSelector } from "@0xflick/app-store";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { FC, useCallback, useState, MouseEvent } from "react";
 import { useLocale } from "@0xflick/feature-locale";
-import {
-  actions as web3Actions,
-  selectors as web3Selectors,
-  WalletType,
-} from "../redux";
 import { WalletModal } from "./WalletModal";
-import { WrongChainModal } from "./WrongChainModal";
 import { ConnectedDropDownModal } from "./ConnectedDropDownModal";
 import { useAuth } from "@0xflick/feature-auth/src/hooks";
-import { defaultChain } from "@0xflick/utils";
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
-import { useAccount } from "wagmi";
 import { useWeb3 } from "../hooks";
 
 const Connect: FC<{
   size?: ButtonProps["size"];
 }> = ({ size }) => {
   const { t } = useLocale("common");
-  // Used to lazy render the ENS name, to avoid hydration mismatch
-  const [settleEnsName, setSettledEnsName] = useState<string | null>(null);
-  const dispatch = useAppDispatch();
+  const [isConnectOpen, setIsConnectOpen] = useState(false);
   const { isAuthenticated, signIn, signOut, ensName, ensNameIsLoading } =
     useAuth();
   const [menuAnchorEl, setMenuAnchorEl] = useState<Element | null>(null);
   const { selectedAddress: address, reset } = useWeb3();
 
   const onClick = useCallback(() => {
-    dispatch(web3Actions.openWalletSelectModal());
-  }, [dispatch]);
+    setIsConnectOpen(true);
+  }, []);
 
   const handleDisconnect = useCallback(() => {
-    dispatch(web3Actions.reset());
     signOut();
     reset();
     setMenuAnchorEl(null);
-  }, [dispatch, signOut]);
+  }, [signOut]);
 
   const onMenuClose = useCallback(() => {
     setMenuAnchorEl(null);
@@ -50,24 +38,18 @@ const Connect: FC<{
     setMenuAnchorEl(event.currentTarget);
   }, []);
 
-  // const chainName = chain?.name;
-  const isOpen = useAppSelector(web3Selectors.isWalletSelectModalOpen);
   const handleLogin = useCallback(() => {
     setMenuAnchorEl(null);
     signIn();
   }, [signIn]);
   const handleLogout = useCallback(() => {
     setMenuAnchorEl(null);
-    dispatch(web3Actions.reset());
     signOut();
     reset();
-  }, [dispatch, signOut]);
+  }, [signOut]);
   const handleModalClose = useCallback(() => {
-    dispatch(web3Actions.closeWalletSelectModal());
-  }, [dispatch]);
-  const handleChangeNetworkAbort = useCallback(() => {
-    dispatch(web3Actions.reset());
-  }, [dispatch]);
+    setIsConnectOpen(false);
+  }, []);
 
   return (
     <>
@@ -116,7 +98,7 @@ const Connect: FC<{
       ) : (
         <Button onClick={onClick}>{t("button_connect")}</Button>
       )}
-      <WalletModal open={isOpen} handleClose={handleModalClose} />
+      <WalletModal open={isConnectOpen} handleClose={handleModalClose} />
       <ConnectedDropDownModal
         anchorEl={menuAnchorEl}
         handleClose={onMenuClose}

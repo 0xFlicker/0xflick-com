@@ -1,7 +1,0 @@
-{
-  "name": "@0xflick/app-store",
-  "version": "1.0.0",
-  "main": "src/index.ts",
-  "license": "MIT",
-  "dependencies": {}
-}

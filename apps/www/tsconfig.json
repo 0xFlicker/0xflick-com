@@ -23,7 +23,6 @@
     "strictNullChecks": false,
     "strictPropertyInitialization": false,
     "paths": {
-      "@0xflick/app-store": ["../../packages/app-store/src/index"],
       "@0xflick/components/*": ["../../packages/components/src/*"],
       "@0xflick/models": ["../../packages/models/src/index"],
       "@0xflick/backend": ["../../packages/backend/src/index"],

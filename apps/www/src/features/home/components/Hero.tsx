@@ -17,7 +17,6 @@ import Box from "@mui/material/Box";
 // import { HeroBackground } from "./HeroBackground";
 import { useSpring, animated, config } from "react-spring";
 import { LinkCollection } from "@0xflick/components/src/LinkCollection";
-import { useAppSelector } from "@0xflick/app-store";
 import { useTheme } from "@0xflick/feature-theme";
 
 const SlideFromSide: FC<

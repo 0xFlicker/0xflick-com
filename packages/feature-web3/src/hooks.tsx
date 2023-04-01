@@ -4,10 +4,8 @@ import {
   PropsWithChildren,
   useContext,
   useEffect,
-  useMemo,
   useState,
 } from "react";
-import { useAppDispatch } from "@0xflick/app-store";
 import { useAccount, useConnect, Chain, useNetwork } from "wagmi";
 import { defaultChain } from "@0xflick/utils";
 
@@ -32,14 +30,7 @@ export function decorateChainImageUrl(chain?: Chain): string {
 
 export function useWeb3Context() {
   const { connector: activeConnector, isConnected, address } = useAccount({});
-  const {
-    connect,
-    isLoading,
-    reset,
-    data: provider,
-  } = useConnect({
-    onSettled: () => {},
-  });
+  const { connect, isLoading, reset, data: provider } = useConnect();
   // We don't want the address to be available on first load so that client render matches server render
   const [isFirstLoad, setIsFirstLoad] = useState(true);
   useEffect(() => {

@@ -8,14 +8,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import { selectors as authSelectors, actions as authActions } from "../redux";
 import { useWeb3 } from "@0xflick/feature-web3";
-import {
-  actions as web3Actions,
-  selectors as web3Selectors,
-} from "@0xflick/feature-web3/src/redux";
-import { useAppDispatch, useAppSelector } from "@0xflick/app-store";
-import useLocalStorage from "use-local-storage";
 import { useNonce } from "./useNonce";
 import {
   createJweRequest,
@@ -26,19 +19,33 @@ import {
 } from "@0xflick/models";
 import { useSignIn } from "./useSignIn";
 import { useSignOut } from "./useSignOut";
-import { useAllowedActions } from "./useAllowedActions";
-import { useEnsAvatar, useEnsName } from "wagmi";
+import { useAccount, useEnsAvatar, useEnsName } from "wagmi";
 import { useSelf } from "./useSelf";
 
 function useAuthContext() {
-  const isAuthenticated = useAppSelector(authSelectors.isAuthenticated);
-  const isAnonymous = useAppSelector(authSelectors.isAnonymous);
+  const [stateToken, setStateToken] = useState<string | null>(null);
+  const [roleIds, setRoleIds] = useState<string[]>([]);
+  const [state, setState] = useState<
+    | "ANONYMOUS"
+    | "REQUEST_SIGN_IN"
+    | "SIGNING_MESSAGE"
+    | "USER_MESSAGE_SIGNED"
+    | "AUTHENTICATED"
+    | "REQUEST_SIGN_OUT"
+  >("ANONYMOUS");
+  const isAnonymous = state === "ANONYMOUS";
+  const isAuthenticated = state === "AUTHENTICATED";
   const {
     currentChain,
     activeConnector,
     selectedAddress: address,
     isConnected: isWeb3Connected,
   } = useWeb3();
+  useEffect(() => {
+    if (isWeb3Connected && state === "ANONYMOUS") {
+      setState("REQUEST_SIGN_IN");
+    }
+  }, [isWeb3Connected, state]);
 
   const { data: ensName, isLoading: ensNameIsLoading } = useEnsName({
     address,
@@ -49,13 +56,9 @@ function useAuthContext() {
     enabled: !!address,
   });
 
-  const isUserSigningMessage = useAppSelector(
-    authSelectors.isUserSigningMessage
-  );
-  const isUserRequestingSignIn = useAppSelector(
-    authSelectors.isUserRequestingSignIn
-  );
-  const isUserSigningOut = useAppSelector(authSelectors.isUserSigningOut);
+  const isUserSigningMessage = state === "SIGNING_MESSAGE";
+  const isUserRequestingSignIn = state === "REQUEST_SIGN_IN";
+  const isUserSigningOut = state === "REQUEST_SIGN_OUT";
 
   // const { data: signer } = useSigner({});
   const [requestSignOut] = useSignOut();
@@ -78,22 +81,34 @@ function useAuthContext() {
   ] = useSignIn();
   const tokenIsSuccess = !!tokenData;
   const tokenIsError = !!tokenError;
-  const { data: user, isLoggedIn: userIsLoggedInToGraphql } = useSelf();
-  const dispatch = useAppDispatch();
-  const signIn = useCallback(() => {
-    if (!isWeb3Connected) {
-      dispatch(web3Actions.openWalletSelectModal());
-    } else {
-      dispatch(authActions.userRequestsSignIn());
+  const {
+    data: user,
+    isLoggedIn: userIsLoggedInToGraphql,
+    error: selfError,
+  } = useSelf();
+  useEffect(() => {
+    if (userIsLoggedInToGraphql && user) {
+      setState("AUTHENTICATED");
+      setRoleIds(user.roleIds);
+      setStateToken(user.token);
+    } else if (selfError) {
+      setState("ANONYMOUS");
+      setRoleIds([]);
+      setStateToken(null);
     }
-  }, [dispatch, isWeb3Connected]);
+  }, [user, userIsLoggedInToGraphql, selfError]);
+  const signIn = useCallback(() => {
+    setState("REQUEST_SIGN_IN");
+  }, []);
 
   const signOut = useCallback(() => {
     tokenReset();
     nonceReset();
     requestSignOut();
-    dispatch(authActions.userSignOut());
-  }, [tokenReset, nonceReset, requestSignOut, dispatch]);
+    setState("ANONYMOUS");
+    setRoleIds([]);
+    setStateToken(null);
+  }, [tokenReset, nonceReset, requestSignOut]);
 
   useEffect(() => {
     if (isWeb3Connected && user && user.address !== address) {
@@ -101,33 +116,23 @@ function useAuthContext() {
       signOut();
     }
   }, [user, address, signOut, isWeb3Connected]);
-  useEffect(() => {
-    if (!isAuthenticated && user && user.address === address) {
-      console.log(
-        "User is not authenticated, but we have a user and a matching address so signing in"
-      );
-      dispatch(
-        authActions.userSignInSuccess({
-          roles: user.roleIds,
-          token: user.token,
-        })
-      );
-    }
-  }, [isAuthenticated, dispatch, user, address]);
 
   useEffect(() => {
     if (address && isUserRequestingSignIn) {
       fetchNonce({ variables: { address } })
-        .then(() => dispatch(authActions.userNeedsSignature()))
-        .catch(() => dispatch(authActions.userSignOut()));
+        .then(() => setState("SIGNING_MESSAGE"))
+        // TODO: toast
+        .catch(() => setState("ANONYMOUS"));
     }
-  }, [address, dispatch, fetchNonce, isUserRequestingSignIn]);
+  }, [address, fetchNonce, isUserRequestingSignIn]);
 
   useEffect(() => {
     if (tokenIsError) {
-      dispatch(authActions.userSignOut());
+      setState("ANONYMOUS");
+      setRoleIds([]);
+      setStateToken(null);
     }
-  }, [dispatch, tokenIsError]);
+  }, [tokenIsError]);
   useEffect(() => {
     if (
       isUserSigningMessage &&
@@ -152,7 +157,7 @@ function useAuthContext() {
       activeConnector.getSigner({ chainId }).then((signer) => {
         signer.signMessage(message).then(
           (signature: string) => {
-            dispatch(authActions.userMessageSigned(signature));
+            setState("USER_MESSAGE_SIGNED");
             createJweRequest(signature, nonceData.nonceForAddress?.nonce || 0)
               .then((jwe) => {
                 return fetchToken({
@@ -165,20 +170,25 @@ function useAuthContext() {
                 });
               })
               .catch((err) => {
+                // TODO: toast
                 console.error(err);
-                dispatch(authActions.userSignOut());
+                setState("ANONYMOUS");
+                setRoleIds([]);
+                setStateToken(null);
               });
           },
           (err: Error) => {
             console.error(err);
             // FIXME: figure out rejection vs error vs wallet type
-            dispatch(authActions.userSignatureError());
+            //TODO: toast;
+            setState("ANONYMOUS");
+            setRoleIds([]);
+            setStateToken(null);
           }
         );
       });
     }
   }, [
-    dispatch,
     isUserSigningMessage,
     nonceData,
     nonceIsSuccess,
@@ -192,8 +202,11 @@ function useAuthContext() {
     if (nonceIsSuccess && nonceData && tokenIsSuccess && tokenData && address) {
       const token = tokenData.signIn?.token;
       if (!token) {
+        // TODO: toast
         console.warn("No token returned from server");
-        dispatch(authActions.userSignInError());
+        setState("ANONYMOUS");
+        setRoleIds([]);
+        setStateToken(null);
         return;
       }
       try {
@@ -202,36 +215,39 @@ function useAuthContext() {
           console.log(
             "Found a token and the token addresses matches the user, signing in"
           );
-          dispatch(
-            authActions.userSignInSuccess({
-              token,
-              roles: authUser.roleIds,
-            })
-          );
+          setRoleIds(authUser.roleIds);
+          setStateToken(token);
+          setState("AUTHENTICATED");
         } else {
           console.warn(`Unable to parse token for ${address}`);
-          dispatch(authActions.userSignInError());
+          // TODO: toast
+          setState("ANONYMOUS");
+          setRoleIds([]);
+          setStateToken(null);
         }
       } catch (err) {
         console.error(err);
-        dispatch(authActions.userSignInError());
+        // TODO: toast
+        setState("ANONYMOUS");
+        setRoleIds([]);
+        setStateToken(null);
       }
     }
-  }, [address, dispatch, nonceData, nonceIsSuccess, tokenData, tokenIsSuccess]);
+  }, [address, nonceData, nonceIsSuccess, tokenData, tokenIsSuccess]);
   const setToken = useCallback(
     (token: string) => {
       // decode token
       const authUser = decodeJwtToken(token);
       if (authUser && authUser.address === address) {
-        dispatch(
-          authActions.userSignInSuccess({
-            token,
-            roles: authUser.roleIds,
-          })
-        );
+        setRoleIds(authUser.roleIds);
+        setStateToken(token);
+        setState("AUTHENTICATED");
       } else {
         console.warn(`Unable to parse token for ${address}`);
-        dispatch(authActions.userSignInError());
+        // TODO: toast
+        setState("ANONYMOUS");
+        setRoleIds([]);
+        setStateToken(null);
       }
     },
     [address]
@@ -243,7 +259,7 @@ function useAuthContext() {
     isUserSigningMessage,
     isUserWaiting: nonceIsLoading || tokenIsLoading,
     isUserSigningOut,
-    token: tokenData?.signIn?.token || user?.token || undefined,
+    token: stateToken || tokenData?.signIn?.token || user?.token || undefined,
     user,
     allowedActions: user?.allowedActions ?? [],
     signIn,
@@ -272,39 +288,11 @@ export function useAuth({
 }: {
   noAutoSignIn?: boolean;
 } = {}) {
-  const [autoLoginUntil, setAutoLoginUntil] = useState(0);
-  const isAnonymous = useAppSelector(authSelectors.isAnonymous);
-  const isWeb3Connected = useAppSelector(web3Selectors.isConnected);
-
   const ctx = useContext(AuthProvider);
   if (ctx === null) {
     throw new Error("No context defined");
   }
-
-  const { signIn: originalSignIn, isAuthenticated } = ctx;
-  const dispatch = useAppDispatch();
-  useEffect(() => {
-    if (noAutoSignIn || autoLoginUntil < Date.now()) {
-      return;
-    }
-    if (isWeb3Connected && isAnonymous) {
-      dispatch(authActions.userRequestsSignIn());
-    }
-  }, [isWeb3Connected, isAnonymous, dispatch, noAutoSignIn, autoLoginUntil]);
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      setAutoLoginUntil(0);
-    }
-  }, [isAuthenticated]);
-  const signIn = useCallback(() => {
-    setAutoLoginUntil(Date.now() + 1000 * 60);
-    originalSignIn();
-  }, [originalSignIn]);
-  return {
-    ...ctx,
-    signIn,
-  };
+  return ctx;
 }
 
 export function useHasAllowedAction(

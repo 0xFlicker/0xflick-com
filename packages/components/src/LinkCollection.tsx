@@ -3,7 +3,6 @@ import Typography from "@mui/material/Typography";
 import { useLocale } from "@0xflick/feature-locale";
 import { FC } from "react";
 import { LinkCard } from "./LinkCard";
-import { useAppSelector } from "@0xflick/app-store";
 
 const defaultCardMediaProps = {
   component: "img",

@@ -19,19 +19,14 @@ import { LoginWithTwitterButton } from "features/twitter/components/LoginWithTwi
 import { CopyToClipboardButton } from "features/faucet/components/CopyToClipboard";
 import { useManageAffiliates } from "features/affiliates/hooks/useManageAffiliates";
 import Chip from "@mui/material/Chip";
-import {
-  useWeb3,
-  selectors as web3Selectors,
-  Connect,
-} from "@0xflick/feature-web3";
-import { useAppSelector } from "@0xflick/app-store";
+import { useWeb3, Connect } from "@0xflick/feature-web3";
 import { WrappedLink } from "@0xflick/components/src/WrappedLink";
 import { useIsFollowerLazyQuery } from "features/twitter/graphql/isFollowerQuery.generated";
 
 const MIN_HEIGHT = 320;
 const UserLoginCard: FC = () => {
   const { t } = useLocale(["user", "common"]);
-  const isWeb3Connected = useAppSelector(web3Selectors.isConnected);
+  const { isConnected: isWeb3Connected } = useWeb3();
   const {
     isAuthenticated,
     isUserWaiting,
