@@ -21,7 +21,15 @@ export const ConnectedDropDownModal: FC<{
   handleClose: () => void;
   handleSwitch: (chain: Chain) => void;
   currentChain?: Chain;
-}> = ({ anchorEl, handleClose, handleSwitch, chains, currentChain }) => {
+  assetPrefix?: string;
+}> = ({
+  anchorEl,
+  assetPrefix,
+  handleClose,
+  handleSwitch,
+  chains,
+  currentChain,
+}) => {
   const { t } = useLocale("common");
   const open = Boolean(anchorEl);
   return (
@@ -53,7 +61,7 @@ export const ConnectedDropDownModal: FC<{
                   <CheckIcon sx={{ fontSize: 40 }} />
                 ) : (
                   <Image
-                    src={decorateChainImageUrl(chain)}
+                    src={`${assetPrefix ?? ""}${decorateChainImageUrl(chain)}`}
                     alt=""
                     width={40}
                     height={40}
@@ -72,13 +80,16 @@ export const ConnectedDropDownModal: FC<{
     </Menu>
   );
 };
-export const ChainSelector: FC = () => {
+export const ChainSelector: FC<{
+  assetPrefix?: string;
+}> = ({ assetPrefix }) => {
   const [menuAnchorEl, setMenuAnchorEl] = useState<Element | null>(null);
 
-  const { chain } = useNetwork();
+  const { currentChan: chain } = useWeb3();
 
   const { chains, error, isLoading, pendingChainId, switchNetwork } =
     useSwitchNetwork();
+
   const handleMenu = useCallback((event: MouseEvent) => {
     setMenuAnchorEl(event.currentTarget);
   }, []);
@@ -94,11 +105,11 @@ export const ChainSelector: FC = () => {
     },
     [onMenuClose, switchNetwork]
   );
-  return (
+  return chains?.length ? (
     <>
       <IconButton onClick={handleMenu} size="small">
         <Image
-          src={decorateChainImageUrl(chain)}
+          src={`${assetPrefix ?? ""}${decorateChainImageUrl(chain)}`}
           alt=""
           width={40}
           height={40}
@@ -116,11 +127,12 @@ export const ChainSelector: FC = () => {
       </IconButton>
       <ConnectedDropDownModal
         anchorEl={menuAnchorEl as any}
+        assetPrefix={assetPrefix}
         handleClose={onMenuClose}
         handleSwitch={handleSwitch}
         chains={chains}
         currentChain={chain}
       />
     </>
-  );
+  ) : null;
 };

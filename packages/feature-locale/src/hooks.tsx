@@ -1,24 +1,19 @@
-import { createContext, FC, PropsWithChildren, useMemo } from "react";
-import type { InitOptions, TFunction } from "i18next";
+import { createContext, FC, PropsWithChildren, useContext } from "react";
+import type { i18n as I18nType, TFunction } from "i18next";
 import i18next from "i18next";
-import { useTranslation, initReactI18next } from "react-i18next";
+import { useTranslation } from "react-i18next";
 
 interface IContext {
-  i18n?: InitOptions;
+  i18n: I18nType;
 }
-const LocaleContext = createContext<IContext>({});
+const LocaleContext = createContext<IContext>({ i18n: i18next });
 
-export const Provider: FC<
-  PropsWithChildren<{
-    i18n: InitOptions;
-  }>
-> = ({ children, i18n: i18nOpts }) => {
-  useMemo(() => {
-    if (i18nOpts) i18next.use(initReactI18next).init(i18nOpts);
-  }, [i18nOpts]);
-
+export const Provider: FC<PropsWithChildren<Partial<IContext>>> = ({
+  children,
+  i18n,
+}) => {
   return (
-    <LocaleContext.Provider value={{ i18n: i18nOpts }}>
+    <LocaleContext.Provider value={i18n ? { i18n } : { i18n: i18next }}>
       {children}
     </LocaleContext.Provider>
   );
@@ -27,6 +22,6 @@ export const Provider: FC<
 export function useLocale(ns?: string | string[]): {
   t: TFunction<string | string[], undefined>;
 } {
-  const { t } = useTranslation(ns);
-  return { t };
+  const { i18n } = useContext(LocaleContext);
+  return useTranslation(ns, { i18n });
 }

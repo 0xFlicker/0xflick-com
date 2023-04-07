@@ -1,5 +1,5 @@
 import { getStaticProps as getStaticLocaleProps } from "@0xflick/feature-locale";
-import { InitOptions } from "i18next";
+import { i18n as I18nType } from "i18next";
 import { GetStaticProps, NextPage } from "next";
 import {
   getStaticProps as getStaticThemeProps,
@@ -8,14 +8,9 @@ import {
 import { deepMerge } from "utils/object";
 
 export const getStaticProps: GetStaticProps = async (context) => {
-  const [locale, theme] = await Promise.all([
-    getStaticLocaleProps(context),
-    getStaticThemeProps(context),
-  ]);
-  return deepMerge(locale, theme);
+  return await getStaticThemeProps(context);
 };
 
 export interface IStaticProps {
-  i18n: InitOptions;
   theme: TTheme;
 }

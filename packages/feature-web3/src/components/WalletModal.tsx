@@ -13,11 +13,12 @@ import {
 } from "../wagmi";
 
 interface IProps {
+  assetPrefix?: string;
   open: boolean;
   handleClose: () => void;
 }
 
-export const WalletModal: FC<IProps> = ({ open, handleClose }) => {
+export const WalletModal: FC<IProps> = ({ assetPrefix, open, handleClose }) => {
   const { t } = useLocale("common");
   const { connect, error, isLoading, connectors } = useConnect({
     onSettled: handleClose,
@@ -67,15 +68,12 @@ export const WalletModal: FC<IProps> = ({ open, handleClose }) => {
   }, [connect]);
   return (
     <Modal
+      keepMounted
       aria-labelledby="modal-wallet-title"
       aria-describedby="modal-wallet-description"
       open={open}
       onClose={handleClose}
       closeAfterTransition
-      BackdropComponent={Backdrop}
-      BackdropProps={{
-        timeout: 500,
-      }}
     >
       <Fade in={open}>
         <Box
@@ -112,7 +110,7 @@ export const WalletModal: FC<IProps> = ({ open, handleClose }) => {
                 startIcon={
                   <Image
                     alt=""
-                    src="/metamask-fox.svg"
+                    src={`${assetPrefix ?? ""}/wallets/metamask-fox.svg`}
                     width={25}
                     height={25}
                   />
@@ -128,7 +126,7 @@ export const WalletModal: FC<IProps> = ({ open, handleClose }) => {
                 startIcon={
                   <Image
                     alt=""
-                    src="/walletconnect.svg"
+                    src={`${assetPrefix ?? ""}/wallets/walletconnect.svg`}
                     width={25}
                     height={25}
                   />
@@ -144,7 +142,7 @@ export const WalletModal: FC<IProps> = ({ open, handleClose }) => {
                 startIcon={
                   <Image
                     alt=""
-                    src="/wallets/coinbase_wallet.png"
+                    src={`${assetPrefix ?? ""}/wallets/coinbase_wallet.png`}
                     width={25}
                     height={25}
                   />
@@ -160,7 +158,7 @@ export const WalletModal: FC<IProps> = ({ open, handleClose }) => {
                 startIcon={
                   <Image
                     alt=""
-                    src="/wallets/FrameLogo512.png"
+                    src={`${assetPrefix ?? ""}/wallets/FrameLogo512.png`}
                     width={25}
                     height={25}
                   />

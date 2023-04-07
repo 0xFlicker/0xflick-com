@@ -1,6 +1,5 @@
 const path = require("path");
 const withTM = require('next-transpile-modules')([
-  '@0xflick/app-store',
   '@0xflick/components',
   '@0xflick/feature-airdrop',
   '@0xflick/feature-auth',

@@ -6,9 +6,9 @@ import type { IStaticProps } from "context/staticProps";
 
 export { getStaticProps } from "context/staticProps";
 
-const FaqPage: NextPage<IStaticProps> = ({ i18n, theme }) => {
+const FaqPage: NextPage<IStaticProps> = ({ theme }) => {
   return (
-    <DefaultProvider i18n={i18n} initialTheme={theme}>
+    <DefaultProvider initialTheme={theme}>
       <Head>
         <title>Nameflick FAQ</title>
         <meta name="viewport" content="initial-scale=1.0, width=device-width" />

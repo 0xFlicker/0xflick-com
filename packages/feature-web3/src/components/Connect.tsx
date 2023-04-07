@@ -12,15 +12,15 @@ import Box from "@mui/material/Box";
 import { useWeb3 } from "../hooks";
 
 const Connect: FC<{
+  assetPrefix?: string;
   size?: ButtonProps["size"];
-}> = ({ size }) => {
+}> = ({ assetPrefix, size }) => {
   const { t } = useLocale("common");
   const [isConnectOpen, setIsConnectOpen] = useState(false);
   const { isAuthenticated, signIn, signOut, ensName, ensNameIsLoading } =
     useAuth();
   const [menuAnchorEl, setMenuAnchorEl] = useState<Element | null>(null);
   const { selectedAddress: address, reset } = useWeb3();
-
   const onClick = useCallback(() => {
     setIsConnectOpen(true);
   }, []);
@@ -98,7 +98,11 @@ const Connect: FC<{
       ) : (
         <Button onClick={onClick}>{t("button_connect")}</Button>
       )}
-      <WalletModal open={isConnectOpen} handleClose={handleModalClose} />
+      <WalletModal
+        assetPrefix={assetPrefix}
+        open={isConnectOpen}
+        handleClose={handleModalClose}
+      />
       <ConnectedDropDownModal
         anchorEl={menuAnchorEl}
         handleClose={onMenuClose}

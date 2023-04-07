@@ -41,7 +41,7 @@ export function useWeb3Context() {
   const { chain } = useNetwork();
 
   const result = {
-    currentChain: chain ?? defaultChain.get(),
+    currentChain: isFirstLoad ? undefined : chain ?? defaultChain.get(),
     provider: provider?.provider,
     selectedAddress: isFirstLoad ? undefined : address,
     connect,

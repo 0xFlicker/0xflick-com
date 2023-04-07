@@ -6,10 +6,10 @@ import { Provider as ApolloProvider } from "graphql/Provider";
 import { Provider as LocaleProvider } from "@0xflick/feature-locale";
 import { Provider as AffiliateProvider } from "features/affiliates/hooks/useManageAffiliates";
 import { Provider as ThemeProvider, TTheme } from "@0xflick/feature-theme";
-import { InitOptions } from "i18next";
+import { i18n as I18nType } from "i18next";
 
 export const DefaultProvider: FC<
-  PropsWithChildren<{ i18n: InitOptions; initialTheme: TTheme }>
+  PropsWithChildren<{ i18n?: I18nType; initialTheme: TTheme }>
 > = ({ children, i18n, initialTheme = "light" }) => (
   <LocaleProvider i18n={i18n}>
     <CssBaseline />
