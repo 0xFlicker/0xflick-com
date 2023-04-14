@@ -5,8 +5,10 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc --build",
-    "start:dev": "ts-node-dev -- src/index.ts | bunyan",
-    "dev": "ts-node-dev --inspect -- src/index.ts | bunyan"
+    "start:dev": "ts-node-dev -r dotenv/config -- src/index.ts | bunyan",
+    "dev": "ts-node-dev --inspect -r dotenv/config -- src/index.ts | bunyan",
+    "start:dev:fls": "AWS_PROFILE=0xflick-portfolio-admin DEPLOYMENT=localhost-fls ts-node-dev -r dotenv/config -- src/index.ts dotenv_config_path=./.env.fls | bunyan",
+    "dev:fls": "AWS_PROFILE=0xflick-portfolio-admin DEPLOYMENT=localhost-fls ts-node-dev --inspect -r dotenv/config -- src/index.ts dotenv_config_path=./.env.fls | bunyan"
   },
   "dependencies": {
     "apollo-server": "^3.10.0",

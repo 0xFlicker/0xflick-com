@@ -8,3 +8,4 @@ cdk.context.json
 yarn-error.log
 tsconfig.tsbuildinfo
 .envrc
+.sst

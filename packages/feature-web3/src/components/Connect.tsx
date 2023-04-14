@@ -46,7 +46,7 @@ const Connect: FC<{
     setMenuAnchorEl(null);
     signOut();
     reset();
-  }, [signOut]);
+  }, [signOut, reset]);
   const handleModalClose = useCallback(() => {
     setIsConnectOpen(false);
   }, []);

@@ -85,11 +85,10 @@ export const ChainSelector: FC<{
 }> = ({ assetPrefix }) => {
   const [menuAnchorEl, setMenuAnchorEl] = useState<Element | null>(null);
 
-  const { currentChan: chain } = useWeb3();
+  const { currentChain: chain } = useWeb3();
 
   const { chains, error, isLoading, pendingChainId, switchNetwork } =
     useSwitchNetwork();
-
   const handleMenu = useCallback((event: MouseEvent) => {
     setMenuAnchorEl(event.currentTarget);
   }, []);
@@ -105,7 +104,7 @@ export const ChainSelector: FC<{
     },
     [onMenuClose, switchNetwork]
   );
-  return chains?.length ? (
+  return chain && chains?.length ? (
     <>
       <IconButton onClick={handleMenu} size="small">
         <Image

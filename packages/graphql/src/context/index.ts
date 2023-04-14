@@ -5,6 +5,9 @@ import { MutationError } from "../errors/mutation";
 import { createConfig } from "./config";
 import { createDbContext, IDbContext, IDbOptions } from "./db";
 import { createProviderContext, IProviderContext } from "./provider";
+import { createLogger } from "@0xflick/backend";
+
+const logger = createLogger({ name: "context" });
 
 export interface ITokenContext {
   getToken: () => string | undefined;

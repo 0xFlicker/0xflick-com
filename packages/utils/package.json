@@ -4,7 +4,7 @@
   "main": "src/index.ts",
   "license": "MIT",
   "dependencies": {
-    "@wagmi/chains": "^0.1.4",
-    "wagmi": "^0.10.1"
+    "@wagmi/chains": "^0.2.18",
+    "wagmi": "^0.12.10"
   }
 }

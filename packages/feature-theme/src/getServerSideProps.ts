@@ -8,7 +8,7 @@ export const getServerSideProps: GetServerSideProps<{
   const theme = context.req.cookies.theme;
   return {
     props: {
-      ...(isTheme(theme) ? { theme } : {}),
+      ...(theme && isTheme(theme) ? { theme } : {}),
     },
   };
 };

@@ -181,9 +181,6 @@ function useAuthContext() {
             console.error(err);
             // FIXME: figure out rejection vs error vs wallet type
             //TODO: toast;
-            setState("ANONYMOUS");
-            setRoleIds([]);
-            setStateToken(null);
           }
         );
       });

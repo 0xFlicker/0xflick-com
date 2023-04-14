@@ -4,6 +4,7 @@ import {
   PropsWithChildren,
   useContext,
   useEffect,
+  useLayoutEffect,
   useState,
 } from "react";
 import { useAccount, useConnect, Chain, useNetwork } from "wagmi";
@@ -28,16 +29,27 @@ export function decorateChainImageUrl(chain?: Chain): string {
   return chainImageUrl;
 }
 
-export function useWeb3Context() {
-  const { connector: activeConnector, isConnected, address } = useAccount({});
-  const { connect, isLoading, reset, data: provider } = useConnect();
-  // We don't want the address to be available on first load so that client render matches server render
+function useDeferFirstRender() {
   const [isFirstLoad, setIsFirstLoad] = useState(true);
-  useEffect(() => {
+  if (typeof window === "undefined") {
+    return true;
+  }
+  // We don't want the address to be available on first load so that client render matches server render
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  useLayoutEffect(() => {
     if (isFirstLoad) {
       setIsFirstLoad(false);
     }
   }, [isFirstLoad]);
+
+  return isFirstLoad;
+}
+
+export function useWeb3Context() {
+  const { connector: activeConnector, isConnected, address } = useAccount({});
+  const { connect, isLoading, reset, data: provider } = useConnect();
+  // We don't want the address to be available on first load so that client render matches server render
+  const isFirstLoad = useDeferFirstRender();
   const { chain } = useNetwork();
 
   const result = {

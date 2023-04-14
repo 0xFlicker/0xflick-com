@@ -28,6 +28,11 @@ Promise.resolve()
         "utf8"
       ),
       fs.promises.writeFile(
+        resolve(__dirname, "../../../apps/fls/schema.graphql"),
+        printableSchema,
+        "utf8"
+      ),
+      fs.promises.writeFile(
         resolve(__dirname, "../schema.graphql"),
         printableSchema,
         "utf8"

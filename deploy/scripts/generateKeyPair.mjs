@@ -57,7 +57,7 @@ const payload = {
   issuer: process.argv[2]
 }
 const inputFile = join(__dirname, "..", "..", "secrets", "_jwt.json");
-const outputFile = join(__dirname, "..", "..", "secrets", "jwt-secret.json");
+const outputFile = join(__dirname, "..", "..", "secrets", "jwt-secrets.json");
 await fs.promises.writeFile(inputFile, JSON.stringify(payload, null, 2), "utf8");
 await fs.promises.writeFile(outputFile, await saveBufferToSecret('_jwt.json'), "utf8");
 await fs.promises.unlink(inputFile);

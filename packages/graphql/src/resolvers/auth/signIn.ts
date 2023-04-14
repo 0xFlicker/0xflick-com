@@ -43,7 +43,7 @@ export const mutations: Resolvers<TContext>["Mutation"] = {
       uri: config.swie.uri,
       version: config.swie.version,
     });
-
+    logger.info(`authMessage: ${userAuthMessage}`);
     const verifiedAddress = utils.verifyMessage(userAuthMessage, signature);
     if (verifiedAddress.toLowerCase() !== address.toLowerCase()) {
       clearToken();

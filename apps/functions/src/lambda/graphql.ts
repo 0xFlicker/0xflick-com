@@ -59,6 +59,21 @@ const server = new ApolloServer({
     {
       async requestDidStart(requestContext) {
         return {
+          async didResolveOperation(requestContext) {
+            logger.info(
+              `Request ${requestContext.request.operationName} started`
+            );
+          },
+          async didResolveSource(requestContext) {
+            logger.info(
+              `Request ${requestContext.request.operationName} resolved source`
+            );
+          },
+          async willSendResponse(requestContext) {
+            logger.info(
+              `Request ${requestContext.request.operationName} will send response`
+            );
+          },
           async didEncounterErrors() {
             requestContext.errors.forEach((error, i) => {
               logger.warn(

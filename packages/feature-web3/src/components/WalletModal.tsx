@@ -89,10 +89,19 @@ export const WalletModal: FC<IProps> = ({ assetPrefix, open, handleClose }) => {
             p: 4,
           }}
         >
-          <Typography id="modal-wallet-title" variant="h6" component="h2">
+          <Typography
+            id="modal-wallet-title"
+            variant="h6"
+            component="h2"
+            color="text.primary"
+          >
             {t("modal_connect_title")}
           </Typography>
-          <Typography id="modal-wallet-description" sx={{ mt: 2 }}>
+          <Typography
+            id="modal-wallet-description"
+            sx={{ mt: 2 }}
+            color="text.secondary"
+          >
             {t("modal_connect_description")}
           </Typography>
           <Grid
@@ -103,10 +112,15 @@ export const WalletModal: FC<IProps> = ({ assetPrefix, open, handleClose }) => {
             justifyContent="center"
             style={{ marginTop: "2rem" }}
           >
-            <Grid item style={{ marginTop: "1rem" }}>
+            <Grid item style={{ marginTop: "1rem", width: "100%" }}>
               <Button
                 onClick={handleMetamask}
                 variant="outlined"
+                style={{
+                  paddingTop: "16px",
+                  paddingBottom: "16px",
+                }}
+                fullWidth
                 startIcon={
                   <Image
                     alt=""
@@ -119,10 +133,21 @@ export const WalletModal: FC<IProps> = ({ assetPrefix, open, handleClose }) => {
                 {t("button_metamask")}
               </Button>
             </Grid>
-            <Grid item style={{ marginTop: "1rem" }}>
+            <Grid
+              item
+              style={{
+                marginTop: "1rem",
+                width: "100%",
+              }}
+            >
               <Button
                 onClick={handleWalletConnect}
                 variant="outlined"
+                fullWidth
+                style={{
+                  paddingTop: "16px",
+                  paddingBottom: "16px",
+                }}
                 startIcon={
                   <Image
                     alt=""
@@ -135,10 +160,15 @@ export const WalletModal: FC<IProps> = ({ assetPrefix, open, handleClose }) => {
                 {t("button_walletconnect")}
               </Button>
             </Grid>
-            <Grid item style={{ marginTop: "1rem" }}>
+            <Grid item style={{ marginTop: "1rem", width: "100%" }}>
               <Button
                 onClick={handleCoinbaseConnect}
                 variant="outlined"
+                fullWidth
+                style={{
+                  paddingTop: "16px",
+                  paddingBottom: "16px",
+                }}
                 startIcon={
                   <Image
                     alt=""
@@ -151,10 +181,15 @@ export const WalletModal: FC<IProps> = ({ assetPrefix, open, handleClose }) => {
                 {t("button_coinbase_wallet")}
               </Button>
             </Grid>
-            <Grid item style={{ marginTop: "1rem" }}>
+            <Grid item style={{ marginTop: "1rem", width: "100%" }}>
               <Button
                 onClick={handleFrameConnect}
                 variant="outlined"
+                fullWidth
+                style={{
+                  paddingTop: "16px",
+                  paddingBottom: "16px",
+                }}
                 startIcon={
                   <Image
                     alt=""

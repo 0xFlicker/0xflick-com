@@ -1,4 +1,3 @@
-import "dotenv/config";
 import path from "path";
 import { spawnSync } from "child_process";
 import { ApolloServer } from "apollo-server";

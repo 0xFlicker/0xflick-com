@@ -1,6 +1,6 @@
 import { GraphQLResolveInfo } from 'graphql';
 import { IUser } from '@0xflick/models';
-import { TRole, TPermission, TAffiliates, TOpenSeaAssetContract } from './models';
+import { TRole, TPermission, TAffiliates, TOpenSeaAssetContract, TOpenSeaAsset, TOpenSeaAccount, TOpenSeaRarityData } from './models';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -270,6 +270,29 @@ export type Nonce = {
   nonce: Scalars['Int'];
 };
 
+export type OpenSeaAsset = {
+  __typename?: 'OpenSeaAsset';
+  assetContract: OpenSeaContract;
+  collection: OpenSeaCollection;
+  externalUrl?: Maybe<Scalars['String']>;
+  id: Scalars['ID'];
+  imageUrl?: Maybe<Scalars['String']>;
+  imageUrlOriginal?: Maybe<Scalars['String']>;
+  lastSale?: Maybe<Scalars['String']>;
+  name?: Maybe<Scalars['String']>;
+  rarityData?: Maybe<OpenSeaRarityData>;
+  thumbnailUrl?: Maybe<Scalars['String']>;
+  tokenId: Scalars['String'];
+  topOwnerships: Array<OpenSeaOwnership>;
+};
+
+export type OpenSeaAssetPagination = {
+  __typename?: 'OpenSeaAssetPagination';
+  assets: Array<OpenSeaAsset>;
+  cursor?: Maybe<Scalars['String']>;
+  page: Scalars['Int'];
+};
+
 export type OpenSeaCollection = {
   __typename?: 'OpenSeaCollection';
   description: Scalars['String'];
@@ -285,12 +308,55 @@ export type OpenSeaCollection = {
   twitterUsername?: Maybe<Scalars['String']>;
 };
 
+export type OpenSeaContract = {
+  __typename?: 'OpenSeaContract';
+  address: Scalars['String'];
+  assetContractType?: Maybe<Scalars['String']>;
+  chainIdentifier: Scalars['String'];
+  id: Scalars['ID'];
+  name?: Maybe<Scalars['String']>;
+};
+
+export type OpenSeaOwnership = {
+  __typename?: 'OpenSeaOwnership';
+  address: Scalars['ID'];
+  isModerator?: Maybe<Scalars['Boolean']>;
+  isVerified?: Maybe<Scalars['Boolean']>;
+  user?: Maybe<Scalars['String']>;
+};
+
+export type OpenSeaRarityData = {
+  __typename?: 'OpenSeaRarityData';
+  calculatedAt?: Maybe<Scalars['Int']>;
+  maxRank?: Maybe<Scalars['Int']>;
+  rank?: Maybe<Scalars['Int']>;
+  score?: Maybe<Scalars['Float']>;
+  strategyId: Scalars['String'];
+  strategyVersion: Scalars['String'];
+  tokensScored?: Maybe<Scalars['Int']>;
+  uniqueAttributeCount?: Maybe<Scalars['Int']>;
+};
+
 export enum OpenSeaSafelistRequestStatus {
   Approved = 'APPROVED',
   NotRequested = 'NOT_REQUESTED',
   Requested = 'REQUESTED',
   Verified = 'VERIFIED'
 }
+
+export type OpenSeaTraitValue = {
+  __typename?: 'OpenSeaTraitValue';
+  floatValue?: Maybe<Scalars['Float']>;
+  intValue?: Maybe<Scalars['Int']>;
+  stringValue?: Maybe<Scalars['String']>;
+};
+
+export type OpenSeaTraits = {
+  __typename?: 'OpenSeaTraits';
+  displayType?: Maybe<Scalars['String']>;
+  traitType?: Maybe<Scalars['String']>;
+  value?: Maybe<OpenSeaTraitValue>;
+};
 
 export type Permission = {
   __typename?: 'Permission';
@@ -336,6 +402,7 @@ export type PresaleApprovalResponse = {
 export type Query = {
   __typename?: 'Query';
   affiliateForAddress: AffiliateQuery;
+  assetsForUserInExactCollection: OpenSeaAssetPagination;
   chain: ChainQuery;
   nameflickByEnsHash?: Maybe<Nameflick>;
   nameflickByFqdn?: Maybe<Nameflick>;
@@ -350,6 +417,17 @@ export type Query = {
 
 export type QueryAffiliateForAddressArgs = {
   address: Scalars['String'];
+};
+
+
+export type QueryAssetsForUserInExactCollectionArgs = {
+  address: Scalars['String'];
+  collectionSlug: Scalars['String'];
+  contractAddress: Scalars['String'];
+  cursor?: InputMaybe<Scalars['String']>;
+  page?: InputMaybe<Scalars['Int']>;
+  pageSize?: InputMaybe<Scalars['Int']>;
+  testnet?: InputMaybe<Scalars['Boolean']>;
 };
 
 
@@ -375,6 +453,7 @@ export type QueryNameflicksByRootDomainArgs = {
 
 export type QueryOpenSeaCollectionByAddressArgs = {
   address: Scalars['String'];
+  testnet?: InputMaybe<Scalars['Boolean']>;
 };
 
 
@@ -524,8 +603,15 @@ export type ResolversTypes = {
   Nft: ResolverTypeWrapper<Nft>;
   NftToken: ResolverTypeWrapper<NftToken>;
   Nonce: ResolverTypeWrapper<Nonce>;
+  OpenSeaAsset: ResolverTypeWrapper<TOpenSeaAsset>;
+  OpenSeaAssetPagination: ResolverTypeWrapper<Omit<OpenSeaAssetPagination, 'assets'> & { assets: Array<ResolversTypes['OpenSeaAsset']> }>;
   OpenSeaCollection: ResolverTypeWrapper<TOpenSeaAssetContract>;
+  OpenSeaContract: ResolverTypeWrapper<OpenSeaContract>;
+  OpenSeaOwnership: ResolverTypeWrapper<TOpenSeaAccount>;
+  OpenSeaRarityData: ResolverTypeWrapper<TOpenSeaRarityData>;
   OpenSeaSafelistRequestStatus: OpenSeaSafelistRequestStatus;
+  OpenSeaTraitValue: ResolverTypeWrapper<OpenSeaTraitValue>;
+  OpenSeaTraits: ResolverTypeWrapper<OpenSeaTraits>;
   Permission: ResolverTypeWrapper<TPermission>;
   PermissionAction: PermissionAction;
   PermissionInput: PermissionInput;
@@ -564,7 +650,14 @@ export type ResolversParentTypes = {
   Nft: Nft;
   NftToken: NftToken;
   Nonce: Nonce;
+  OpenSeaAsset: TOpenSeaAsset;
+  OpenSeaAssetPagination: Omit<OpenSeaAssetPagination, 'assets'> & { assets: Array<ResolversParentTypes['OpenSeaAsset']> };
   OpenSeaCollection: TOpenSeaAssetContract;
+  OpenSeaContract: OpenSeaContract;
+  OpenSeaOwnership: TOpenSeaAccount;
+  OpenSeaRarityData: TOpenSeaRarityData;
+  OpenSeaTraitValue: OpenSeaTraitValue;
+  OpenSeaTraits: OpenSeaTraits;
   Permission: TPermission;
   PermissionInput: PermissionInput;
   PresaleApprovalResponse: PresaleApprovalResponse;
@@ -722,6 +815,29 @@ export type NonceResolvers<ContextType = any, ParentType extends ResolversParent
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type OpenSeaAssetResolvers<ContextType = any, ParentType extends ResolversParentTypes['OpenSeaAsset'] = ResolversParentTypes['OpenSeaAsset']> = {
+  assetContract?: Resolver<ResolversTypes['OpenSeaContract'], ParentType, ContextType>;
+  collection?: Resolver<ResolversTypes['OpenSeaCollection'], ParentType, ContextType>;
+  externalUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  imageUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  imageUrlOriginal?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  lastSale?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  rarityData?: Resolver<Maybe<ResolversTypes['OpenSeaRarityData']>, ParentType, ContextType>;
+  thumbnailUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  tokenId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  topOwnerships?: Resolver<Array<ResolversTypes['OpenSeaOwnership']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type OpenSeaAssetPaginationResolvers<ContextType = any, ParentType extends ResolversParentTypes['OpenSeaAssetPagination'] = ResolversParentTypes['OpenSeaAssetPagination']> = {
+  assets?: Resolver<Array<ResolversTypes['OpenSeaAsset']>, ParentType, ContextType>;
+  cursor?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  page?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type OpenSeaCollectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['OpenSeaCollection'] = ResolversParentTypes['OpenSeaCollection']> = {
   description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   discordUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -734,6 +850,49 @@ export type OpenSeaCollectionResolvers<ContextType = any, ParentType extends Res
   slug?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   telegramUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   twitterUsername?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type OpenSeaContractResolvers<ContextType = any, ParentType extends ResolversParentTypes['OpenSeaContract'] = ResolversParentTypes['OpenSeaContract']> = {
+  address?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  assetContractType?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  chainIdentifier?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type OpenSeaOwnershipResolvers<ContextType = any, ParentType extends ResolversParentTypes['OpenSeaOwnership'] = ResolversParentTypes['OpenSeaOwnership']> = {
+  address?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  isModerator?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  isVerified?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  user?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type OpenSeaRarityDataResolvers<ContextType = any, ParentType extends ResolversParentTypes['OpenSeaRarityData'] = ResolversParentTypes['OpenSeaRarityData']> = {
+  calculatedAt?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  maxRank?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  rank?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  score?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  strategyId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  strategyVersion?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  tokensScored?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  uniqueAttributeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type OpenSeaTraitValueResolvers<ContextType = any, ParentType extends ResolversParentTypes['OpenSeaTraitValue'] = ResolversParentTypes['OpenSeaTraitValue']> = {
+  floatValue?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  intValue?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  stringValue?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type OpenSeaTraitsResolvers<ContextType = any, ParentType extends ResolversParentTypes['OpenSeaTraits'] = ResolversParentTypes['OpenSeaTraits']> = {
+  displayType?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  traitType?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  value?: Resolver<Maybe<ResolversTypes['OpenSeaTraitValue']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -752,6 +911,7 @@ export type PresaleApprovalResponseResolvers<ContextType = any, ParentType exten
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   affiliateForAddress?: Resolver<ResolversTypes['AffiliateQuery'], ParentType, ContextType, RequireFields<QueryAffiliateForAddressArgs, 'address'>>;
+  assetsForUserInExactCollection?: Resolver<ResolversTypes['OpenSeaAssetPagination'], ParentType, ContextType, RequireFields<QueryAssetsForUserInExactCollectionArgs, 'address' | 'collectionSlug' | 'contractAddress'>>;
   chain?: Resolver<ResolversTypes['ChainQuery'], ParentType, ContextType, RequireFields<QueryChainArgs, 'id'>>;
   nameflickByEnsHash?: Resolver<Maybe<ResolversTypes['Nameflick']>, ParentType, ContextType, RequireFields<QueryNameflickByEnsHashArgs, 'ensHash'>>;
   nameflickByFqdn?: Resolver<Maybe<ResolversTypes['Nameflick']>, ParentType, ContextType, RequireFields<QueryNameflickByFqdnArgs, 'fqdn'>>;
@@ -810,7 +970,14 @@ export type Resolvers<ContextType = any> = {
   Nft?: NftResolvers<ContextType>;
   NftToken?: NftTokenResolvers<ContextType>;
   Nonce?: NonceResolvers<ContextType>;
+  OpenSeaAsset?: OpenSeaAssetResolvers<ContextType>;
+  OpenSeaAssetPagination?: OpenSeaAssetPaginationResolvers<ContextType>;
   OpenSeaCollection?: OpenSeaCollectionResolvers<ContextType>;
+  OpenSeaContract?: OpenSeaContractResolvers<ContextType>;
+  OpenSeaOwnership?: OpenSeaOwnershipResolvers<ContextType>;
+  OpenSeaRarityData?: OpenSeaRarityDataResolvers<ContextType>;
+  OpenSeaTraitValue?: OpenSeaTraitValueResolvers<ContextType>;
+  OpenSeaTraits?: OpenSeaTraitsResolvers<ContextType>;
   Permission?: PermissionResolvers<ContextType>;
   PresaleApprovalResponse?: PresaleApprovalResponseResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;

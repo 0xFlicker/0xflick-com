@@ -3,12 +3,13 @@ import { lazySingleton } from "./factory";
 
 export const supportedAppChains = [mainnet, goerli, sepolia] as const;
 
-sepolia.contracts = {
-  ...sepolia.contracts,
-  ensRegistry: {
-    address: "0xBc4693CB0F572b99f6aB4462602b5A0B8585010B",
-  },
-};
+// //
+// sepolia.contracts = {
+//   ...sepolia.contracts,
+//   ensRegistry: {
+//     address: "0xBc4693CB0F572b99f6aB4462602b5A0B8585010B",
+//   },
+// };
 const supportedAppChainNames = supportedAppChains.map(({ network }) => network);
 
 export const infuraKey = {
@@ -123,8 +124,8 @@ export const supportedChains = lazySingleton(() => {
     );
     if (wagmiChain) {
       if (
-        wagmiChain.network === "sepolia" &&
-        wagmiChain.contracts?.ensRegistry
+        wagmiChain.network === "sepolia"
+        // wagmiChain.contracts?.ensRegistry
       ) {
         // wagmiChain.contracts.ensRegistry.address =
         //   "0xBc4693CB0F572b99f6aB4462602b5A0B8585010B";

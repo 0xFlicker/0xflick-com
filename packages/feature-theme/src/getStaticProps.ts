@@ -6,11 +6,11 @@ export const getStaticProps: GetStaticProps<{
   theme?: TTheme;
 }> = async (context) => {
   const theme = Array.isArray(context.params?.theme)
-    ? context.params.theme[0]
+    ? context.params?.theme[0]
     : context.params?.theme;
   return {
     props: {
-      ...(isTheme(theme) ? { theme } : {}),
+      ...(theme && isTheme(theme) ? { theme } : {}),
     },
   };
 };

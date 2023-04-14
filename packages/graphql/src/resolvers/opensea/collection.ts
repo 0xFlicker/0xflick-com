@@ -32,9 +32,13 @@ export const typeSchema = gql`
 `;
 
 export const queryResolvers: QueryResolvers<TContext> = {
-  openSeaCollectionByAddress: async (_, { address }, context) => {
+  openSeaCollectionByAddress: async (_, { address, testnet }, context) => {
     await verifyAuthorizedUser(context);
-    const asset = await fetchCollectionByContractAddress(context, address);
+    const asset = await fetchCollectionByContractAddress({
+      context,
+      contractAddress: address,
+      testnet,
+    });
     return asset;
   },
 };

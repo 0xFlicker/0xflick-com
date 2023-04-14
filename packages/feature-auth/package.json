@@ -16,7 +16,7 @@
     "graphql": "^16.6.0",
     "react": "^18.2.0",
     "use-local-storage": "^2.3.6",
-    "wagmi": "^0.10.1"
+    "wagmi": "^0.12.10"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^2.16.2",

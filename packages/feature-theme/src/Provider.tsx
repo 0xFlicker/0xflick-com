@@ -16,7 +16,7 @@ export const Provider: FC<
     initialTheme?: TTheme;
   }>
 > = ({ children, initialTheme }) => {
-  const [theme, setTheme] = useState<TTheme | undefined>(initialTheme);
+  const [theme, setTheme] = useState<TTheme>(initialTheme || "dark");
   const [storedTheme, setStoredTheme] = useLocalStorage<TTheme>("theme", theme);
   useEffect(() => {
     if (storedTheme) {

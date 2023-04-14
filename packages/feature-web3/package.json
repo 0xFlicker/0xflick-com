@@ -6,12 +6,12 @@
   "dependencies": {
     "@ethersproject/providers": "^5.7.2",
     "@reduxjs/toolkit": "^1.9.1",
-    "@wagmi/chains": "^0.1.4",
-    "@wagmi/core": "^0.8.5",
+    "@wagmi/chains": "^0.2.18",
+    "@wagmi/core": "^0.10.9",
     "lokijs": "^1.5.12",
     "pino-pretty": "^10.0.0",
     "react": "^18.2.0",
-    "wagmi": "^0.10.1"
+    "wagmi": "^0.12.10"
   },
   "devDependencies": {
     "typescript": "^4.9.4"

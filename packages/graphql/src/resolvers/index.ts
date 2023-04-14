@@ -67,7 +67,19 @@ export const typeDefs = gql`
     role(id: ID!): Role!
     roles: [Role!]!
     affiliateForAddress(address: String!): AffiliateQuery!
-    openSeaCollectionByAddress(address: String!): OpenSeaCollection
+    openSeaCollectionByAddress(
+      address: String!
+      testnet: Boolean
+    ): OpenSeaCollection
+    assetsForUserInExactCollection(
+      address: String!
+      collectionSlug: String!
+      contractAddress: String!
+      testnet: Boolean
+      cursor: String
+      page: Int
+      pageSize: Int
+    ): OpenSeaAssetPagination!
   }
 
   type Mutation {

@@ -46,7 +46,7 @@
     "formik-mui": "^5.0.0-alpha.0",
     "graphql": "^16.6.0",
     "graphql-tag": "^2.12.6",
-    "ipfs-http-client": "^57.0.1",
+    "ipfs-http-client": "^60.0.0",
     "isomorphic-fetch": "^3.0.0",
     "isomorphic-unfetch": "^3.1.0",
     "jose": "^4.8.1",

@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useCallback, useState } from "react";
 import Backdrop from "@mui/material/Backdrop";
 import Box from "@mui/material/Box";
 import ListItemIcon from "@mui/material/ListItemIcon";
@@ -10,8 +10,10 @@ import Typography from "@mui/material/Typography";
 import LoginIcon from "@mui/icons-material/Login";
 import LogoutIcon from "@mui/icons-material/Logout";
 import ProfileIcon from "@mui/icons-material/AccountCircle";
+import CopyIcon from "@mui/icons-material/FileCopyOutlined";
 import { useLocale } from "@0xflick/feature-locale";
 import { WrappedLink } from "@0xflick/components/src/WrappedLink";
+import { useAuth } from "@0xflick/feature-auth/src/hooks";
 
 interface IProps {
   anchorEl: Element | null;
@@ -31,83 +33,112 @@ export const ConnectedDropDownModal: FC<IProps> = ({
   isLoggedIn,
 }) => {
   const { t } = useLocale("common");
+  const { token } = useAuth();
+  const [tokenCopied, setTokenCopied] = useState(false);
+  const handleClick = useCallback(() => {
+    if (token) {
+      setTokenCopied(true);
+      window.navigator.clipboard.writeText(token);
+      setTimeout(() => {
+        setTokenCopied(false);
+      }, 2000);
+    }
+  }, [token]);
   const open = Boolean(anchorEl);
   return (
-    <Menu
-      anchorEl={anchorEl}
-      open={open}
-      anchorOrigin={{
-        vertical: "bottom",
-        horizontal: "right",
-      }}
-      onClose={handleClose}
-      keepMounted
-      BackdropComponent={Backdrop}
-      BackdropProps={{
-        timeout: 500,
-      }}
-      transformOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
-    >
-      <Box sx={{ width: 320 }}>
-        <MenuList disablePadding>
-          {isLoggedIn ? (
-            <MenuItem onClick={handleLogout}>
-              <ListItemIcon>
-                <LogoutIcon />
-              </ListItemIcon>
-              <ListItemText
-                primary={
-                  <Typography textAlign="right">
-                    {t("auth_button_logout")}
-                  </Typography>
-                }
-              />
-            </MenuItem>
-          ) : (
-            <MenuItem onClick={handleLogin}>
-              <ListItemIcon>
-                <LoginIcon />
-              </ListItemIcon>
-              <ListItemText
-                primary={
-                  <Typography textAlign="right">
-                    {t("auth_button_login")}
-                  </Typography>
-                }
-              />
-            </MenuItem>
-          )}
-          {!isLoggedIn && (
-            <MenuItem onClick={handleDisconnect}>
-              <ListItemIcon>
-                <LogoutIcon />
-              </ListItemIcon>
-              <ListItemText
-                primary={
-                  <Typography textAlign="right">
-                    {t("connect_disconnect")}
-                  </Typography>
-                }
-              />
-            </MenuItem>
-          )}
-          {isLoggedIn && (
-            <MenuItem component={WrappedLink} href="/profile">
-              <ListItemIcon>
-                <ProfileIcon />
-              </ListItemIcon>
-              <ListItemText
-                primary={
-                  <Typography textAlign="right">{t("profile")}</Typography>
-                }
-              />
-            </MenuItem>
-          )}
-        </MenuList>
-      </Box>
-    </Menu>
+    <>
+      <Menu
+        anchorEl={anchorEl}
+        open={open}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right",
+        }}
+        onClose={handleClose}
+        keepMounted
+        BackdropComponent={Backdrop}
+        BackdropProps={{
+          timeout: 500,
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "right",
+        }}
+      >
+        <Box sx={{ width: 320 }}>
+          <MenuList disablePadding>
+            {isLoggedIn ? (
+              <MenuItem onClick={handleLogout}>
+                <ListItemIcon>
+                  <LogoutIcon />
+                </ListItemIcon>
+                <ListItemText
+                  primary={
+                    <Typography textAlign="right">
+                      {t("auth_button_logout")}
+                    </Typography>
+                  }
+                />
+              </MenuItem>
+            ) : (
+              <MenuItem onClick={handleLogin}>
+                <ListItemIcon>
+                  <LoginIcon />
+                </ListItemIcon>
+                <ListItemText
+                  primary={
+                    <Typography textAlign="right">
+                      {t("auth_button_login")}
+                    </Typography>
+                  }
+                />
+              </MenuItem>
+            )}
+            {isLoggedIn && (
+              <MenuItem onClick={handleClick}>
+                <ListItemIcon>
+                  <CopyIcon />
+                </ListItemIcon>
+                <ListItemText
+                  primary={
+                    <Typography textAlign="right">
+                      {tokenCopied
+                        ? t("connect_token_copied")
+                        : t("connect_token_copy")}
+                    </Typography>
+                  }
+                />
+              </MenuItem>
+            )}
+            {!isLoggedIn && (
+              <MenuItem onClick={handleDisconnect}>
+                <ListItemIcon>
+                  <LogoutIcon />
+                </ListItemIcon>
+                <ListItemText
+                  primary={
+                    <Typography textAlign="right">
+                      {t("connect_disconnect")}
+                    </Typography>
+                  }
+                />
+              </MenuItem>
+            )}
+            {isLoggedIn && (
+              <MenuItem component={WrappedLink} href="/profile">
+                <ListItemIcon>
+                  <ProfileIcon />
+                </ListItemIcon>
+                <ListItemText
+                  primary={
+                    <Typography textAlign="right">{t("profile")}</Typography>
+                  }
+                />
+              </MenuItem>
+            )}
+          </MenuList>
+        </Box>
+      </Menu>
+    </>
   );
 };

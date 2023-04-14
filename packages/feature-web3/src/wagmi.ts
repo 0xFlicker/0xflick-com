@@ -1,5 +1,5 @@
-import "@wagmi/chains";
-import { createClient, configureChains, ChainProviderFn, Chain } from "wagmi";
+import { Chain } from "@wagmi/chains";
+import { createClient, configureChains } from "wagmi";
 import { infuraProvider } from "wagmi/providers/infura";
 import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";
@@ -7,6 +7,7 @@ import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import { CoinbaseWalletConnector } from "wagmi/connectors/coinbaseWallet";
 import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
 import { InjectedConnector } from "wagmi/connectors/injected";
+import "@wagmi/core";
 import {
   alchemyKey,
   appName,
@@ -41,7 +42,7 @@ export const appConnectors = lazySingleton<TAppConnectors[]>(() => {
     new WalletConnectConnector({
       chains,
       options: {
-        qrcode: true,
+        projectId: "7eda77ab5f68c6d387446c34a633565d",
       },
     }),
     new CoinbaseWalletConnector({
@@ -87,6 +88,5 @@ export const wagmiClient = lazySingleton(() => {
     connectors: appConnectors.get(),
     provider,
     webSocketProvider,
-    autoConnect: true,
   });
 });

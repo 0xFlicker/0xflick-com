@@ -33,7 +33,7 @@ function jsonFromSecret(file) {
 
 const deployment = process.env.DEPLOYMENT || "localhost";
 const secretsJson = jsonFromSecret(`${deployment}/deploy-secrets.json`);
-const jwtJson = jsonFromSecret(`${deployment}/jwt-secret.json`);
+const jwtJson = jsonFromSecret(`${deployment}/jwt-secrets.json`);
 const twitter = jsonFromSecret(`${deployment}/twitter-secrets.json`);
 
 const INFURA_IPFS_AUTH = `Basic ${Buffer.from(

@@ -23,7 +23,7 @@ if (!deployment) {
   throw new Error("DEPLOYMENT environment variable is required");
 }
 const secretsJson = jsonFromSecret(`${deployment}/deploy-secrets.json`);
-const jwtJson = jsonFromSecret(`${deployment}/jwt-secret.json`);
+const jwtJson = jsonFromSecret(`${deployment}/jwt-secrets.json`);
 const twitterJson = jsonFromSecret(`${deployment}/twitter-secrets.json`);
 const discordJson = jsonFromSecret(`${deployment}/discord-secrets.json`);
 const faucetJson = jsonFromSecret(`${deployment}/faucet-secrets.json`);

@@ -7,7 +7,7 @@ const siweExpirationTime =
 
 const appName =
   process.env.NEXT_PUBLIC_APP_NAME || "PUBLIC_APP_NAME_NOT_DEFINED";
-
+console.log(`appName: ${appName}`);
 const publicEnsDomain =
   process.env.NEXT_PUBLIC_ENS_DOMAIN || "public.nameflick.eth";
 

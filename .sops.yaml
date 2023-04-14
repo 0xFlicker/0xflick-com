@@ -1,5 +1,25 @@
 creation_rules:
+  - path_regex: secrets/fls.0xflick.com/.*
+    key_groups:
+      - kms:
+          - arn: arn:aws:kms:us-east-2:167146046754:key/42d63d0c-0f8e-493f-ac73-91c83da1341e
+            role: arn:aws:iam::167146046754:role/Sops-SopsUserAccessKeyRole8E22FE05-19BSLZH19Y6AD
+  - path_regex: secrets/fameladysociety.com/.*
+    key_groups:
+      - kms:
+          - arn: arn:aws:kms:us-east-2:167146046754:key/42d63d0c-0f8e-493f-ac73-91c83da1341e
+            role: arn:aws:iam::167146046754:role/Sops-SopsUserAccessKeyRole8E22FE05-19BSLZH19Y6AD
   - path_regex: secrets/0xflick.com/.*
+    key_groups:
+      - kms:
+          - arn: arn:aws:kms:us-east-2:167146046754:key/42d63d0c-0f8e-493f-ac73-91c83da1341e
+            role: arn:aws:iam::167146046754:role/Sops-SopsUserAccessKeyRole8E22FE05-19BSLZH19Y6AD
+  - path_regex: secrets/tmp/.*
+    key_groups:
+      - kms:
+          - arn: arn:aws:kms:us-east-2:167146046754:key/42d63d0c-0f8e-493f-ac73-91c83da1341e
+            role: arn:aws:iam::167146046754:role/Sops-SopsUserAccessKeyRole8E22FE05-19BSLZH19Y6AD
+  - path_regex: secrets/localhost-fls/.*
     key_groups:
       - kms:
           - arn: arn:aws:kms:us-east-2:167146046754:key/42d63d0c-0f8e-493f-ac73-91c83da1341e
@@ -29,3 +49,13 @@ creation_rules:
       - kms:
           - arn: arn:aws:kms:us-east-1:896643918678:key/237df4f4-a40e-44f9-a80c-3ed1d0813932
             role: arn:aws:iam::896643918678:role/Sops-SopsUserAccessKeyRole8E22FE05-FS9CKQ0X6SUF
+  - path_regex: apps/fls/.env.fls.0xflick.com.enc
+    key_groups:
+      - kms:
+          - arn: arn:aws:kms:us-east-2:167146046754:key/42d63d0c-0f8e-493f-ac73-91c83da1341e
+            role: arn:aws:iam::167146046754:role/Sops-SopsUserAccessKeyRole8E22FE05-19BSLZH19Y6AD
+  - path_regex: apps/fls/.env.fameladysociety.com.enc
+    key_groups:
+      - kms:
+          - arn: arn:aws:kms:us-east-2:167146046754:key/42d63d0c-0f8e-493f-ac73-91c83da1341e
+            role: arn:aws:iam::167146046754:role/Sops-SopsUserAccessKeyRole8E22FE05-19BSLZH19Y6AD

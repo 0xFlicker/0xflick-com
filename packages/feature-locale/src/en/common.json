@@ -1,6 +1,8 @@
 {
   "button_connect": "connect",
   "connect_disconnect": "disconnect",
+  "connect_token_copied": "token copied",
+  "connect_token_copy": "copy auth token",
   "profile": "profile",
   "modal_connect_title": "Connect your wallet",
   "modal_connect_description": "Pick from the following web wallets",
@@ -54,5 +56,6 @@
   "title_faq": "faq",
   "title_profile": "profile",
   "title_presale_signup": "signup",
-  "title_home": "home"
+  "title_home": "home",
+  "title_wrap": "it's a wrap"
 }

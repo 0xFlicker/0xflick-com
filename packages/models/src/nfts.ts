@@ -30,10 +30,6 @@ export class NftsModel {
     return JSON.stringify(this.toJson());
   }
 
-  public clone(): NftsModel {
-    return new NftsModel([...this]);
-  }
-
   public [Symbol.iterator]() {
     return this.nfts[Symbol.iterator]();
   }

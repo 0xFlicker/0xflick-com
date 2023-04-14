@@ -21,7 +21,7 @@
     "color-name": "^1.1.4",
     "commander": "^9.0.0",
     "ethers": "^5.5.4",
-    "ipfs-http-client": "^55.0.0",
+    "ipfs-http-client": "^60.0.0",
     "node-emoji": "^1.11.0",
     "ramda": "^0.28.0",
     "rimraf": "^3.0.2",
@@ -31,6 +31,7 @@
     "@reduxjs/toolkit": "^1.7.2",
     "canvas": "^2.9.3",
     "ethers": "^5.7.2",
+    "ipfs-http-client": "^60.0.0",
     "minimist": "^1.2.5"
   }
 }

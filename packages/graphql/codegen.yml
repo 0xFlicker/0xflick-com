@@ -10,6 +10,9 @@ generates:
         AffiliateMutation: "./models#TAffiliates"
         AffiliateQuery: "./models#TAffiliates"
         OpenSeaCollection: "./models#TOpenSeaAssetContract"
+        OpenSeaAsset: "./models#TOpenSeaAsset"
+        OpenSeaOwnership: "./models#TOpenSeaAccount"
+        OpenSeaRarityData: "./models#TOpenSeaRarityData"
     plugins:
       - typescript
       - typescript-resolvers
