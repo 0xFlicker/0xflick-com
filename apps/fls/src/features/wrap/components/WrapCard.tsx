@@ -16,6 +16,8 @@ import {
   useTestNftSetApprovalForAll,
   usePrepareWrappedNftWrap,
   useWrappedNftWrap,
+  useWrappedNftWrapTo,
+  usePrepareWrappedNftWrapTo,
 } from "@/wagmi";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
@@ -24,8 +26,8 @@ import CheckIcon from "@mui/icons-material/CheckCircle";
 import CloseIcon from "@mui/icons-material/CloseOutlined";
 
 import { useWeb3 } from "@0xflick/feature-web3";
-import { BigNumber } from "ethers";
-import { Box } from "@mui/material";
+import { BigNumber, utils } from "ethers";
+import { Box, FormControlLabel, Switch } from "@mui/material";
 import { TransactionProgress } from "@/components/TransactionProgress";
 import { useAuth } from "@0xflick/feature-auth/src/hooks";
 import { TokenSelect } from "./TokenSelect";
@@ -35,6 +37,8 @@ export const WrapCard: FC<{
   maxTokenId: number;
 }> = ({ minTokenId, maxTokenId }) => {
   const [tokenIds, setTokenIds] = useState<string[]>([]);
+  const [transferTo, setTransferTo] = useState(false);
+  const [sendTo, setSendTo] = useState<string>();
 
   const { selectedAddress, currentChain } = useWeb3();
   const { isAuthenticated } = useAuth();
@@ -45,6 +49,7 @@ export const WrapCard: FC<{
   const { data: isApprovedForAll, isFetched: isApprovedForAllFetched } =
     useTestNftIsApprovedForAll({
       enabled: isValidToCheckApproval,
+      watch: true,
       ...(isValidToCheckApproval && {
         args: [
           selectedAddress,
@@ -71,8 +76,9 @@ export const WrapCard: FC<{
     isLoading: approveIsLoading,
     isSuccess: approveIsSuccess,
   } = useTestNftSetApprovalForAll(configureSetApprovalForAll);
+
   const { config: configureWrappedNftWrap } = usePrepareWrappedNftWrap({
-    enabled: isApprovedForAll,
+    enabled: isApprovedForAll && tokenIds.length > 0 && !transferTo,
     ...(selectedAddress &&
       isApprovedForAll && {
         args: [
@@ -89,84 +95,52 @@ export const WrapCard: FC<{
     isLoading: wrapIsLoading,
     isSuccess: wrapIsSuccess,
   } = useWrappedNftWrap(configureWrappedNftWrap);
-  const { data: ownerOfAddress } = useContractReads({
-    contracts: tokenIds.map((tokenIdStr) => {
-      const tokenId = Number(tokenIdStr);
-      return {
-        abi: testNftABI,
-        address: testNftAddress[5],
-        functionName: "ownerOf",
-        enabled:
-          tokenIdStr !== null && tokenId >= minTokenId && tokenId <= maxTokenId,
-        ...(Number.isInteger(tokenId) && {
-          args: [BigNumber.from(tokenId)],
-        }),
-      };
-    }) as {
-      abi: typeof testNftABI;
-      address: `0x${string}`;
-      functionName: "ownerOf";
-    }[],
+
+  const { config: configureWrappedNftWrapTo } = usePrepareWrappedNftWrapTo({
+    enabled:
+      isApprovedForAll &&
+      tokenIds.length > 0 &&
+      transferTo &&
+      !!sendTo &&
+      utils.isAddress(sendTo),
+    ...(selectedAddress &&
+      transferTo &&
+      !!sendTo &&
+      utils.isAddress(sendTo) &&
+      isApprovedForAll && {
+        args: [
+          sendTo as `0x${string}`,
+          tokenIds
+            .filter((tokenId) => tokenId !== null)
+            .map((n) => BigNumber.from(n)) as BigNumber[],
+        ],
+      }),
   });
 
-  // const addTokenId = useCallback(
-  //   () => setTokenIds([...tokenIds, null]),
-  //   [tokenIds]
-  // );
-  // const removeTokenId = useCallback(
-  //   (index: number) => {
-  //     setTokenIds([...tokenIds.slice(0, index), ...tokenIds.slice(index + 1)]);
-  //   },
-  //   [tokenIds]
-  // );
-  const validTokenIds = useMemo(() => {
-    return tokenIds.map((value, index) => {
-      const isError: boolean =
-        value !== null &&
-        // @ts-ignore
-        (ownerOfAddress?.[index] !== selectedAddress ||
-          // @ts-ignore
-          ownerOfAddress?.[index] === undefined ||
-          // @ts-ignore
-          ownerOfAddress?.[index] === null ||
-          // @ts-ignore
-          ownerOfAddress?.[index] === "" ||
-          // @ts-ignore
-          ownerOfAddress?.[index] === "0x");
-      return !isError;
-    });
-  }, [tokenIds, ownerOfAddress, selectedAddress]);
+  const {
+    writeAsync: wrappedNftWrapTo,
+    isError: wrapToIsError,
+    isLoading: wrapToIsLoading,
+    isSuccess: wrapToIsSuccess,
+  } = useWrappedNftWrapTo(configureWrappedNftWrapTo);
 
-  const tokenIsDuplicate = useMemo(() => {
-    // for every token, return false if unique or true if duplicate
-    return tokenIds.map((tokenId, index) => {
-      return tokenIds.filter((tokenId2) => tokenId === tokenId2).length > 1;
-    });
-  }, [tokenIds]);
-
-  const anyError = useMemo(() => {
-    return (
-      tokenIds.filter((a) => a !== null).length === 0 ||
-      validTokenIds.filter((a) => a === false).length > 0 ||
-      tokenIsDuplicate.filter((a) => a === true).length > 0
-    );
-  }, [tokenIds, validTokenIds, tokenIsDuplicate]);
   const [wrapInProgress, setWrapInProgress] = useState(false);
   const [wrapTransactionResult, setWrappedTransactionResult] =
     useState<SendTransactionResult>();
   const onWrap = useCallback(async () => {
-    if (wrappedNftWrap) {
-      try {
-        setWrapInProgress(true);
-        const response = await wrappedNftWrap();
-        setWrappedTransactionResult(response);
-      } catch (e) {
-        console.error(e);
-        setWrappedTransactionResult(undefined);
-        setWrapInProgress(false);
-      }
+    try {
+      setWrapInProgress(true);
+      const response =
+        transferTo && sendTo && utils.isAddress(sendTo)
+          ? await wrappedNftWrapTo?.()
+          : await wrappedNftWrap?.();
+      setWrappedTransactionResult(response);
+    } catch (e) {
+      console.error(e);
+      setWrappedTransactionResult(undefined);
+      setWrapInProgress(false);
     }
-  }, [wrappedNftWrap]);
+  }, [sendTo, transferTo, wrappedNftWrap, wrappedNftWrapTo]);
   const onWrapSuccess = useCallback(() => {
     setWrapInProgress(false);
     setWrappedTransactionResult(undefined);
@@ -193,7 +167,7 @@ export const WrapCard: FC<{
   }, []);
   return (
     <>
-      <Card sx={{ minWidth: 480 }}>
+      <Card>
         <CardContent>
           <Typography variant="h5" component="div">
             Wrap
@@ -201,7 +175,29 @@ export const WrapCard: FC<{
           <Typography sx={{ mb: 1.5 }} color="text.secondary">
             Select your tokens to wrap
           </Typography>
-
+          <FormGroup>
+            <FormControlLabel
+              onClick={(event) => {
+                event.preventDefault();
+                setTransferTo(!transferTo);
+              }}
+              control={<Switch checked={transferTo} />}
+              label={"Wrap and transfer"}
+            />
+            <TextField
+              sx={{
+                my: 1,
+              }}
+              label="Send wrapped tokens to"
+              variant="outlined"
+              disabled={!transferTo}
+              onChange={(e) => {
+                if (utils.isAddress(e.target.value)) {
+                  setSendTo(e.target.value);
+                }
+              }}
+            />
+          </FormGroup>
           {isAuthenticated && (
             <TokenSelect
               contractAddress={testNftAddress[5]}
@@ -211,63 +207,10 @@ export const WrapCard: FC<{
               onSelected={(tokenIds) => {
                 setTokenIds(tokenIds);
               }}
-              tokenIds={tokenIds}
+              maxTokenId={maxTokenId}
+              minTokenId={minTokenId}
             />
           )}
-          {/* <FormGroup>
-            {tokenIds.map((tokenId, index) => {
-              return (
-                <>
-                  <TextField
-                    sx={{ mb: 1 }}
-                    key={index}
-                    label="Token ID"
-                    value={tokenId}
-                    onChange={(e: any) => {
-                      setTokenIds([
-                        ...tokenIds.slice(0, index),
-                        e.target.value,
-                        ...tokenIds.slice(index + 1),
-                      ]);
-                    }}
-                    InputProps={{
-                      startAdornment:
-                        tokenId === null ? (
-                          <Box sx={{ width: 24, mr: 2 }} />
-                        ) : validTokenIds[index] === true &&
-                          tokenIsDuplicate[index] === false ? (
-                          <CheckIcon sx={{ color: "success.main", mr: 2 }} />
-                        ) : (
-                          <CloseIcon sx={{ color: "error.main", mr: 2 }} />
-                        ),
-                      endAdornment: (
-                        <IconButton
-                          onClick={() => removeTokenId(index)}
-                          disabled={tokenIds.length === 1}
-                        >
-                          <RemoveIcon />
-                        </IconButton>
-                      ),
-                    }}
-                    error={
-                      validTokenIds[index] === false ||
-                      tokenIsDuplicate[index] === true
-                    }
-                  />
-                </>
-              );
-            })}
-            {validTokenIds.some((value) => value === false) && (
-              <Typography color="error">
-                One or more token IDs are invalid
-              </Typography>
-            )}
-            {tokenIsDuplicate.some((value) => value === true) && (
-              <Typography color="error">
-                One or more token IDs are duplicates
-              </Typography>
-            )}
-          </FormGroup>
           {(wrapInProgress || wrapTransactionResult) && (
             <TransactionProgress
               isError={wrapIsError}
@@ -283,16 +226,95 @@ export const WrapCard: FC<{
               transactionResult={approveTransactionResult}
               onConfirmed={onApproveSuccess}
             />
-          )} */}
-        </CardContent>
+          )}
+          {!(
+            wrapInProgress ||
+            wrapTransactionResult ||
+            approveInProgress ||
+            approveTransactionResult
+          ) && (
+            <Box sx={{ height: 32 }}>
+              {isApprovedForAll === false && (
+                <Typography variant="body2" color="text.warning">
+                  You must approve the contract to wrap your tokens
+                </Typography>
+              )}
+              {isApprovedForAll === true && (
+                <>
+                  {(() => {
+                    switch (tokenIds.length) {
+                      case 0:
+                        return (
+                          <Typography variant="body2" color="error">
+                            Select one or more tokens to wrap
+                          </Typography>
+                        );
+                      case 1:
+                        return (
+                          <Typography variant="body2" color="text.secondary">
+                            1 token selected
+                          </Typography>
+                        );
+                      default:
+                        return (
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                          >{`${tokenIds.length} tokens selected`}</Typography>
+                        );
+                    }
+                  })()}
 
+                  {(() => {
+                    if (
+                      tokenIds.length &&
+                      transferTo &&
+                      sendTo &&
+                      utils.isAddress(sendTo)
+                    ) {
+                      return (
+                        <Typography variant="body2" color="text.secondary">
+                          {`Send wrapped tokens to ${sendTo}`}
+                        </Typography>
+                      );
+                    } else if (
+                      transferTo &&
+                      !(sendTo && utils.isAddress(sendTo))
+                    ) {
+                      return (
+                        <Typography variant="body2" color="error">
+                          Invalid address
+                        </Typography>
+                      );
+                    } else if (tokenIds.length) {
+                      return (
+                        <Typography variant="body2" color="text.secondary">
+                          Wrapped tokens will be sent back to your wallet
+                        </Typography>
+                      );
+                    } else {
+                      return null;
+                    }
+                  })()}
+                </>
+              )}
+            </Box>
+          )}
+        </CardContent>
         <CardActions>
           {isApprovedForAll === false && (
             <Button onClick={onApprove}>Approve</Button>
           )}
-          {isApprovedForAll === true && !anyError && (
-            <Button onClick={onWrap}>Wrap</Button>
-          )}
+          <Button
+            onClick={onWrap}
+            disabled={
+              !isApprovedForAll ||
+              tokenIds.length === 0 ||
+              (transferTo && !(sendTo && utils.isAddress(sendTo)))
+            }
+          >
+            Wrap
+          </Button>
         </CardActions>
       </Card>
     </>

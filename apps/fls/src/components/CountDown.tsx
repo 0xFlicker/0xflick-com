@@ -1,10 +1,28 @@
 import { FC, useEffect, useState } from "react";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
+import Grid from "@mui/material/Grid";
 import ReactCountDown from "react-countdown";
 
 const END_DATE = new Date("2023-04-21T00:00:00.000Z");
+const SIZED_COUNTER = {
+  typography: {
+    sm: "h2",
+    lg: "h1",
+  },
+};
+const SIZED_TEXT = {
+  typography: {
+    sm: "h5",
+    lg: "h4",
+  },
+};
 
+const CELL_SIZE = {
+  xs: 12,
+  sm: 6,
+  md: 3,
+};
 export const CountDown: FC = () => {
   const [start, setStart] = useState(false);
   useEffect(() => {
@@ -14,67 +32,112 @@ export const CountDown: FC = () => {
     <ReactCountDown
       date={END_DATE}
       renderer={({ days, hours, minutes, seconds }) => (
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            flexWrap: "wrap",
-          }}
-        >
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-            <Typography variant="h1" component="span" color="text.primary">
-              {days}
-            </Typography>
-            <Typography
-              variant="h5"
-              component="span"
-              marginLeft={2}
-              color="text.primary"
+        <Grid container justifyContent="center" alignItems="center" spacing={1}>
+          <Grid item {...CELL_SIZE}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
             >
-              Days
-            </Typography>
-          </Box>
-          <Box sx={{ display: "flex", alignItems: "center" }} marginLeft={2}>
-            <Typography variant="h1" component="span" color="text.primary">
-              {hours}
-            </Typography>
-            <Typography
-              variant="h5"
-              component="span"
-              marginLeft={2}
-              color="text.primary"
+              <Typography
+                sx={SIZED_COUNTER}
+                component="span"
+                color="text.primary"
+              >
+                {days}
+              </Typography>
+              <Typography
+                sx={SIZED_TEXT}
+                component="span"
+                marginLeft={3}
+                color="text.primary"
+                noWrap
+              >
+                Days
+              </Typography>
+            </Box>
+          </Grid>
+          <Grid item {...CELL_SIZE}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
             >
-              Hours
-            </Typography>
-          </Box>
-          <Box sx={{ display: "flex", alignItems: "center" }} marginLeft={2}>
-            <Typography variant="h1" component="span" color="text.primary">
-              {minutes}
-            </Typography>
-            <Typography
-              variant="h5"
-              component="span"
-              marginLeft={2}
-              color="text.primary"
+              <Typography
+                sx={SIZED_COUNTER}
+                component="span"
+                color="text.primary"
+              >
+                {hours}
+              </Typography>
+              <Typography
+                sx={SIZED_TEXT}
+                component="span"
+                marginLeft={3}
+                color="text.primary"
+                noWrap
+              >
+                Hours
+              </Typography>
+            </Box>
+          </Grid>
+          <Grid item {...CELL_SIZE}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
             >
-              Minutes
-            </Typography>
-          </Box>
-          <Box sx={{ display: "flex", alignItems: "center" }} marginLeft={2}>
-            <Typography variant="h1" component="span" color="text.primary">
-              {seconds}
-            </Typography>
-            <Typography
-              variant="h5"
-              component="span"
-              marginLeft={2}
-              color="text.primary"
+              <Typography
+                sx={SIZED_COUNTER}
+                component="span"
+                color="text.primary"
+              >
+                {minutes.toString().padStart(2, "0")}
+              </Typography>
+              <Typography
+                sx={SIZED_TEXT}
+                component="span"
+                marginLeft={3}
+                color="text.primary"
+                noWrap
+              >
+                Minutes
+              </Typography>
+            </Box>
+          </Grid>
+          <Grid item {...CELL_SIZE}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
             >
-              Seconds
-            </Typography>
-          </Box>
-        </Box>
+              <Typography
+                sx={SIZED_COUNTER}
+                component="span"
+                color="text.primary"
+              >
+                {seconds.toString().padStart(2, "0")}
+              </Typography>
+              <Typography
+                sx={SIZED_TEXT}
+                component="span"
+                marginLeft={3}
+                color="text.primary"
+                noWrap
+              >
+                Seconds
+              </Typography>
+            </Box>
+          </Grid>
+        </Grid>
       )}
     />
   ) : null;

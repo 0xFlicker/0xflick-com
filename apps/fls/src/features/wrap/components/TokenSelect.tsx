@@ -3,19 +3,22 @@ import Grid2 from "@mui/material/Unstable_Grid2";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardActionArea from "@mui/material/CardActionArea";
+import CardMedia from "@mui/material/CardMedia";
 import CardHeader from "@mui/material/CardHeader";
 import Typography from "@mui/material/Typography";
 import GreaterThanIcon from "@mui/icons-material/ArrowForwardIos";
 import LessThenIcon from "@mui/icons-material/ArrowBackIos";
 import IconButton from "@mui/material/IconButton";
 import CircularProgress from "@mui/material/CircularProgress";
-import NextImage from "next/image";
 
 import {
   useTokensToWrapLazyQuery,
   TokensToWrapQuery,
 } from "../graphql/tokensToWrap.generated";
 import { Button } from "@mui/material";
+import { testNftABI, testNftAddress } from "@/wagmi";
+import { BigNumber } from "ethers";
+import { useContractReads } from "wagmi";
 
 export const TokenSelect: FC<{
   contractAddress?: string;
@@ -23,18 +26,42 @@ export const TokenSelect: FC<{
   contractSlug?: string;
   testnet?: boolean;
   onSelected: (selected: string[]) => void;
-  tokenIds: string[];
+  minTokenId: number;
+  maxTokenId: number;
 }> = ({
-  tokenIds,
   contractAddress,
   userAddress,
   contractSlug,
   testnet,
   onSelected,
+  minTokenId,
+  maxTokenId,
 }) => {
+  const [tokenIds, setTokenIds] = useState<string[]>([]);
   const [loadedTokens, setLoadedTokens] = useState<
     TokensToWrapQuery["assetsForUserInExactCollection"]["assets"]
   >([]);
+
+  const { data: ownerOfAddress } = useContractReads({
+    watch: true,
+    contracts: loadedTokens.map(({ tokenId: tokenIdStr }) => {
+      const tokenId = Number(tokenIdStr);
+      return {
+        abi: testNftABI,
+        address: testNftAddress[5],
+        functionName: "ownerOf",
+        enabled:
+          tokenIdStr !== null && tokenId >= minTokenId && tokenId <= maxTokenId,
+        ...(Number.isInteger(tokenId) && {
+          args: [BigNumber.from(tokenId)],
+        }),
+      };
+    }) as {
+      abi: typeof testNftABI;
+      address: `0x${string}`;
+      functionName: "ownerOf";
+    }[],
+  });
 
   const defaultVariables = useMemo(
     () => ({
@@ -55,6 +82,28 @@ export const TokenSelect: FC<{
   const response = data?.assetsForUserInExactCollection;
 
   useEffect(() => {
+    if (userAddress && contractAddress) fetchTokens();
+  }, [contractAddress, fetchTokens, userAddress]);
+
+  const validTokens = useMemo(() => {
+    return loadedTokens.filter(({ tokenId }, index) => {
+      const isError: boolean =
+        tokenId !== null &&
+        // @ts-ignore
+        (ownerOfAddress?.[index] !== userAddress ||
+          // @ts-ignore
+          ownerOfAddress?.[index] === undefined ||
+          // @ts-ignore
+          ownerOfAddress?.[index] === null ||
+          // @ts-ignore
+          ownerOfAddress?.[index] === "" ||
+          // @ts-ignore
+          ownerOfAddress?.[index] === "0x");
+      return !isError;
+    });
+  }, [loadedTokens, ownerOfAddress, userAddress]);
+
+  useEffect(() => {
     if (response) {
       setLoadedTokens((loadedTokens) => {
         const newTokens = response.assets.filter(
@@ -66,20 +115,27 @@ export const TokenSelect: FC<{
   }, [response]);
 
   useEffect(() => {
-    if (userAddress && contractAddress) fetchTokens();
-  }, [contractAddress, fetchTokens, userAddress]);
+    // Look for tokens to remove from the tokenId list if they are no longer valid
+    const newTokenIds = tokenIds.filter((tokenId) =>
+      validTokens.find((asset) => asset.tokenId === tokenId)
+    );
+    if (newTokenIds.length !== tokenIds.length) {
+      setTokenIds(newTokenIds);
+    }
+    onSelected(newTokenIds);
+  }, [onSelected, tokenIds, validTokens]);
   return (
     <>
       <Grid2 container spacing={1}>
-        {loadedTokens.map((asset) => (
+        {validTokens.map((asset) => (
           <Grid2 xs={12} sm={6} md={4} lg={3} key={asset.id}>
             <Card>
               <CardActionArea
                 onClick={() => {
                   if (tokenIds.includes(asset.tokenId)) {
-                    onSelected(tokenIds.filter((id) => id !== asset.tokenId));
+                    setTokenIds(tokenIds.filter((id) => id !== asset.tokenId));
                   } else {
-                    onSelected([...tokenIds, asset.tokenId]);
+                    setTokenIds([...tokenIds, asset.tokenId]);
                   }
                 }}
                 sx={{
@@ -91,26 +147,20 @@ export const TokenSelect: FC<{
                 }}
               >
                 <CardHeader title={asset.name || asset.tokenId} />
-                <CardContent>
-                  {asset.thumbnailUrl && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={asset.thumbnailUrl}
-                      style={{
-                        objectFit: "contain",
-                        width: "100%",
-
-                        transition: "transform 0.5s ease-in-out",
-                        ...(tokenIds.includes(asset.tokenId)
-                          ? {
-                              transform: "rotateY(180deg)",
-                            }
-                          : {}),
-                      }}
-                      alt={asset.name || asset.tokenId}
-                    />
-                  )}
-                </CardContent>
+                <CardMedia
+                  component="img"
+                  image={asset.thumbnailUrl ?? ""}
+                  sx={{
+                    objectFit: "contain",
+                    width: "100%",
+                    transition: "transform 0.5s ease-in-out",
+                    ...(tokenIds.includes(asset.tokenId)
+                      ? {
+                          transform: "rotateY(180deg)",
+                        }
+                      : {}),
+                  }}
+                />
               </CardActionArea>
             </Card>
           </Grid2>

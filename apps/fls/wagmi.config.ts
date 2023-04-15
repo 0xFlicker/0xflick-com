@@ -20,7 +20,7 @@ export default defineConfig({
         {
           name: "WrappedNFT",
           address: {
-            [goerli.id]: "0x3018671f3495419636519f37FfeA85BfBe3dce0f" as const,
+            [goerli.id]: "0xff3cC4aDD1a4A967fDfa8D0E02472709939553c4" as const,
           },
         },
       ],

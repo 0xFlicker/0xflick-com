@@ -20,12 +20,12 @@ const FaqPage: NextPage<{}> = () => {
       <Head>
         <title>Fame Lady Society</title>
         <meta name="viewport" content="initial-scale=1.0, width=device-width" />
-        <meta property="og:site_name" content="FLS" />
+        <meta property="og:site_name" content="#itsawrap" />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
         <meta
           property="og:image"
-          content="https://fameladysociety.com/images/flip.gif"
+          content="https://fameladysociety.com/images/fls-wrap.gif"
         />
         <meta property="twitter:title" content={title} />
         <meta property="twitter:description" content={description} />
@@ -47,7 +47,7 @@ const FaqPage: NextPage<{}> = () => {
         }
         title={
           <Typography variant="h5" component="h1" marginLeft={2}>
-            {t("title_home")}
+            coming soon
           </Typography>
         }
       >
