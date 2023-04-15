@@ -1,0 +1,6 @@
+{
+  "button_wrap": "wrap",
+  "tokens_wrapped_0": "no token selected",
+  "tokens_wrapped_1": "one token selected",
+  "tokens_wrapped_n": "{{COUNT}} tokens selected"
+}
