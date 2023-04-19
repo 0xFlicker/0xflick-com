@@ -12,12 +12,42 @@ import { MintCard } from "@/features/wrap/components/MintCard";
 import useClient from "@/hooks/useClient";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { WrapCard } from "@/features/wrap/components/WrapCard";
+import { GoerliTurboWrap } from "@/features/wrap/components/GoerliTurboWrap";
+import { FC, useEffect } from "react";
+import { wagmiClientAutoConnect } from "@0xflick/feature-web3/src/wagmi";
 
-const FaqPage: NextPage<{}> = () => {
-  const { t } = useLocale(["common"]);
+const Content: FC<{
+  hasMint?: boolean;
+}> = ({ hasMint = true }) => {
   const isClient = useClient();
   return (
-    <DefaultProvider>
+    <Container maxWidth="lg">
+      <Grid2 container spacing={2}>
+        {hasMint ? (
+          <Grid2 xs={12} sm={12} md={12}>
+            <Box sx={{ mt: 4 }}>{isClient && <MintCard />}</Box>
+          </Grid2>
+        ) : null}
+        <Grid2 xs={12} sm={12} md={12}>
+          <Box sx={{ mt: 4 }}>{isClient && <GoerliTurboWrap />}</Box>
+        </Grid2>
+        <Grid2 xs={12} sm={12} md={12}>
+          <Box sx={{ mt: 4 }}>
+            {isClient && <WrapCard minTokenId={0} maxTokenId={8887} />}
+          </Box>
+        </Grid2>
+      </Grid2>
+    </Container>
+  );
+};
+
+const FaqPage: NextPage<{
+  hasMint?: boolean;
+}> = ({ hasMint = true }) => {
+  const { t } = useLocale(["common"]);
+
+  return (
+    <DefaultProvider wagmiClient={wagmiClientAutoConnect.get()}>
       <Head>
         <title>Fame Lady Society Wrap</title>
         <meta name="viewport" content="initial-scale=1.0, width=device-width" />
@@ -26,7 +56,7 @@ const FaqPage: NextPage<{}> = () => {
         menu={
           <>
             <MenuList dense disablePadding>
-              <SiteMenu isHome />
+              <SiteMenu isWrap />
             </MenuList>
           </>
         }
@@ -36,18 +66,7 @@ const FaqPage: NextPage<{}> = () => {
           </Typography>
         }
       >
-        <Container maxWidth="lg">
-          <Grid2 container spacing={2}>
-            <Grid2 xs={12} sm={12} md={12}>
-              <Box sx={{ mt: 4 }}>{isClient && <MintCard />}</Box>
-            </Grid2>
-            <Grid2 xs={12} sm={12} md={12}>
-              <Box sx={{ mt: 4 }}>
-                {isClient && <WrapCard minTokenId={0} maxTokenId={8887} />}
-              </Box>
-            </Grid2>
-          </Grid2>
-        </Container>
+        <Content hasMint={hasMint} />
       </Main>
     </DefaultProvider>
   );

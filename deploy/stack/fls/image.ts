@@ -8,6 +8,7 @@ import * as targets from "aws-cdk-lib/aws-route53-targets";
 import * as route53 from "aws-cdk-lib/aws-route53";
 import { fileURLToPath } from "url";
 import path from "path";
+import { NetworkMode } from "aws-cdk-lib/aws-ecr-assets";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -49,7 +50,7 @@ export class Image extends Construct {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
-    const handler = new lambda.DockerImageFunction(this, "flip", {
+    const flipHandler = new lambda.DockerImageFunction(this, "flip", {
       timeout: cdk.Duration.seconds(30),
       code: lambda.DockerImageCode.fromImageAsset(
         path.join(__dirname, "../../.layers/fls-flip"),
@@ -57,9 +58,10 @@ export class Image extends Construct {
           file: "../../docker/canvas/Dockerfile",
           cmd: ["index.handler"],
           extraHash: "8",
+          networkMode: NetworkMode.HOST
         }
       ),
-      memorySize: 1536,
+      memorySize: 512,
       environment: {
         ASSET_BUCKET: storageBucket.bucketName,
         IMAGE_HOST: storageBucket.bucketDomainName,
@@ -68,8 +70,30 @@ export class Image extends Construct {
         BASE_CID: baseCid,
       },
     });
-    storageBucket.grantReadWrite(handler);
-    storageBucket.grantPutAcl(handler);
+    storageBucket.grantReadWrite(flipHandler);
+    storageBucket.grantPutAcl(flipHandler);
+    const thumbHandler = new lambda.DockerImageFunction(this, "thumb", {
+      timeout: cdk.Duration.seconds(30),
+      code: lambda.DockerImageCode.fromImageAsset(
+        path.join(__dirname, "../../.layers/fls-thumb"),
+        {
+          file: "../../docker/canvas/Dockerfile",
+          cmd: ["index.handler"],
+          extraHash: "8",
+          networkMode: NetworkMode.HOST
+        }
+      ),
+      memorySize: 512,
+      environment: {
+        ASSET_BUCKET: storageBucket.bucketName,
+        IMAGE_HOST: storageBucket.bucketDomainName,
+        IPFS_API_URL: infuraIpfsUrl,
+        IPFS_API_AUTH: infuraIpfsAuth,
+        BASE_CID: baseCid,
+      },
+    });
+    storageBucket.grantReadWrite(thumbHandler);
+    storageBucket.grantPutAcl(thumbHandler);
 
     const httpApi = new apigateway.RestApi(this, "fls-image-flip", {
       domainName: {
@@ -84,7 +108,15 @@ export class Image extends Construct {
       allowOrigins: corsAllowedOrigins,
       allowMethods: ["GET"],
     });
-    flipApiResource.addMethod("GET", new apigateway.LambdaIntegration(handler));
+    flipApiResource.addMethod("GET", new apigateway.LambdaIntegration(flipHandler));
+    const thumbApiResource = httpApi.root
+      .addResource("thumb")
+      .addResource("{tokenId}");
+    thumbApiResource.addCorsPreflight({
+      allowOrigins: corsAllowedOrigins,
+      allowMethods: ["GET"],
+    });
+    thumbApiResource.addMethod("GET", new apigateway.LambdaIntegration(thumbHandler));
 
     new cdk.CfnOutput(this, "apiUrl", {
       value: httpApi.url,

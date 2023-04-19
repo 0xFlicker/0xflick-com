@@ -7,9 +7,8 @@ import TextField from "@mui/material/TextField";
 import CardActions from "@mui/material/CardActions";
 import Button from "@mui/material/Button";
 import {
-  useTestNftOwnerOf,
-  useTestNftMint,
-  usePrepareTestNftMint,
+  useBulkMinterMint,
+  usePrepareBulkMinterMint,
 } from "@/wagmi";
 import { BigNumber, constants } from "ethers";
 import { useWeb3 } from "@0xflick/feature-web3";
@@ -18,19 +17,13 @@ import { SendTransactionResult } from "@wagmi/core";
 
 export const MintCard: FC = () => {
   const { selectedAddress, currentChain } = useWeb3();
-  const [tokenId, setTokenId] = useState("");
-  const enabled = !!selectedAddress && !!tokenId.length;
+  const [count, setCount] = useState("");
+  const enabled = !!selectedAddress && !!count.length && count !== "0" && Number.isInteger(Number(count));
   const [mintProgress, setMintProgress] = useState(false);
-  const { isSuccess: exists } = useTestNftOwnerOf({
+  const { config } = usePrepareBulkMinterMint({
     enabled,
     ...(enabled && {
-      args: [BigNumber.from(tokenId)],
-    }),
-  });
-  const { config } = usePrepareTestNftMint({
-    enabled,
-    ...(enabled && {
-      args: [selectedAddress ?? constants.AddressZero, BigNumber.from(tokenId)],
+      args: [BigNumber.from(count)],
     }),
   });
   const {
@@ -39,7 +32,7 @@ export const MintCard: FC = () => {
     isSuccess,
     isLoading,
     writeAsync: onMintAsync,
-  } = useTestNftMint(config);
+  } = useBulkMinterMint(config);
   const [transactionResult, setTransactionResult] =
     useState<SendTransactionResult>();
   const onMint = useCallback(async () => {
@@ -56,8 +49,10 @@ export const MintCard: FC = () => {
     }
   }, [onMintAsync]);
 
+  const countError = count.length && (count === "0" || !Number.isInteger(Number(count)));
+
   const onUpdateTokenId = useCallback((e: any) => {
-    setTokenId(e.target.value);
+    setCount(e.target.value);
   }, []);
   const onSubmit: FormEventHandler = useCallback(
     (e) => {
@@ -85,17 +80,17 @@ export const MintCard: FC = () => {
         </Typography>
         <FormGroup onSubmit={onSubmit}>
           <TextField
-            value={tokenId}
+            value={count}
             onChange={onUpdateTokenId}
             margin="normal"
             fullWidth
-            helperText="Token ID"
-            error={exists}
+            helperText="Mint count"
+            error={!!countError}
           />
         </FormGroup>
-        {exists && (
+        {!!countError && (
           <Typography sx={{ mb: 1.5 }} color="text.error">
-            Token already exists
+            Invalid count
           </Typography>
         )}
         {(mintProgress || transactionResult) && (

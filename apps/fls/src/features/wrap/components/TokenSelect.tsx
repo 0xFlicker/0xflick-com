@@ -1,14 +1,9 @@
 import { FC, useEffect, useMemo, useState } from "react";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
 import CardActionArea from "@mui/material/CardActionArea";
 import CardMedia from "@mui/material/CardMedia";
 import CardHeader from "@mui/material/CardHeader";
-import Typography from "@mui/material/Typography";
-import GreaterThanIcon from "@mui/icons-material/ArrowForwardIos";
-import LessThenIcon from "@mui/icons-material/ArrowBackIos";
-import IconButton from "@mui/material/IconButton";
 import CircularProgress from "@mui/material/CircularProgress";
 
 import {
@@ -16,7 +11,7 @@ import {
   TokensToWrapQuery,
 } from "../graphql/tokensToWrap.generated";
 import { Button } from "@mui/material";
-import { testNftABI, testNftAddress } from "@/wagmi";
+import { bulkMinterAddress, bulkMinterABI } from "@/wagmi";
 import { BigNumber } from "ethers";
 import { useContractReads } from "wagmi";
 
@@ -47,8 +42,8 @@ export const TokenSelect: FC<{
     contracts: loadedTokens.map(({ tokenId: tokenIdStr }) => {
       const tokenId = Number(tokenIdStr);
       return {
-        abi: testNftABI,
-        address: testNftAddress[5],
+        abi: bulkMinterABI,
+        address: bulkMinterAddress[5],
         functionName: "ownerOf",
         enabled:
           tokenIdStr !== null && tokenId >= minTokenId && tokenId <= maxTokenId,
@@ -57,7 +52,7 @@ export const TokenSelect: FC<{
         }),
       };
     }) as {
-      abi: typeof testNftABI;
+      abi: typeof bulkMinterABI;
       address: `0x${string}`;
       functionName: "ownerOf";
     }[],
@@ -69,7 +64,7 @@ export const TokenSelect: FC<{
       contractAddress: contractAddress || "",
       contractSlug: contractSlug || "",
       testnet: testnet,
-      pageSize: 12,
+      pageSize: 50,
     }),
     [contractAddress, contractSlug, testnet, userAddress]
   );
@@ -154,11 +149,11 @@ export const TokenSelect: FC<{
                     objectFit: "contain",
                     width: "100%",
                     transition: "transform 0.5s ease-in-out",
-                    ...(tokenIds.includes(asset.tokenId)
-                      ? {
-                          transform: "rotateY(180deg)",
-                        }
-                      : {}),
+                    // ...(tokenIds.includes(asset.tokenId)
+                    //   ? {
+                    //       transform: "scale(1.2)",
+                    //     }
+                    //   : {}),
                   }}
                 />
               </CardActionArea>

@@ -1,21 +1,22 @@
 import Head from "next/head";
 import { DefaultProvider } from "@/context/default";
 import { NextPage } from "next";
-import Box from "@mui/material/Box";
 import MenuList from "@mui/material/MenuList";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { Main } from "@/layouts/Main";
 import { SiteMenu } from "@/features/appbar/components/SiteMenu";
 import { useLocale } from "@0xflick/feature-locale";
-import { CountDown } from "@/components/CountDown";
-import NextImage from "next/image";
-import { RandomWrapVideo } from "@/features/reveal/components/RandomWrapVideo";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import theme from "@/theme";
+import FAQ from "@/features/faq";
+import Box from "@mui/material/Box";
 
-const HomePage: NextPage<{}> = () => {
+const FaqPage: NextPage<{}> = () => {
   const { t } = useLocale(["common"]);
-  const title = "Fame Lady Society";
-  const description = "Unstoppable";
+  const title = "Fame Lady Society - FAQ";
+  const description = "Frequently Asked Questions about wrapping";
+  const roomForTitle = useMediaQuery(theme.breakpoints.up("sm"));
   return (
     <DefaultProvider>
       <Head>
@@ -42,48 +43,22 @@ const HomePage: NextPage<{}> = () => {
         menu={
           <>
             <MenuList dense disablePadding>
-              <SiteMenu isHome />
+              <SiteMenu isFaq />
             </MenuList>
           </>
         }
         title={
           <Typography variant="h5" component="h1" marginLeft={2}>
-            coming soon
+            {roomForTitle ? "frequently asked questions" : "FAQ"}
           </Typography>
         }
       >
         <Container maxWidth="lg">
-          <Box sx={{ mt: 4 }}>
-            {/* image fill width and keep aspect ratio */}
-            <NextImage
-              src="/images/Flsociety_morg_mock.png"
-              alt="hero"
-              layout="responsive"
-              width={1920}
-              height={1080}
-            />
-          </Box>
-          <Box sx={{ mt: 4 }}>
-            <CountDown />
-          </Box>
+          <Box sx={{ mt: 4 }} />
+          <FAQ />
         </Container>
       </Main>
-      <RandomWrapVideo
-        urls={[
-          "/videos/wrap1.mp4",
-          "/videos/wrap2.mp4",
-          "/videos/wrap3.mp4",
-          "/videos/wrap4.mp4",
-          "/videos/wrap5.mp4",
-          "/videos/wrap6.mp4",
-          "/videos/wrap7.mp4",
-          "/videos/wrap8.mp4",
-          "/videos/wrap9.mp4",
-          "/videos/wrap10.mp4",
-        ]}
-        interval={10000}
-      />
     </DefaultProvider>
   );
 };
-export default HomePage;
+export default FaqPage;

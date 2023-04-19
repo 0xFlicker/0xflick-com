@@ -40,3 +40,31 @@ export async function flip({
   console.log("Returning image");
   return canvas.toBuffer("image/png");
 }
+
+export async function resizeImage({
+  ipfsHttpClient,
+  ipfsCid,
+  width,
+  height,
+}: {
+  ipfsHttpClient: IPFSHTTPClient;
+  ipfsCid: string;
+  width: number;
+  height: number;
+}) {
+  console.log("Loading image from IPFS", ipfsCid);
+  const jsonBuffer = await loadIpfsContent(ipfsHttpClient, ipfsCid);
+  const metadata = JSON.parse(jsonBuffer.toString());
+  const imageCid = metadata.image.split("ipfs://")[1];
+  console.log("Loading image buffer from IPFS", imageCid);
+  const imageBuffer = await loadIpfsContent(ipfsHttpClient, imageCid);
+  console.log("Creating image bitmap");
+  const img = await createImageBitmap(imageBuffer);
+  console.log("Creating canvas");
+  const canvas: Canvas = (await createCanvas(width, height)) as Canvas;
+  console.log("Drawing image");
+  const ctx: CanvasRenderingContext2D = canvas.getContext("2d");
+  ctx.drawImage(img, 0, 0, width, height);
+  console.log("Returning image");
+  return canvas.toBuffer("image/png");
+}

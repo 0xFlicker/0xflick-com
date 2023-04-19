@@ -90,3 +90,15 @@ export const wagmiClient = lazySingleton(() => {
     webSocketProvider,
   });
 });
+
+export const wagmiClientAutoConnect = lazySingleton(() => {
+  const { provider, webSocketProvider } = appChains.get();
+  return createClient({
+    connectors: appConnectors.get(),
+    provider,
+    webSocketProvider,
+    autoConnect: true,
+  });
+});
+
+export type WagmiConfiguredClient = ReturnType<typeof wagmiClient.get> | ReturnType<typeof wagmiClientAutoConnect.get>;

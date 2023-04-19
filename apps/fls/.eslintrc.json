@@ -1,3 +1,6 @@
 {
-  "extends": "next/core-web-vitals"
+  "extends": "next/core-web-vitals",
+  "rules": {
+    "react/no-unknown-property": [1, { "ignore": ["position", "transparent", "attach", "intensity", "lookAt", "args", "rotation", "roughness", "map"] }]
+  }
 }

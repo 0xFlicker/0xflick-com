@@ -141,7 +141,7 @@ async function notifyDiscord({
             testnet ? " on Goerli" : ""
           }`,
           image: {
-            url: `https://img.fameladysociety.com/flip/${tokenId}`,
+            url: `https://img.fameladysociety.com/thumb/${tokenId}`,
           },
           fields,
         },

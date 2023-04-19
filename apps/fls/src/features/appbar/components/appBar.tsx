@@ -36,7 +36,7 @@ export const AppBar: FC<{
     <>
       <MuiAppBar color="default">
         <Toolbar>
-          {/* <MenuIcon onClick={handleMenu} /> */}
+          <MenuIcon onClick={handleMenu} />
           {title}
           <Box sx={{ flexGrow: 1 }} component="span" />
           <ChainSelector assetPrefix="/images" />
