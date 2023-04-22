@@ -1,6 +1,5 @@
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
-import { clientFactory as createClient } from "@creaturenft/ipfs";
 import type { IPFSHTTPClient } from "ipfs-http-client";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -19,8 +18,4 @@ function addViaIpfsClient(
       resolve(result);
     }, reject);
   });
-}
-
-async function main() {
-  const ipfsClient = createClient();
 }

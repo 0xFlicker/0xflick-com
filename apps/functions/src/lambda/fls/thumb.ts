@@ -1,5 +1,5 @@
 import { S3 } from "@aws-sdk/client-s3";
-import { flip, resizeImage } from "@0xflick/assets/src/canvas/fls";
+import { resizeImage } from "@0xflick/assets/src/canvas/fls";
 import { create as createIpfsHttpClient } from "ipfs-http-client";
 import { APIGatewayProxyHandler } from "aws-lambda";
 

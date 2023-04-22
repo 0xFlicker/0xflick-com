@@ -73,7 +73,6 @@ export const WalletModal: FC<IProps> = ({ assetPrefix, open, handleClose }) => {
       aria-describedby="modal-wallet-description"
       open={open}
       onClose={handleClose}
-      closeAfterTransition
     >
       <Fade in={open}>
         <Box

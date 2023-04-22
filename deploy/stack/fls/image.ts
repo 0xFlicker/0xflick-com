@@ -57,8 +57,8 @@ export class Image extends Construct {
         {
           file: "../../docker/canvas/Dockerfile",
           cmd: ["index.handler"],
-          extraHash: "8",
-          networkMode: NetworkMode.HOST
+          extraHash: "8-flip",
+          networkMode: NetworkMode.HOST,
         }
       ),
       memorySize: 512,
@@ -79,8 +79,8 @@ export class Image extends Construct {
         {
           file: "../../docker/canvas/Dockerfile",
           cmd: ["index.handler"],
-          extraHash: "8",
-          networkMode: NetworkMode.HOST
+          extraHash: "8-thumb",
+          networkMode: NetworkMode.HOST,
         }
       ),
       memorySize: 512,
@@ -108,7 +108,10 @@ export class Image extends Construct {
       allowOrigins: corsAllowedOrigins,
       allowMethods: ["GET"],
     });
-    flipApiResource.addMethod("GET", new apigateway.LambdaIntegration(flipHandler));
+    flipApiResource.addMethod(
+      "GET",
+      new apigateway.LambdaIntegration(flipHandler)
+    );
     const thumbApiResource = httpApi.root
       .addResource("thumb")
       .addResource("{tokenId}");
@@ -116,7 +119,10 @@ export class Image extends Construct {
       allowOrigins: corsAllowedOrigins,
       allowMethods: ["GET"],
     });
-    thumbApiResource.addMethod("GET", new apigateway.LambdaIntegration(thumbHandler));
+    thumbApiResource.addMethod(
+      "GET",
+      new apigateway.LambdaIntegration(thumbHandler)
+    );
 
     new cdk.CfnOutput(this, "apiUrl", {
       value: httpApi.url,

@@ -14,7 +14,7 @@ const QA: FC<{ question: ReactNode; answer: ReactNode }> = ({
       <Typography variant="h6">{question}</Typography>
     </AccordionSummary>
     <AccordionDetails>
-      <Typography>{answer}</Typography>
+      {typeof answer === "string" ? <Typography>{answer}</Typography> : answer}
     </AccordionDetails>
   </Accordion>
 );
@@ -22,18 +22,61 @@ const QA: FC<{ question: ReactNode; answer: ReactNode }> = ({
 export const FAQ: FC = () => {
   return (
     <>
-      <Card>
-        <QA
-          question="What is wrapping?"
-          answer="Wrapping is a process of exchanging one token for another. In this case, you are exchanging one Fame Lady Squad NFT for a Fame Lady Society NFT."
-        />
+      <Card
+        sx={{
+          mb: 6,
+        }}
+      >
         <QA
           question="What is the Fame Lady Society?"
-          answer="The Fame Lady Society is a community of NFT collectors and creators that are passionate about the Fame Lady Squad NFTs. However, the community no longer has access to the smart contract that created the Fame Lady Squad NFTs. The Fame Lady Society seeks to regain access to the smart contract and continue operating as a community owned and operated NFT project."
+          answer={
+            <>
+              <Typography>
+                The Fame Lady Society (FLSoc) is a community of NFT collectors
+                and creators who share a deep passion for the Fame Lady Squad
+                (FLS) NFTs. FLS is an HERstoric NFT project established July 12,
+                2021 as the first all female generative PFP project consisting
+                of 8,888 tokens.
+              </Typography>
+              <Typography mt={2}>
+                The project was originally founded by Russian men pretending to
+                be women and the smart contract was transferred to an elected
+                steward on August 11, 2021, to hold until a multi-signature
+                wallet was established on behalf of the community as a whole.
+              </Typography>
+              <Typography mt={2}>
+                Unfortunately, the community currently has no access to the
+                smart contract that created the FLS NFT tokens. The Fame Lady
+                Society was established on November 2022 to join members
+                together and reclaim access to the original smart contract, and
+                return to our standing as a community-owned and managed NFT
+                project
+              </Typography>
+            </>
+          }
+        />
+        <QA
+          question="What is wrapping?"
+          answer={
+            <>
+              <Typography>
+                Wrapping is a process of exchanging one token for another. In
+                this case, you are exchanging one Fame Lady Squad NFT for a Fame
+                Lady Society NFT.
+              </Typography>
+              <Typography mt={2}>
+                While wrapping, you will have the option to send the new Fame
+                Lady Society NFT to a different address than the address than
+                currently holds the Fame Lady Squad token. This way you can save
+                gas and transfer the wrapped token to a different address, for
+                example a ledger wallet.
+              </Typography>
+            </>
+          }
         />
         <QA
           question="What happens to my NFT when I wrap it?"
-          answer="When you wrap your Fame Lady Squad NFT, you will deposit it into the Fame Lady Society smart contract. You will receive a Fame Lady Society NFT in return. The Fame Lady Society NFT is a 1:1 representation of your Fame Lady Squad NFT. While the original Fame Lady Squad NFT is wrapped, it is owned by the Fame Lady Society smart contract and can no longer be moved or sold. You can then use your Fame Lady Society NFT to participate in the Fame Lady Society community."
+          answer="Upon wrapping your Fame Lady Squad NFT, it's deposited into the Fame Lady Society smart contract and you receive an equivalent Fame Lady Society NFT. The original NFT is owned by the contract and becomes immovable. You can then engage in the Fame Lady Society community using your new NFT."
         />
         <QA
           question="Can I unwrap my Fame Lady Society NFT?"
@@ -41,7 +84,7 @@ export const FAQ: FC = () => {
         />
         <QA
           question="Why should I wrap my Fame Lady Squad NFT?"
-          answer="Wrapping your Fame Lady Squad NFT will allow you to continue participating in the Fame Lady Squad community. The Fame Lady Squad community is no longer active and the smart contract that created the Fame Lady Squad NFTs is no longer accessible. Wrapping your Fame Lady Squad NFT will allow you to continue participating in the Fame Lady Society community. In addition the Fame Lady Society smart contract, being a modern and efficient smart contract will guarantee royalty enforcement and enable gas efficient transfers compared to the Fame Lady Squad smart contract."
+          answer="By wrapping your Fame Lady Squad NFT, you can remain engaged with the Fame Lady Society community. Since the Fame Lady Squad community and its smart contract are now inactive and inaccessible, this wrapping process is essential for continued participation. Additionally, the modern and efficient Fame Lady Society smart contract ensures royalty enforcement and facilitates gas-efficient transfers, in contrast to the former Fame Lady Squad contract."
         />
         <QA
           question="What if I want to transfer my Fame Lady Society NFT to another address after I wrap it?"
@@ -49,7 +92,20 @@ export const FAQ: FC = () => {
         />
         <QA
           question="What will the governance structure of the Fame Lady Society be?"
-          answer="The Fame Lady Society will be governed by the Fame Lady Society NFT holders. The Fame Lady Society NFT holders will be able to vote on proposals to drive the community forward and make decisions on how the Fame Lady Society will operate."
+          answer={
+            <>
+              <Typography>
+                The Fame Lady Society will be governed by Fame Lady Society NFT
+                holders, who will have the power to vote on proposals aimed at
+                concerning the operational affairs of the Fame Lady Society.
+              </Typography>
+              <Typography mt={2}>
+                The Fame Lady Society shall be guided by an elected seven-member
+                Community Council. The FLSoc Council is responsible for planning
+                the overall direction, vision, and long-term strategy.
+              </Typography>
+            </>
+          }
         />
       </Card>
     </>

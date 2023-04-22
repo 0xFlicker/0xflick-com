@@ -7,7 +7,12 @@ import {
   PutCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { utils } from "ethers";
-import { wrappedNftABI, wrappedNftAddress } from "./generated";
+import {
+  wrappedNftABI,
+  wrappedNftAddress,
+  fameLadySocietyABI,
+  fameLadySocietyAddress,
+} from "./generated";
 import { SNS } from "@aws-sdk/client-sns";
 import { APIEmbedField } from "discord-api-types/v10";
 import { sendDiscordMessage } from "@0xflick/backend/discord/send";
@@ -43,10 +48,10 @@ if (!process.env.DISCORD_CHANNEL_ID) {
   throw new Error("DISCORD_CHANNEL_ID not set");
 }
 
-// const mainnetProvider = new providers.JsonRpcProvider(
-//   process.env.RPC_URL_MAINNET,
-//   1
-// );
+const mainnetProvider = new providers.JsonRpcProvider(
+  process.env.RPC_URL_MAINNET,
+  1
+);
 
 const goerliProvider = new providers.JsonRpcProvider(
   process.env.RPC_URL_GOERLI,
@@ -156,8 +161,9 @@ export const handler = async () =>
   // event: EventBridgeEvent<"check-fls-wrap", void>
   {
     const wrappedNftInterface = new Interface(wrappedNftABI);
+    const fameLadySocietyInterface = new Interface(fameLadySocietyABI);
     // Get last bock read
-    const [lastBlockGoerliResponse /*lastBlockMainnetResponse*/] =
+    const [lastBlockGoerliResponse, lastBlockMainnetResponse] =
       await Promise.all([
         db.send(
           new GetCommand({
@@ -167,28 +173,28 @@ export const handler = async () =>
             },
           })
         ),
-        // db.send(
-        //   new GetCommand({
-        //     TableName: process.env.DYNAMODB_TABLE,
-        //     Key: {
-        //       key: "lastBlockMainnet",
-        //     },
-        //   })
-        // ),
+        db.send(
+          new GetCommand({
+            TableName: process.env.DYNAMODB_TABLE,
+            Key: {
+              key: "lastBlockMainnet",
+            },
+          })
+        ),
       ]);
 
-    const [latestBlockGoerli /*latestBlockMainnet*/] = await Promise.all([
+    const [latestBlockGoerli, latestBlockMainnet] = await Promise.all([
       goerliProvider.getBlockNumber(),
-      // mainnetProvider.getBlockNumber(),
+      mainnetProvider.getBlockNumber(),
     ]);
 
     const lastBlockGoerli: number =
       lastBlockGoerliResponse.Item?.value ?? latestBlockGoerli;
-    // const lastBlockMainnet: number =
-    //   lastBlockMainnetResponse.Item?.value ?? latestBlockMainnet;
+    const lastBlockMainnet: number =
+      lastBlockMainnetResponse.Item?.value ?? latestBlockMainnet;
 
     // Get events from last block read
-    const [goerliEvents] = await Promise.all([
+    const [goerliEvents, mainnetEvents] = await Promise.all([
       findEvents(
         goerliProvider,
         wrappedNftAddress[5],
@@ -196,12 +202,19 @@ export const handler = async () =>
         lastBlockGoerli,
         latestBlockGoerli
       ),
+      findEvents(
+        mainnetProvider,
+        fameLadySocietyAddress[1],
+        fameLadySocietyInterface,
+        lastBlockMainnet,
+        latestBlockMainnet
+      ),
     ]);
 
     // Notify discord
     const sns = new SNS({});
-    await Promise.all(
-      goerliEvents.map((event) => {
+    await Promise.all([
+      ...goerliEvents.map((event) => {
         return notifyDiscord({
           tokenId: event.args[2].toString(),
           toAddress: event.args[1],
@@ -211,8 +224,19 @@ export const handler = async () =>
           testnet: true,
           sns,
         });
-      })
-    );
+      }),
+      ...mainnetEvents.map((event) => {
+        return notifyDiscord({
+          tokenId: event.args[2].toString(),
+          toAddress: event.args[1],
+          channelId: process.env.DISCORD_CHANNEL_ID,
+          provider: mainnetProvider,
+          discordMessageTopicArn: process.env.DISCORD_MESSAGE_TOPIC_ARN,
+          testnet: false,
+          sns,
+        });
+      }),
+    ]);
 
     await Promise.all([
       db.send(
@@ -224,14 +248,14 @@ export const handler = async () =>
           },
         })
       ),
-      // db.send(
-      //   new PutCommand({
-      //     TableName: process.env.DYNAMODB_TABLE,
-      //     Item: {
-      //       key: "lastBlockMainnet",
-      //       value: latestBlockMainnet,
-      //     },
-      //   })
-      // ),
+      db.send(
+        new PutCommand({
+          TableName: process.env.DYNAMODB_TABLE,
+          Item: {
+            key: "lastBlockMainnet",
+            value: latestBlockMainnet + 1,
+          },
+        })
+      ),
     ]);
   };

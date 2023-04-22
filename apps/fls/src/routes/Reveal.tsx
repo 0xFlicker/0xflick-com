@@ -2,7 +2,11 @@ import Head from "next/head";
 import { DefaultProvider } from "@/context/default";
 import { NextPage } from "next";
 import { useLocale } from "@0xflick/feature-locale";
-import { Lips } from "@/features/reveal/components/Lips";
+import { PostReveal } from "@/features/reveal/components/PostReveal";
+import Typography from "@mui/material/Typography";
+import MenuList from "@mui/material/MenuList";
+import { SiteMenu } from "@/features/appbar/components/SiteMenu";
+import { Main } from "@/layouts/Main";
 
 const RevealPage: NextPage<{}> = () => {
   const { t } = useLocale(["common"]);
@@ -30,7 +34,22 @@ const RevealPage: NextPage<{}> = () => {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:creator" content="@FameLadySociety" />
       </Head>
-      <Lips />
+      <Main
+        menu={
+          <>
+            <MenuList dense disablePadding>
+              <SiteMenu isHome />
+            </MenuList>
+          </>
+        }
+        title={
+          <Typography variant="h5" component="h1" marginLeft={2}>
+            Fame Lady Society
+          </Typography>
+        }
+      >
+        <PostReveal />
+      </Main>
     </DefaultProvider>
   );
 };

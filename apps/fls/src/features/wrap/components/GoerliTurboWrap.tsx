@@ -120,6 +120,7 @@ export const GoerliTurboWrap: FC<{}> = () => {
       tokenIds={tokenIds ?? []}
       isApprovedForAll={isApprovedForAll}
       setApprovalForAll={setApprovalForAll}
+      testnet
     />
   );
 };

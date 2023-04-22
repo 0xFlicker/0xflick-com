@@ -1,27 +1,35 @@
-import { FC, useCallback, useMemo, useState } from "react";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardActions from "@mui/material/CardActions";
 import Typography from "@mui/material/Typography";
 import FormGroup from "@mui/material/FormGroup";
 import TextField from "@mui/material/TextField";
-import { useContractReads } from "wagmi";
 import { SendTransactionResult } from "@wagmi/core";
 import {
   usePrepareWrappedNftWrap,
   useWrappedNftWrap,
   useWrappedNftWrapTo,
   usePrepareWrappedNftWrapTo,
+  usePrepareFameLadySocietyWrap,
+  useFameLadySocietyWrap,
+  usePrepareFameLadySocietyWrapTo,
+  useFameLadySocietyWrapTo,
   bulkMinterAddress,
+  fameLadySocietyAddress,
 } from "@/wagmi";
 import Button from "@mui/material/Button";
 
 import { useWeb3 } from "@0xflick/feature-web3";
 import { BigNumber, utils } from "ethers";
-import { Box, FormControlLabel, Switch } from "@mui/material";
+import { Box, CircularProgress, FormControlLabel, Switch } from "@mui/material";
 import { TransactionProgress } from "@/components/TransactionProgress";
 import { useAuth } from "@0xflick/feature-auth/src/hooks";
 import { TokenSelect } from "./TokenSelect";
+import { MainnetTokenSelect } from "./MainnetTokenSelect";
+import { DevTipModal, TipCloseReason } from "./DevTipModal";
+import { useEnsAddress } from "wagmi";
+import { CheckCircle } from "@mui/icons-material";
 
 export const WrapCardContent: FC<{
   minTokenId: number;
@@ -30,6 +38,7 @@ export const WrapCardContent: FC<{
   setApprovalForAll?: () => Promise<SendTransactionResult>;
   approveIsError: boolean;
   approveIsSuccess: boolean;
+  testnet?: boolean;
 }> = ({
   approveIsError,
   approveIsSuccess,
@@ -37,16 +46,29 @@ export const WrapCardContent: FC<{
   maxTokenId,
   isApprovedForAll,
   setApprovalForAll,
+  testnet,
 }) => {
   const [tokenIds, setTokenIds] = useState<string[]>([]);
   const [transferTo, setTransferTo] = useState(false);
-  const [sendTo, setSendTo] = useState<string>();
+
+  const [sendToInput, setSendToInput] = useState<string>();
+  const [isTipRequested, setIsTipRequested] = useState(false);
+  const [tipState, setTipState] = useState<{
+    reason?: TipCloseReason;
+    value?: BigNumber;
+  }>({});
+  const { data: sendTo, isLoading: ensAddressIsLoading } = useEnsAddress({
+    name: sendToInput,
+  });
 
   const { selectedAddress } = useWeb3();
   const { isAuthenticated } = useAuth();
 
   const { config: configureWrappedNftWrap } = usePrepareWrappedNftWrap({
-    enabled: isApprovedForAll && tokenIds.length > 0 && !transferTo,
+    overrides: {
+      value: tipState.value,
+    },
+    enabled: testnet && isApprovedForAll && tokenIds.length > 0 && !transferTo,
     ...(selectedAddress &&
       isApprovedForAll && {
         args: [
@@ -57,15 +79,40 @@ export const WrapCardContent: FC<{
       }),
   });
 
+  const testnetWrapWrite = useWrappedNftWrap(configureWrappedNftWrap);
+
+  const { config: configureFameLadySocietyWrap } =
+    usePrepareFameLadySocietyWrap({
+      overrides: {
+        value: tipState.value,
+      },
+      enabled:
+        !testnet && isApprovedForAll && tokenIds.length > 0 && !transferTo,
+      ...(selectedAddress &&
+        isApprovedForAll && {
+          args: [
+            tokenIds
+              .filter((tokenId) => tokenId !== null)
+              .map((n) => BigNumber.from(n)) as BigNumber[],
+          ],
+        }),
+    });
+
+  const flsWrapWrite = useFameLadySocietyWrap(configureFameLadySocietyWrap);
+
   const {
     writeAsync: wrappedNftWrap,
     isError: wrapIsError,
     isLoading: wrapIsLoading,
     isSuccess: wrapIsSuccess,
-  } = useWrappedNftWrap(configureWrappedNftWrap);
+  } = testnet ? testnetWrapWrite : flsWrapWrite;
 
   const { config: configureWrappedNftWrapTo } = usePrepareWrappedNftWrapTo({
+    overrides: {
+      value: tipState.value,
+    },
     enabled:
+      testnet &&
       isApprovedForAll &&
       tokenIds.length > 0 &&
       transferTo &&
@@ -85,34 +132,97 @@ export const WrapCardContent: FC<{
       }),
   });
 
+  const testnetWrapToWrite = useWrappedNftWrapTo(configureWrappedNftWrapTo);
+
+  const { config: configureFameLadySocietyWrapTo } =
+    usePrepareFameLadySocietyWrapTo({
+      overrides: {
+        value: tipState.value,
+      },
+      enabled:
+        !testnet &&
+        isApprovedForAll &&
+        tokenIds.length > 0 &&
+        transferTo &&
+        !!sendTo &&
+        utils.isAddress(sendTo),
+      ...(selectedAddress &&
+        transferTo &&
+        !!sendTo &&
+        utils.isAddress(sendTo) &&
+        isApprovedForAll && {
+          args: [
+            sendTo as `0x${string}`,
+            tokenIds
+              .filter((tokenId) => tokenId !== null)
+              .map((n) => BigNumber.from(n)) as BigNumber[],
+          ],
+        }),
+    });
+
+  const flsWrapToWrite = useFameLadySocietyWrapTo(
+    configureFameLadySocietyWrapTo
+  );
+
   const {
     writeAsync: wrappedNftWrapTo,
     isError: wrapToIsError,
     isLoading: wrapToIsLoading,
     isSuccess: wrapToIsSuccess,
-  } = useWrappedNftWrapTo(configureWrappedNftWrapTo);
+  } = testnet ? testnetWrapToWrite : flsWrapToWrite;
 
   const [wrapInProgress, setWrapInProgress] = useState(false);
   const [wrapTransactionResult, setWrappedTransactionResult] =
     useState<SendTransactionResult>();
-  const onWrap = useCallback(async () => {
-    try {
-      setWrapInProgress(true);
-      const response =
-        transferTo && sendTo && utils.isAddress(sendTo)
-          ? await wrappedNftWrapTo?.()
-          : await wrappedNftWrap?.();
-      setWrappedTransactionResult(response);
-    } catch (e) {
-      console.error(e);
-      setWrappedTransactionResult(undefined);
-      setWrapInProgress(false);
-    }
-  }, [sendTo, transferTo, wrappedNftWrap, wrappedNftWrapTo]);
+
   const onWrapSuccess = useCallback(() => {
     setWrapInProgress(false);
     setWrappedTransactionResult(undefined);
   }, []);
+  const onRequestWrapTip = useCallback(() => {
+    setIsTipRequested(true);
+  }, []);
+  const onHandleTipClose = useCallback(
+    async (reason: TipCloseReason, tip?: BigNumber) => {
+      setIsTipRequested(false);
+      if (reason === "confirm") {
+        setTipState({ reason, value: tip });
+      }
+    },
+    []
+  );
+
+  useEffect(() => {
+    if (
+      tipState.reason === "confirm" &&
+      // Keep trying until one of these is true
+      ((transferTo && sendTo && utils.isAddress(sendTo) && wrappedNftWrapTo) ||
+        wrappedNftWrap)
+    ) {
+      let wasCancelled = false;
+      Promise.resolve().then(async () => {
+        setTipState({});
+        try {
+          setWrapInProgress(true);
+          const response =
+            transferTo && sendTo && utils.isAddress(sendTo)
+              ? await wrappedNftWrapTo?.()
+              : await wrappedNftWrap?.();
+          if (wasCancelled) {
+            return;
+          }
+          setWrappedTransactionResult(response);
+        } catch (e) {
+          console.error(e);
+          setWrappedTransactionResult(undefined);
+          setWrapInProgress(false);
+        }
+      });
+      return () => {
+        wasCancelled = true;
+      };
+    }
+  }, [tipState, transferTo, sendTo, wrappedNftWrapTo, wrappedNftWrap]);
   const [approveInProgress, setApproveInProgress] = useState(false);
   const [approveTransactionResult, setApproveTransactionResult] =
     useState<SendTransactionResult>();
@@ -138,10 +248,10 @@ export const WrapCardContent: FC<{
       <Card>
         <CardContent>
           <Typography variant="h5" component="div">
-            Wrap
+            wrap
           </Typography>
           <Typography sx={{ mb: 1.5 }} color="text.secondary">
-            Select your tokens to wrap
+            select your tokens to wrap
           </Typography>
           <FormGroup>
             <FormControlLabel
@@ -150,34 +260,39 @@ export const WrapCardContent: FC<{
                 setTransferTo(!transferTo);
               }}
               control={<Switch checked={transferTo} />}
-              label={"Wrap and transfer"}
+              label={"wrap and transfer"}
             />
             <TextField
               sx={{
                 my: 1,
               }}
-              label="Send wrapped tokens to"
+              label="send wrapped tokens to"
               variant="outlined"
               disabled={!transferTo}
               onChange={(e) => {
-                if (utils.isAddress(e.target.value)) {
-                  setSendTo(e.target.value);
-                }
+                setSendToInput(e.target.value);
+              }}
+              InputProps={{
+                endAdornment: ensAddressIsLoading ? (
+                  <CircularProgress color="inherit" size={20} />
+                ) : sendTo ? (
+                  <CheckCircle color="success" />
+                ) : null,
               }}
             />
           </FormGroup>
-          {isAuthenticated && (
+          {isAuthenticated && testnet ? (
             <TokenSelect
               contractAddress={bulkMinterAddress[5]}
-              contractSlug="go-fame-lady-1"
+              contractSlug={"go-fame-lady-1"}
               testnet
               userAddress={selectedAddress}
-              onSelected={(tokenIds) => {
-                setTokenIds(tokenIds);
-              }}
+              onSelected={setTokenIds}
               maxTokenId={maxTokenId}
               minTokenId={minTokenId}
             />
+          ) : (
+            <MainnetTokenSelect onSelected={setTokenIds} />
           )}
           {(wrapInProgress || wrapTransactionResult) && (
             <TransactionProgress
@@ -201,10 +316,10 @@ export const WrapCardContent: FC<{
             approveInProgress ||
             approveTransactionResult
           ) && (
-            <Box sx={{ height: 32 }}>
+            <Box component="div" sx={{ height: 32 }}>
               {isApprovedForAll === false && (
                 <Typography variant="body2" color="text.warning">
-                  You must approve the contract to wrap your tokens
+                  you must approve the contract to wrap your tokens
                 </Typography>
               )}
               {isApprovedForAll === true && (
@@ -214,7 +329,7 @@ export const WrapCardContent: FC<{
                       case 0:
                         return (
                           <Typography variant="body2" color="error">
-                            Select one or more tokens to wrap
+                            select one or more tokens to wrap
                           </Typography>
                         );
                       case 1:
@@ -242,7 +357,7 @@ export const WrapCardContent: FC<{
                     ) {
                       return (
                         <Typography variant="body2" color="text.secondary">
-                          {`Send wrapped tokens to ${sendTo}`}
+                          {`send wrapped tokens to ${sendTo}`}
                         </Typography>
                       );
                     } else if (
@@ -251,13 +366,13 @@ export const WrapCardContent: FC<{
                     ) {
                       return (
                         <Typography variant="body2" color="error">
-                          Invalid address
+                          invalid address
                         </Typography>
                       );
                     } else if (tokenIds.length) {
                       return (
                         <Typography variant="body2" color="text.secondary">
-                          Wrapped tokens will be sent back to your wallet
+                          wrapped tokens will be sent back to your wallet
                         </Typography>
                       );
                     } else {
@@ -274,7 +389,7 @@ export const WrapCardContent: FC<{
             <Button onClick={onApprove}>Approve</Button>
           )}
           <Button
-            onClick={onWrap}
+            onClick={onRequestWrapTip}
             disabled={
               !isApprovedForAll ||
               tokenIds.length === 0 ||
@@ -285,6 +400,11 @@ export const WrapCardContent: FC<{
           </Button>
         </CardActions>
       </Card>
+      <DevTipModal
+        handleClose={onHandleTipClose}
+        open={isTipRequested}
+        numberOfTokens={tokenIds.length}
+      />
     </>
   );
 };

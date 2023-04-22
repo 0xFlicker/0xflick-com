@@ -22,7 +22,7 @@ import { useSignOut } from "./useSignOut";
 import { useAccount, useEnsAvatar, useEnsName } from "wagmi";
 import { useSelf } from "./useSelf";
 
-function useAuthContext() {
+function useAuthContext({ autoLogin = false }: { autoLogin?: boolean }) {
   const [stateToken, setStateToken] = useState<string | null>(null);
   const [roleIds, setRoleIds] = useState<string[]>([]);
   const [state, setState] = useState<
@@ -41,8 +41,9 @@ function useAuthContext() {
     selectedAddress: address,
     isConnected: isWeb3Connected,
   } = useWeb3();
+
   useEffect(() => {
-    if (isWeb3Connected && state === "ANONYMOUS") {
+    if (autoLogin && isWeb3Connected && state === "ANONYMOUS") {
       setState("REQUEST_SIGN_IN");
     }
   }, [isWeb3Connected, state]);
@@ -272,8 +273,14 @@ function useAuthContext() {
 type TContext = ReturnType<typeof useAuthContext>;
 const AuthProvider = createContext<TContext | null>(null);
 
-export const Provider: FC<PropsWithChildren<{}>> = ({ children }) => {
-  const context = useAuthContext();
+export const Provider: FC<
+  PropsWithChildren<{
+    autoLogin?: boolean;
+  }>
+> = ({ autoLogin, children }) => {
+  const context = useAuthContext({
+    autoLogin,
+  });
 
   return (
     <AuthProvider.Provider value={context}>{children}</AuthProvider.Provider>

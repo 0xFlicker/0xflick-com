@@ -58,6 +58,7 @@ export const GoerliSelectWrap: FC<{
       setApprovalForAll={setApprovalForAll}
       approveIsError={approveIsError}
       approveIsSuccess={approveIsSuccess}
+      testnet
     />
   );
 };

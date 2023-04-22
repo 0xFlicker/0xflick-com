@@ -15,6 +15,8 @@ import { WrapCard } from "@/features/wrap/components/WrapCard";
 import { GoerliTurboWrap } from "@/features/wrap/components/GoerliTurboWrap";
 import { FC, useEffect } from "react";
 import { wagmiClientAutoConnect } from "@0xflick/feature-web3/src/wagmi";
+import { TurboWrap } from "@/features/wrap/components/TurboWrap";
+import { UnwrapCard } from "@/features/wrap/components/UnWrapCard";
 
 const Content: FC<{
   hasMint?: boolean;
@@ -25,15 +27,24 @@ const Content: FC<{
       <Grid2 container spacing={2}>
         {hasMint ? (
           <Grid2 xs={12} sm={12} md={12}>
-            <Box sx={{ mt: 4 }}>{isClient && <MintCard />}</Box>
+            <Box component="div" sx={{ mt: 4 }}>
+              {isClient && <MintCard />}
+            </Box>
           </Grid2>
         ) : null}
         <Grid2 xs={12} sm={12} md={12}>
-          <Box sx={{ mt: 4 }}>{isClient && <GoerliTurboWrap />}</Box>
+          <Box component="div" sx={{ mt: 4 }}>
+            {isClient && <TurboWrap />}
+          </Box>
         </Grid2>
         <Grid2 xs={12} sm={12} md={12}>
-          <Box sx={{ mt: 4 }}>
+          <Box component="div" sx={{ mt: 4 }}>
             {isClient && <WrapCard minTokenId={0} maxTokenId={8887} />}
+          </Box>
+        </Grid2>
+        <Grid2 xs={12} sm={12} md={12}>
+          <Box component="div" sx={{ mt: 4 }}>
+            {isClient && <UnwrapCard />}
           </Box>
         </Grid2>
       </Grid2>

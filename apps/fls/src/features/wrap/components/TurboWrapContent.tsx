@@ -1,18 +1,20 @@
-import { FC, useCallback, useMemo, useState } from "react";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardActions from "@mui/material/CardActions";
 import Typography from "@mui/material/Typography";
 import FormGroup from "@mui/material/FormGroup";
 import TextField from "@mui/material/TextField";
-import { useContractReads } from "wagmi";
 import { SendTransactionResult } from "@wagmi/core";
 import {
-  testNftAddress,
   usePrepareWrappedNftWrap,
   useWrappedNftWrap,
   useWrappedNftWrapTo,
   usePrepareWrappedNftWrapTo,
+  usePrepareFameLadySocietyWrap,
+  useFameLadySocietyWrap,
+  usePrepareFameLadySocietyWrapTo,
+  useFameLadySocietyWrapTo,
 } from "@/wagmi";
 import Button from "@mui/material/Button";
 
@@ -20,8 +22,8 @@ import { useWeb3 } from "@0xflick/feature-web3";
 import { BigNumber, utils } from "ethers";
 import { Box, FormControlLabel, Switch } from "@mui/material";
 import { TransactionProgress } from "@/components/TransactionProgress";
-import { useAuth } from "@0xflick/feature-auth/src/hooks";
-import { TokenSelect } from "./TokenSelect";
+import { DevTipModal, TipCloseReason } from "./DevTipModal";
+import { useEnsAddress } from "wagmi";
 
 export const TurboWrapContent: FC<{
   tokenIds: BigNumber[];
@@ -29,35 +31,71 @@ export const TurboWrapContent: FC<{
   setApprovalForAll?: () => Promise<SendTransactionResult>;
   approveIsError: boolean;
   approveIsSuccess: boolean;
+  testnet: boolean;
 }> = ({
   tokenIds,
   approveIsError,
   approveIsSuccess,
   isApprovedForAll,
   setApprovalForAll,
+  testnet,
 }) => {
   const [transferTo, setTransferTo] = useState(false);
-  const [sendTo, setSendTo] = useState<string>();
+  const [isTipRequested, setIsTipRequested] = useState(false);
+  const [tipState, setTipState] = useState<{
+    reason?: TipCloseReason;
+    value?: BigNumber;
+  }>({});
+  const [sendToInput, setSendToInput] = useState<string>();
+  const { data: sendTo, isLoading: ensAddressIsLoading } = useEnsAddress({
+    name: sendToInput,
+  });
 
   const { selectedAddress } = useWeb3();
 
   const { config: configureWrappedNftWrap } = usePrepareWrappedNftWrap({
-    enabled: isApprovedForAll && tokenIds.length > 0 && !transferTo,
+    overrides: {
+      value: tipState.value,
+    },
+    enabled: testnet && isApprovedForAll && tokenIds.length > 0 && !transferTo,
     ...(selectedAddress &&
       isApprovedForAll && {
         args: [tokenIds],
       }),
   });
 
+  const testnetWrapWrite = useWrappedNftWrap(configureWrappedNftWrap);
+
+  const { config: configureFameLadySocietyWrap } =
+    usePrepareFameLadySocietyWrap({
+      overrides: {
+        value: tipState.value,
+      },
+      enabled:
+        !testnet && isApprovedForAll && tokenIds.length > 0 && !transferTo,
+      ...(selectedAddress &&
+        isApprovedForAll && {
+          args: [tokenIds],
+        }),
+    });
+
+  const fameLadySocietyWrapWrite = useFameLadySocietyWrap(
+    configureFameLadySocietyWrap
+  );
+
   const {
     writeAsync: wrappedNftWrap,
     isError: wrapIsError,
     isLoading: wrapIsLoading,
     isSuccess: wrapIsSuccess,
-  } = useWrappedNftWrap(configureWrappedNftWrap);
+  } = testnet ? testnetWrapWrite : fameLadySocietyWrapWrite;
 
   const { config: configureWrappedNftWrapTo } = usePrepareWrappedNftWrapTo({
+    overrides: {
+      value: tipState.value,
+    },
     enabled:
+      testnet &&
       isApprovedForAll &&
       tokenIds.length > 0 &&
       transferTo &&
@@ -72,30 +110,85 @@ export const TurboWrapContent: FC<{
       }),
   });
 
+  const testnetWrapToWrite = useWrappedNftWrapTo(configureWrappedNftWrapTo);
+
+  const { config: configureFameLadyWrapTo } = usePrepareFameLadySocietyWrapTo({
+    overrides: {
+      value: tipState.value,
+    },
+    enabled:
+      !testnet &&
+      isApprovedForAll &&
+      tokenIds.length > 0 &&
+      transferTo &&
+      !!sendTo &&
+      utils.isAddress(sendTo),
+    ...(selectedAddress &&
+      transferTo &&
+      !!sendTo &&
+      utils.isAddress(sendTo) &&
+      isApprovedForAll && {
+        args: [sendTo as `0x${string}`, tokenIds],
+      }),
+  });
+
+  const fameLadySocietyWrapToWrite = useFameLadySocietyWrapTo(
+    configureFameLadyWrapTo
+  );
+
   const {
     writeAsync: wrappedNftWrapTo,
     isError: wrapToIsError,
     isLoading: wrapToIsLoading,
     isSuccess: wrapToIsSuccess,
-  } = useWrappedNftWrapTo(configureWrappedNftWrapTo);
+  } = testnet ? testnetWrapToWrite : fameLadySocietyWrapToWrite;
 
   const [wrapInProgress, setWrapInProgress] = useState(false);
   const [wrapTransactionResult, setWrappedTransactionResult] =
     useState<SendTransactionResult>();
-  const onWrap = useCallback(async () => {
-    try {
-      setWrapInProgress(true);
-      const response =
-        transferTo && sendTo && utils.isAddress(sendTo)
-          ? await wrappedNftWrapTo?.()
-          : await wrappedNftWrap?.();
-      setWrappedTransactionResult(response);
-    } catch (e) {
-      console.error(e);
-      setWrappedTransactionResult(undefined);
-      setWrapInProgress(false);
+  const onRequestWrapTip = useCallback(() => {
+    setIsTipRequested(true);
+  }, []);
+  const onHandleTipClose = useCallback(
+    async (reason: TipCloseReason, tip?: BigNumber) => {
+      setIsTipRequested(false);
+      if (reason === "confirm") {
+        setTipState({ reason, value: tip });
+      }
+    },
+    []
+  );
+  useEffect(() => {
+    if (
+      tipState.reason === "confirm" &&
+      // Keep trying until one of these is true
+      ((transferTo && sendTo && utils.isAddress(sendTo) && wrappedNftWrapTo) ||
+        wrappedNftWrap)
+    ) {
+      let wasCancelled = false;
+      Promise.resolve().then(async () => {
+        setTipState({});
+        try {
+          setWrapInProgress(true);
+          const response =
+            transferTo && sendTo && utils.isAddress(sendTo)
+              ? await wrappedNftWrapTo?.()
+              : await wrappedNftWrap?.();
+          if (wasCancelled) {
+            return;
+          }
+          setWrappedTransactionResult(response);
+        } catch (e) {
+          console.error(e);
+          setWrappedTransactionResult(undefined);
+          setWrapInProgress(false);
+        }
+      });
+      return () => {
+        wasCancelled = true;
+      };
     }
-  }, [sendTo, transferTo, wrappedNftWrap, wrappedNftWrapTo]);
+  }, [tipState, transferTo, sendTo, wrappedNftWrapTo, wrappedNftWrap]);
   const onWrapSuccess = useCallback(() => {
     setWrapInProgress(false);
     setWrappedTransactionResult(undefined);
@@ -125,10 +218,10 @@ export const TurboWrapContent: FC<{
       <Card>
         <CardContent>
           <Typography variant="h5" component="div">
-            Turbo Wrap
+            turbo wrap
           </Typography>
           <Typography sx={{ mb: 1.5 }} color="text.secondary">
-            Wrap all your NFTs in one click
+            wrap all your NFTs in one click
           </Typography>
           <FormGroup>
             <FormControlLabel
@@ -137,19 +230,17 @@ export const TurboWrapContent: FC<{
                 setTransferTo(!transferTo);
               }}
               control={<Switch checked={transferTo} />}
-              label={"Wrap and transfer"}
+              label={"wrap and transfer"}
             />
             <TextField
               sx={{
                 my: 1,
               }}
-              label="Send wrapped tokens to"
+              label="send wrapped tokens to"
               variant="outlined"
               disabled={!transferTo}
               onChange={(e) => {
-                if (utils.isAddress(e.target.value)) {
-                  setSendTo(e.target.value);
-                }
+                setSendToInput(e.target.value);
               }}
             />
           </FormGroup>
@@ -179,7 +270,7 @@ export const TurboWrapContent: FC<{
             <Box sx={{ height: 32 }}>
               {isApprovedForAll === false && (
                 <Typography variant="body2" color="text.warning">
-                  You must approve the contract to wrap your tokens
+                  you must approve the contract to wrap your tokens
                 </Typography>
               )}
               {isApprovedForAll === true && (
@@ -189,11 +280,12 @@ export const TurboWrapContent: FC<{
                       tokenIds.length &&
                       transferTo &&
                       sendTo &&
-                      utils.isAddress(sendTo)
+                      utils.isAddress(sendTo) &&
+                      sendTo !== selectedAddress
                     ) {
                       return (
                         <Typography variant="body2" color="text.secondary">
-                          {`Send wrapped tokens to ${sendTo}`}
+                          {`send wrapped tokens to ${sendTo}`}
                         </Typography>
                       );
                     } else if (
@@ -208,7 +300,7 @@ export const TurboWrapContent: FC<{
                     } else if (tokenIds.length) {
                       return (
                         <Typography variant="body2" color="text.secondary">
-                          Wrapped tokens will be sent back to your wallet
+                          wrapped tokens will be sent back to your wallet
                         </Typography>
                       );
                     } else {
@@ -226,7 +318,7 @@ export const TurboWrapContent: FC<{
           )}
           {tokenIds.length ? (
             <Button
-              onClick={onWrap}
+              onClick={onRequestWrapTip}
               disabled={
                 !isApprovedForAll ||
                 tokenIds.length === 0 ||
@@ -240,6 +332,11 @@ export const TurboWrapContent: FC<{
           ) : null}
         </CardActions>
       </Card>
+      <DevTipModal
+        open={isTipRequested}
+        handleClose={onHandleTipClose}
+        numberOfTokens={tokenIds.length}
+      />
     </>
   );
 };

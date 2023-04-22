@@ -52,7 +52,10 @@ export const TransactionProgress: FC<{
     : 33; // signing
 
   return (
-    <Box sx={{ position: "relative", display: "flex", alignItems: "center" }}>
+    <Box
+      component="div"
+      sx={{ position: "relative", display: "flex", alignItems: "center" }}
+    >
       <Stack sx={{ position: "relative", mr: 1 }} alignItems="center">
         <CircularProgress
           size={32}
@@ -62,6 +65,7 @@ export const TransactionProgress: FC<{
           }}
         />
         <Box
+          component="div"
           sx={{
             position: "absolute",
             zIndex: 2,
@@ -73,13 +77,14 @@ export const TransactionProgress: FC<{
           />
         </Box>
       </Stack>
-      <Box sx={{ position: "relative", flexGrow: 1 }}>
+      <Box component="div" sx={{ position: "relative", flexGrow: 1 }}>
         <LinearProgress
           variant="determinate"
           value={progress}
           sx={{ zIndex: 1 }}
         />
         <Box
+          component="div"
           sx={{
             position: "absolute",
             left: "33%",
@@ -93,6 +98,7 @@ export const TransactionProgress: FC<{
           />
         </Box>
         <Box
+          component="div"
           sx={{
             position: "absolute",
             left: "66%",

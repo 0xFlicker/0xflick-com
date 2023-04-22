@@ -9,7 +9,6 @@
     "composite": true,
     "jsx": "preserve",
     "paths": {
-      "@0xflick/feature-auth": ["../../packages/feature-auth/src/index"],
       "@0xflick/components": ["../../packages/components/src/index"],
       "@0xflick/utils": ["../../packages/utils/src/index"]
     },
@@ -18,9 +17,6 @@
   "include": ["ethereum.d.ts", "src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["./node_modules"],
   "references": [
-    {
-      "path": "../../packages/feature-auth"
-    },
     {
       "path": "../../packages/components"
     },

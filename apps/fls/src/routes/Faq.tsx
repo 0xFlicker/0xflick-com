@@ -54,7 +54,7 @@ const FaqPage: NextPage<{}> = () => {
         }
       >
         <Container maxWidth="lg">
-          <Box sx={{ mt: 4 }} />
+          <Box component="div" sx={{ mt: 4 }} />
           <FAQ />
         </Container>
       </Main>

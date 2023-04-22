@@ -28,12 +28,11 @@ export const Main: FC<
         component="main"
         display="flex"
         sx={{
+          mt: 4,
           backgroundColor: "background.default",
           flexFlow: "column",
-          height: "100%",
         }}
       >
-        <Toolbar ref={toolbarRef} sx={{ flex: "0 1 auto" }} />
         <Box component="div" display="flex" sx={{ flex: "1 1 auto" }}>
           {children}
         </Box>

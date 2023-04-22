@@ -160,7 +160,7 @@ export class ImageStack extends cdk.Stack {
 
     // Create the origin lambda
     const imageOrigin = new cloudfront.experimental.EdgeFunction(this, "io", {
-      runtime: lambda.Runtime.NODEJS_14_X,
+      runtime: lambda.Runtime.NODEJS_16_X,
       code: lambda.Code.fromAsset(
         path.join(__dirname, "../.layers/sharp-layer.zip")
       ),
@@ -187,151 +187,151 @@ export class ImageStack extends cdk.Stack {
     resizerBucket.grantPut(imageOrigin);
     resizerBucket.grantRead(imageOrigin);
 
-    const axolotlOrigin = new lambda.DockerImageFunction(
-      this,
-      "Image-Axolotl",
-      {
-        timeout: cdk.Duration.seconds(15),
-        code: lambda.DockerImageCode.fromImageAsset(
-          path.join(__dirname, "../.layers/axolotl"),
-          {
-            file: "../../docker/axolotl/Dockerfile",
-            cmd: ["index.handler"],
-            extraHash: "3",
-          }
-        ),
-        memorySize: 1536,
-        environment: {
-          SEED_BUCKET: seedBucket.bucketName,
-          ASSET_BUCKET: generativeAssetBucket.bucketName,
-          IMAGE_HOST: domainName,
-        },
-      }
-    );
-    seedBucket.grantReadWrite(axolotlOrigin);
-    seedBucket.grantPutAcl(axolotlOrigin);
-    generativeAssetBucket.grantRead(axolotlOrigin);
+    // const axolotlOrigin = new lambda.DockerImageFunction(
+    //   this,
+    //   "Image-Axolotl",
+    //   {
+    //     timeout: cdk.Duration.seconds(15),
+    //     code: lambda.DockerImageCode.fromImageAsset(
+    //       path.join(__dirname, "../.layers/axolotl"),
+    //       {
+    //         file: "../../docker/axolotl/Dockerfile",
+    //         cmd: ["index.handler"],
+    //         extraHash: "3",
+    //       }
+    //     ),
+    //     memorySize: 1536,
+    //     environment: {
+    //       SEED_BUCKET: seedBucket.bucketName,
+    //       ASSET_BUCKET: generativeAssetBucket.bucketName,
+    //       IMAGE_HOST: domainName,
+    //     },
+    //   }
+    // );
+    // seedBucket.grantReadWrite(axolotlOrigin);
+    // seedBucket.grantPutAcl(axolotlOrigin);
+    // generativeAssetBucket.grantRead(axolotlOrigin);
 
-    const axolotlHttpApi = new apigateway.RestApi(this, "axolotlApi", {});
-    const axolotlResource = axolotlHttpApi.root
-      .addResource("axolotl-seed")
-      .addResource("{seed}");
-    axolotlResource.addCorsPreflight({
-      allowOrigins: [
-        "http://localhost:3000",
-        "https://localhost:9000",
-        `https://${rootDomain}`,
-      ],
-      allowMethods: ["GET"],
-    });
-    axolotlResource.addMethod(
-      "GET",
-      new apigateway.LambdaIntegration(axolotlOrigin)
-    );
+    // const axolotlHttpApi = new apigateway.RestApi(this, "axolotlApi", {});
+    // const axolotlResource = axolotlHttpApi.root
+    //   .addResource("axolotl-seed")
+    //   .addResource("{seed}");
+    // axolotlResource.addCorsPreflight({
+    //   allowOrigins: [
+    //     "http://localhost:3000",
+    //     "https://localhost:9000",
+    //     `https://${rootDomain}`,
+    //   ],
+    //   allowMethods: ["GET"],
+    // });
+    // axolotlResource.addMethod(
+    //   "GET",
+    //   new apigateway.LambdaIntegration(axolotlOrigin)
+    // );
 
-    const nameflickImageBucket = new s3.Bucket(this, "nameflick-image-bucket", {
-      publicReadAccess: true,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-    });
+    // const nameflickImageBucket = new s3.Bucket(this, "nameflick-image-bucket", {
+    //   publicReadAccess: true,
+    //   removalPolicy: cdk.RemovalPolicy.DESTROY,
+    // });
 
-    const nameflickImage = new lambda.DockerImageFunction(
-      this,
-      "Image-Nameflick",
-      {
-        timeout: cdk.Duration.seconds(15),
-        code: lambda.DockerImageCode.fromImageAsset(
-          path.join(__dirname, "../.layers/nameflick-image"),
-          {
-            file: "../../docker/nameflick-image/Dockerfile",
-            cmd: ["index.handler"],
-            extraHash: "6",
-          }
-        ),
-        memorySize: 512,
-        environment: {
-          BUCKET_NAME: nameflickImageBucket.bucketName,
-          IMAGE_HOST: domainName,
-        },
-      }
-    );
-    nameflickImageBucket.grantReadWrite(nameflickImage);
-    nameflickImageBucket.grantPutAcl(nameflickImage);
-    const nameflickImageHttpApi = new apigateway.RestApi(
-      this,
-      "nameflickImageApi",
-      {}
-    );
-    const nameflickImageResource = nameflickImageHttpApi.root
-      .addResource("nameflick-image")
-      .addResource("{wrapped}")
-      .addResource("{tokenId}");
-    nameflickImageResource.addCorsPreflight({
-      allowOrigins: [
-        "http://localhost:3000",
-        "https://localhost:9000",
-        `https://${rootDomain}`,
-      ],
-      allowMethods: ["GET"],
-    });
-    nameflickImageResource.addMethod(
-      "GET",
-      new apigateway.LambdaIntegration(nameflickImage)
-    );
+    // const nameflickImage = new lambda.DockerImageFunction(
+    //   this,
+    //   "Image-Nameflick",
+    //   {
+    //     timeout: cdk.Duration.seconds(15),
+    //     code: lambda.DockerImageCode.fromImageAsset(
+    //       path.join(__dirname, "../.layers/nameflick-image"),
+    //       {
+    //         file: "../../docker/nameflick-image/Dockerfile",
+    //         cmd: ["index.handler"],
+    //         extraHash: "6",
+    //       }
+    //     ),
+    //     memorySize: 512,
+    //     environment: {
+    //       BUCKET_NAME: nameflickImageBucket.bucketName,
+    //       IMAGE_HOST: domainName,
+    //     },
+    //   }
+    // );
+    // nameflickImageBucket.grantReadWrite(nameflickImage);
+    // nameflickImageBucket.grantPutAcl(nameflickImage);
+    // const nameflickImageHttpApi = new apigateway.RestApi(
+    //   this,
+    //   "nameflickImageApi",
+    //   {}
+    // );
+    // const nameflickImageResource = nameflickImageHttpApi.root
+    //   .addResource("nameflick-image")
+    //   .addResource("{wrapped}")
+    //   .addResource("{tokenId}");
+    // nameflickImageResource.addCorsPreflight({
+    //   allowOrigins: [
+    //     "http://localhost:3000",
+    //     "https://localhost:9000",
+    //     `https://${rootDomain}`,
+    //   ],
+    //   allowMethods: ["GET"],
+    // });
+    // nameflickImageResource.addMethod(
+    //   "GET",
+    //   new apigateway.LambdaIntegration(nameflickImage)
+    // );
 
     const cf = new cloudfront.Distribution(this, "image-distribution", {
       additionalBehaviors: {
-        "axolotl/*": {
-          origin: new origins.S3Origin(seedBucket),
-          cachePolicy: new cloudfront.CachePolicy(
-            this,
-            "axolotl-cache-policy",
-            {
-              defaultTtl: cdk.Duration.days(60),
-              minTtl: cdk.Duration.seconds(0),
-              maxTtl: cdk.Duration.days(30),
-            }
-          ),
-        },
-        "axolotl-seed/*": {
-          origin: new origins.RestApiOrigin(axolotlHttpApi),
-          cachePolicy: new cloudfront.CachePolicy(
-            this,
-            "axolotl-origin-cache-policy",
-            {
-              minTtl: cdk.Duration.hours(72),
-              queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
-              cookieBehavior: cloudfront.CacheCookieBehavior.none(),
-              headerBehavior:
-                cloudfront.CacheHeaderBehavior.allowList("origin"),
-            }
-          ),
-        },
-        "nameflick/*": {
-          origin: new origins.S3Origin(nameflickImageBucket),
-          cachePolicy: new cloudfront.CachePolicy(
-            this,
-            "nameflick-image-cache-policy",
-            {
-              defaultTtl: cdk.Duration.days(60),
-              minTtl: cdk.Duration.seconds(0),
-              maxTtl: cdk.Duration.days(30),
-            }
-          ),
-        },
-        "nameflick-image/*": {
-          origin: new origins.RestApiOrigin(nameflickImageHttpApi),
-          cachePolicy: new cloudfront.CachePolicy(
-            this,
-            "nameflick-image-origin-cache-policy",
-            {
-              minTtl: cdk.Duration.hours(24),
-              queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
-              cookieBehavior: cloudfront.CacheCookieBehavior.none(),
-              headerBehavior:
-                cloudfront.CacheHeaderBehavior.allowList("origin"),
-            }
-          ),
-        },
+        // "axolotl/*": {
+        //   origin: new origins.S3Origin(seedBucket),
+        //   cachePolicy: new cloudfront.CachePolicy(
+        //     this,
+        //     "axolotl-cache-policy",
+        //     {
+        //       defaultTtl: cdk.Duration.days(60),
+        //       minTtl: cdk.Duration.seconds(0),
+        //       maxTtl: cdk.Duration.days(30),
+        //     }
+        //   ),
+        // },
+        // "axolotl-seed/*": {
+        //   origin: new origins.RestApiOrigin(axolotlHttpApi),
+        //   cachePolicy: new cloudfront.CachePolicy(
+        //     this,
+        //     "axolotl-origin-cache-policy",
+        //     {
+        //       minTtl: cdk.Duration.hours(72),
+        //       queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
+        //       cookieBehavior: cloudfront.CacheCookieBehavior.none(),
+        //       headerBehavior:
+        //         cloudfront.CacheHeaderBehavior.allowList("origin"),
+        //     }
+        //   ),
+        // },
+        // "nameflick/*": {
+        //   origin: new origins.S3Origin(nameflickImageBucket),
+        //   cachePolicy: new cloudfront.CachePolicy(
+        //     this,
+        //     "nameflick-image-cache-policy",
+        //     {
+        //       defaultTtl: cdk.Duration.days(60),
+        //       minTtl: cdk.Duration.seconds(0),
+        //       maxTtl: cdk.Duration.days(30),
+        //     }
+        //   ),
+        // },
+        // "nameflick-image/*": {
+        //   origin: new origins.RestApiOrigin(nameflickImageHttpApi),
+        //   cachePolicy: new cloudfront.CachePolicy(
+        //     this,
+        //     "nameflick-image-origin-cache-policy",
+        //     {
+        //       minTtl: cdk.Duration.hours(24),
+        //       queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
+        //       cookieBehavior: cloudfront.CacheCookieBehavior.none(),
+        //       headerBehavior:
+        //         cloudfront.CacheHeaderBehavior.allowList("origin"),
+        //     }
+        //   ),
+        // },
       },
       defaultBehavior: {
         origin: new origins.S3Origin(resizerBucket),
@@ -380,11 +380,11 @@ export class ImageStack extends cdk.Stack {
     new cdk.CfnOutput(this, "imageBucket", {
       value: resizerBucket.bucketName,
     });
-    new cdk.CfnOutput(this, "nameflickImageBucket", {
-      value: nameflickImageBucket.bucketName,
-    });
-    new cdk.CfnOutput(this, "axolotlHttpApi", {
-      value: axolotlHttpApi.url,
-    });
+    // new cdk.CfnOutput(this, "nameflickImageBucket", {
+    //   value: nameflickImageBucket.bucketName,
+    // });
+    // new cdk.CfnOutput(this, "axolotlHttpApi", {
+    //   value: axolotlHttpApi.url,
+    // });
   }
 }

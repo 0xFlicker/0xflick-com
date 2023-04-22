@@ -11,7 +11,7 @@
     "lokijs": "^1.5.12",
     "pino-pretty": "^10.0.0",
     "react": "^18.2.0",
-    "wagmi": "^0.12.10"
+    "wagmi": "^0.12.12"
   },
   "devDependencies": {
     "typescript": "^4.9.4"

@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { defineConfig } from "@wagmi/cli";
 import { etherscan, react } from "@wagmi/cli/plugins";
-import { goerli } from "wagmi/chains";
+import { goerli, mainnet } from "wagmi/chains";
 
 export default defineConfig({
   out: "src/wagmi/index.ts",
@@ -31,6 +31,27 @@ export default defineConfig({
         },
       ],
     }),
-    react(),
+    etherscan({
+      apiKey: process.env.ETHERSCAN_API_KEY!,
+      chainId: mainnet.id,
+      contracts: [
+        {
+          name: "FameLadySociety",
+          address: {
+            [mainnet.id]: "0x6cf4328f1ea83b5d592474f9fcdc714faafd1574" as const,
+          },
+        },
+        {
+          name: "FameLadySquad",
+          address: {
+            [mainnet.id]: "0xf3E6DbBE461C6fa492CeA7Cb1f5C5eA660EB1B47" as const,
+          },
+        },
+      ],
+    }),
+    react({
+      useContractEvent: false,
+      useContractItemEvent: false,
+    }),
   ],
 });

@@ -4,10 +4,8 @@ import Typography from "@mui/material/Typography";
 import InputIcon from "@mui/icons-material/Input";
 import QAIcon from "@mui/icons-material/QuestionAnswer";
 import ExchangeIcon from "@mui/icons-material/CurrencyExchange";
-import { DarkModeSwitch } from "@/features/appbar/components/DarkModeSwitch";
 import { useLocale } from "@0xflick/feature-locale";
 import { FC } from "react";
-import { useTheme } from "@0xflick/feature-theme";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import { WrappedLink } from "@0xflick/components/src/WrappedLink";
 
