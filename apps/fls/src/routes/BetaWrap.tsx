@@ -11,11 +11,10 @@ import { useLocale } from "@0xflick/feature-locale";
 import { MintCard } from "@/features/wrap/components/MintCard";
 import useClient from "@/hooks/useClient";
 import Grid2 from "@mui/material/Unstable_Grid2";
-import { WrapCard } from "@/features/wrap/components/WrapCard";
-import { GoerliTurboWrap } from "@/features/wrap/components/GoerliTurboWrap";
 import { FC, useEffect } from "react";
 import { wagmiClientAutoConnect } from "@0xflick/feature-web3/src/wagmi";
-import { TurboWrap } from "@/features/wrap/components/TurboWrap";
+import { BetaTurboWrap } from "@/features/wrap/components/BetaTurboWrap";
+import { BetaWrapCard } from "@/features/wrap/components/BetaWrapCard";
 import { UnwrapCard } from "@/features/wrap/components/UnWrapCard";
 
 const Content: FC<{
@@ -34,17 +33,17 @@ const Content: FC<{
         ) : null}
         <Grid2 xs={12} sm={12} md={12}>
           <Box component="div" sx={{ mt: 4 }}>
-            {isClient && <TurboWrap />}
+            {isClient && <BetaTurboWrap />}
           </Box>
         </Grid2>
         <Grid2 xs={12} sm={12} md={12}>
           <Box component="div" sx={{ mt: 4 }}>
-            {isClient && <WrapCard minTokenId={0} maxTokenId={8887} />}
+            {isClient && <BetaWrapCard minTokenId={0} maxTokenId={8887} />}
           </Box>
         </Grid2>
         <Grid2 xs={12} sm={12} md={12}>
           <Box component="div" sx={{ mt: 4 }}>
-            {isClient && <UnwrapCard testnetOnly />}
+            {isClient && <UnwrapCard />}
           </Box>
         </Grid2>
       </Grid2>

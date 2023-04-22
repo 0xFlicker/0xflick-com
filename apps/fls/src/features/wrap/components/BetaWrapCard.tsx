@@ -3,7 +3,7 @@ import { useWeb3 } from "@0xflick/feature-web3";
 import { GoerliSelectWrap } from "./GoerliSelectWrap";
 import { MainnetSelectWrap } from "./MainnetSelectWrap";
 
-export const WrapCard: FC<{ minTokenId: number; maxTokenId: number }> = ({
+export const BetaWrapCard: FC<{ minTokenId: number; maxTokenId: number }> = ({
   minTokenId,
   maxTokenId,
 }) => {
@@ -13,6 +13,10 @@ export const WrapCard: FC<{ minTokenId: number; maxTokenId: number }> = ({
       case 5:
         return (
           <GoerliSelectWrap minTokenId={minTokenId} maxTokenId={maxTokenId} />
+        );
+      case 1:
+        return (
+          <MainnetSelectWrap minTokenId={minTokenId} maxTokenId={maxTokenId} />
         );
       default:
         return null;
