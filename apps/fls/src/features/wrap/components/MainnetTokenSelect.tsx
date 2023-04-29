@@ -88,7 +88,7 @@ export const MainnetTokenSelect: FC<{
                 <CardHeader title={tokenId} />
                 <CardMedia
                   component="img"
-                  image={`https://img.fameladysociety.com/thumb/${tokenId}`}
+                  image={`https://fls-prod-imagestoragef1b24905-1ftqhtk2cy7nl.s3.amazonaws.com/thumb/${tokenId}.png`}
                   sx={{
                     objectFit: "contain",
                     width: "100%",

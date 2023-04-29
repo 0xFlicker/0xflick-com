@@ -6,7 +6,7 @@ export const DiscordIcon: FC = () => {
   const isDarkMode = useTheme();
   return (
     <Image
-      src={`/marketing/discord-${isDarkMode ? "dark" : "light"}.png`}
+      src={`/images/marketing/discord-${isDarkMode ? "dark" : "light"}.png`}
       alt="discord"
       height={32}
       layout="fixed"

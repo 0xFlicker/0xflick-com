@@ -44,7 +44,7 @@ const Content: FC<{
         </Grid2>
         <Grid2 xs={12} sm={12} md={12}>
           <Box component="div" sx={{ mt: 4 }}>
-            {isClient && <UnwrapCard testnetOnly />}
+            {isClient && <UnwrapCard />}
           </Box>
         </Grid2>
       </Grid2>

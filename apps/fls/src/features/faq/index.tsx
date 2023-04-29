@@ -4,6 +4,7 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import Card from "@mui/material/Card";
 import Typography from "@mui/material/Typography";
+import { WrappedLink } from "@0xflick/components/src/WrappedLink";
 
 const QA: FC<{ question: ReactNode; answer: ReactNode }> = ({
   question,
@@ -83,6 +84,22 @@ export const FAQ: FC = () => {
           answer="Yes, you can unwrap your Fame Lady Society NFT at any time. When you unwrap your Fame Lady Society NFT, you will relinquish ownership of the Fame Lady Society NFT and receive the original Fame Lady Squad NFT in return. The Fame Lady Squad NFT is a 1:1 representation of your Fame Lady Society NFT."
         />
         <QA
+          question="Unwrap says coming soon. When?"
+          answer={
+            <Typography>
+              You can unwrap today using etherscan{" "}
+              <WrappedLink
+                href="https://etherscan.io/address/0x6cf4328f1ea83b5d592474f9fcdc714faafd1574#writeContract#F18"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                here
+              </WrappedLink>
+              . The widget will be available soon.
+            </Typography>
+          }
+        />
+        <QA
           question="Why should I wrap my Fame Lady Squad NFT?"
           answer="By wrapping your Fame Lady Squad NFT, you can remain engaged with the Fame Lady Society community. Since the Fame Lady Squad community and its smart contract are now inactive and inaccessible, this wrapping process is essential for continued participation. Additionally, the modern and efficient Fame Lady Society smart contract ensures royalty enforcement and facilitates gas-efficient transfers, in contrast to the former Fame Lady Squad contract."
         />
@@ -100,9 +117,10 @@ export const FAQ: FC = () => {
                 concerning the operational affairs of the Fame Lady Society.
               </Typography>
               <Typography mt={2}>
-                The Fame Lady Society shall be guided by an elected seven-member
-                Community Council. The FLSoc Council is responsible for planning
-                the overall direction, vision, and long-term strategy.
+                The Fame Lady Society shall be guided by an elected Community
+                Council voted in by verified holders. The FLSoc Council is
+                responsible for planning the overall direction, vision, and
+                long-term strategy.
               </Typography>
             </>
           }

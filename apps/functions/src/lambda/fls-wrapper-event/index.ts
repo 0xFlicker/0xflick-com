@@ -22,6 +22,14 @@ const logger = createLogger({
   name: "fls-wrapper-event",
 });
 
+interface Event {
+  blockNumber: number;
+  eventFragment: utils.EventFragment;
+  name: string;
+  signature: string;
+  topic: string;
+  args: utils.Result;
+}
 const { Interface } = utils;
 
 if (!process.env.RPC_URL_MAINNET) {
@@ -75,7 +83,7 @@ async function findEvents(
   contractInterface: utils.Interface,
   fromBlock: number,
   toBlock: number
-) {
+): Promise<Event[]> {
   const events = await provider.getLogs({
     address: contractAddress,
     fromBlock,
@@ -98,7 +106,7 @@ async function findEvents(
   return ret;
 }
 
-async function notifyDiscord({
+async function notifyDiscordSingleToken({
   tokenId,
   toAddress,
   channelId,
@@ -147,6 +155,71 @@ async function notifyDiscord({
           }`,
           image: {
             url: `https://img.fameladysociety.com/thumb/${tokenId}`,
+          },
+          fields,
+        },
+      ],
+    },
+    topicArn: discordMessageTopicArn,
+    sns,
+  });
+}
+
+async function notifyDiscordMultipleTokens({
+  tokenIds,
+  toAddress,
+  channelId,
+  provider,
+  testnet,
+  discordMessageTopicArn,
+  sns,
+}: {
+  tokenIds: string[];
+  toAddress: string;
+  channelId: string;
+  provider: providers.Provider;
+  testnet: boolean;
+  discordMessageTopicArn: string;
+  sns: SNS;
+}) {
+  let ensName: string;
+  try {
+    ensName = await provider.lookupAddress(toAddress);
+  } catch (e) {
+    logger.error(e, "Failed to lookup address", toAddress);
+    ensName = toAddress;
+  }
+  const displayName = ensName ? ensName : toAddress;
+  const fields: APIEmbedField[] = [];
+  fields.push({
+    name: "total wrapped",
+    value: tokenIds.length.toString(),
+    inline: true,
+  });
+  fields.push({
+    name: "by",
+    value: displayName,
+    inline: true,
+  });
+  if (testnet) {
+    fields.push({
+      name: "goerli",
+      value: "true",
+      inline: true,
+    });
+  }
+
+  await sendDiscordMessage({
+    channelId,
+    message: {
+      embeds: [
+        {
+          title: "#itsawrap",
+          description: `Fame Lady Society were wrapped${
+            testnet ? " on Goerli" : ""
+          }`,
+          image: {
+            url: `https://img.fameladysociety.com/mosaic/${tokenIds.join(",")}`,
           },
           fields,
         },
@@ -213,30 +286,70 @@ export const handler = async () =>
 
     // Notify discord
     const sns = new SNS({});
-    await Promise.all([
-      ...goerliEvents.map((event) => {
-        return notifyDiscord({
-          tokenId: event.args[2].toString(),
-          toAddress: event.args[1],
+    // Group events by to address
+    const goerliEventsByTo = new Map<string, Event[]>();
+    const mainnetEventsByTo = new Map<string, Event[]>();
+    for (const event of goerliEvents) {
+      const events: Event[] = goerliEventsByTo.get(event.args[1]) || [];
+      events.push(event);
+      goerliEventsByTo.set(event.args[1], events);
+    }
+    for (const event of mainnetEvents) {
+      const events: Event[] = mainnetEventsByTo.get(event.args[1]) || [];
+      events.push(event);
+      mainnetEventsByTo.set(event.args[1], events);
+    }
+
+    // Now push out the events
+    for (const [to, events] of goerliEventsByTo.entries()) {
+      const tokenIds = events.map(({ args }) => args[2].toString());
+      if (tokenIds.length === 1) {
+        await notifyDiscordSingleToken({
+          tokenId: tokenIds[0],
+          toAddress: to,
           channelId: process.env.DISCORD_CHANNEL_ID,
           provider: goerliProvider,
           discordMessageTopicArn: process.env.DISCORD_MESSAGE_TOPIC_ARN,
           testnet: true,
           sns,
         });
-      }),
-      ...mainnetEvents.map((event) => {
-        return notifyDiscord({
-          tokenId: event.args[2].toString(),
-          toAddress: event.args[1],
+      } else {
+        await notifyDiscordMultipleTokens({
+          tokenIds,
+          toAddress: to,
+          channelId: process.env.DISCORD_CHANNEL_ID,
+          provider: goerliProvider,
+          testnet: true,
+          discordMessageTopicArn: process.env.DISCORD_MESSAGE_TOPIC_ARN,
+          sns,
+        });
+      }
+    }
+
+    for (const [to, events] of mainnetEventsByTo.entries()) {
+      const tokenIds = events.map(({ args }) => args[2].toString());
+      if (tokenIds.length === 1) {
+        await notifyDiscordSingleToken({
+          tokenId: tokenIds[0],
+          toAddress: to,
           channelId: process.env.DISCORD_CHANNEL_ID,
           provider: mainnetProvider,
           discordMessageTopicArn: process.env.DISCORD_MESSAGE_TOPIC_ARN,
           testnet: false,
           sns,
         });
-      }),
-    ]);
+      } else {
+        await notifyDiscordMultipleTokens({
+          tokenIds,
+          toAddress: to,
+          channelId: process.env.DISCORD_CHANNEL_ID,
+          provider: mainnetProvider,
+          testnet: false,
+          discordMessageTopicArn: process.env.DISCORD_MESSAGE_TOPIC_ARN,
+          sns,
+        });
+      }
+    }
 
     await Promise.all([
       db.send(

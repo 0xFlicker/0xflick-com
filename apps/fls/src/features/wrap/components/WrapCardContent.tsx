@@ -16,20 +16,23 @@ import {
   usePrepareFameLadySocietyWrapTo,
   useFameLadySocietyWrapTo,
   bulkMinterAddress,
-  fameLadySocietyAddress,
 } from "@/wagmi";
 import Button from "@mui/material/Button";
 
 import { useWeb3 } from "@0xflick/feature-web3";
 import { BigNumber, utils } from "ethers";
-import { Box, CircularProgress, FormControlLabel, Switch } from "@mui/material";
+import Box from "@mui/material/Box";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Switch from "@mui/material/Switch";
+import CircularProgress from "@mui/material/CircularProgress";
 import { TransactionProgress } from "@/components/TransactionProgress";
 import { useAuth } from "@0xflick/feature-auth/src/hooks";
 import { TokenSelect } from "./TokenSelect";
 import { MainnetTokenSelect } from "./MainnetTokenSelect";
 import { DevTipModal, TipCloseReason } from "./DevTipModal";
 import { useEnsAddress } from "wagmi";
-import { CheckCircle } from "@mui/icons-material";
+import CheckCircle from "@mui/icons-material/CheckCircle";
+import { useRouter } from "next/router";
 
 export const WrapCardContent: FC<{
   minTokenId: number;
@@ -48,6 +51,7 @@ export const WrapCardContent: FC<{
   setApprovalForAll,
   testnet,
 }) => {
+  const router = useRouter();
   const [tokenIds, setTokenIds] = useState<string[]>([]);
   const [transferTo, setTransferTo] = useState(false);
 
@@ -56,6 +60,7 @@ export const WrapCardContent: FC<{
   const [tipState, setTipState] = useState<{
     reason?: TipCloseReason;
     value?: BigNumber;
+    wrapTo?: boolean;
   }>({});
   const { data: sendTo, isLoading: ensAddressIsLoading } = useEnsAddress({
     name: sendToInput,
@@ -178,7 +183,11 @@ export const WrapCardContent: FC<{
   const onWrapSuccess = useCallback(() => {
     setWrapInProgress(false);
     setWrappedTransactionResult(undefined);
-  }, []);
+    const params = new URLSearchParams();
+    params.set("tokenIds", tokenIds.join(","));
+    params.set("txHash", wrapTransactionResult?.hash || "");
+    router.push(`/wrap/success?${params.toString()}`);
+  }, [router, tokenIds, wrapTransactionResult?.hash]);
   const onRequestWrapTip = useCallback(() => {
     setIsTipRequested(true);
   }, []);
@@ -186,31 +195,25 @@ export const WrapCardContent: FC<{
     async (reason: TipCloseReason, tip?: BigNumber) => {
       setIsTipRequested(false);
       if (reason === "confirm") {
-        setTipState({ reason, value: tip });
+        setTipState({ reason, value: tip, wrapTo: transferTo && !!sendTo });
       }
     },
-    []
+    [sendTo, transferTo]
   );
 
   useEffect(() => {
     if (
       tipState.reason === "confirm" &&
       // Keep trying until one of these is true
-      ((transferTo && sendTo && utils.isAddress(sendTo) && wrappedNftWrapTo) ||
-        wrappedNftWrap)
+      ((tipState.wrapTo && wrappedNftWrapTo) || wrappedNftWrap)
     ) {
-      let wasCancelled = false;
       Promise.resolve().then(async () => {
         setTipState({});
         try {
           setWrapInProgress(true);
-          const response =
-            transferTo && sendTo && utils.isAddress(sendTo)
-              ? await wrappedNftWrapTo?.()
-              : await wrappedNftWrap?.();
-          if (wasCancelled) {
-            return;
-          }
+          const response = tipState.wrapTo
+            ? await wrappedNftWrapTo?.()
+            : await wrappedNftWrap?.();
           setWrappedTransactionResult(response);
         } catch (e) {
           console.error(e);
@@ -218,9 +221,6 @@ export const WrapCardContent: FC<{
           setWrapInProgress(false);
         }
       });
-      return () => {
-        wasCancelled = true;
-      };
     }
   }, [tipState, transferTo, sendTo, wrappedNftWrapTo, wrappedNftWrap]);
   const [approveInProgress, setApproveInProgress] = useState(false);

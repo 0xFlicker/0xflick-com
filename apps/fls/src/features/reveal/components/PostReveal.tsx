@@ -8,6 +8,7 @@ import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { Card, CardActionArea, Typography } from "@mui/material";
+import { WrappedLink } from "@0xflick/components/src/WrappedLink";
 
 export const PostReveal = () => {
   return (
@@ -24,6 +25,7 @@ export const PostReveal = () => {
                 height={1080}
               />
             </Box>
+
             <Typography variant="h6" align="center">
               down
             </Typography>
@@ -34,15 +36,17 @@ export const PostReveal = () => {
         </ParallaxLayer>
         <ParallaxLayer offset={1} speed={0.5}>
           <Container maxWidth="xl">
-            <Typography
-              variant="h2"
-              align="center"
-              sx={{
-                textShadow: "0 0 3px #FF0000, 0 0 5px #0000FF",
-              }}
-            >
-              #itsawrap
-            </Typography>
+            <WrappedLink href="/wrap">
+              <Typography
+                variant="h2"
+                align="center"
+                sx={{
+                  textShadow: "0 0 3px #FF0000, 0 0 5px #0000FF",
+                }}
+              >
+                #itsawrap
+              </Typography>
+            </WrappedLink>
           </Container>
         </ParallaxLayer>
         <ParallaxLayer

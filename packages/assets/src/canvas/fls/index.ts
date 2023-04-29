@@ -68,3 +68,54 @@ export async function resizeImage({
   console.log("Returning image");
   return canvas.toBuffer("image/png");
 }
+
+function calculateRowsAndColumns(numImages: number) {
+  let numRows = Math.floor(Math.sqrt(numImages));
+  let numCols = Math.ceil(numImages / numRows);
+
+  while (numRows * numCols < numImages) {
+    numRows += 1;
+  }
+
+  return { numRows, numCols };
+}
+
+export async function generateMosaic({ images }: { images: Image[] }) {
+  const { numRows, numCols } = calculateRowsAndColumns(images.length);
+
+  const imgWidth = images[0].width;
+  const imgHeight = images[0].height;
+
+  const mosaicWidth = numCols * imgWidth;
+  const mosaicHeight = numRows * imgHeight;
+
+  const maxCanvasSize = 2000;
+  const widthScaleFactor = maxCanvasSize / mosaicWidth;
+  const heightScaleFactor = maxCanvasSize / mosaicHeight;
+
+  let scaleFactor = Math.min(widthScaleFactor, heightScaleFactor);
+
+  const canvas = (await createCanvas(
+    mosaicWidth * scaleFactor,
+    mosaicHeight * scaleFactor
+  )) as Canvas;
+  const ctx = canvas.getContext("2d");
+  ctx.scale(scaleFactor, scaleFactor);
+
+  for (let i = 0; i < numRows; i++) {
+    for (let j = 0; j < numCols; j++) {
+      const index = i * numCols + j;
+      if (index < images.length) {
+        ctx.drawImage(
+          images[index],
+          j * imgWidth,
+          i * imgHeight,
+          imgWidth,
+          imgHeight
+        );
+      }
+    }
+  }
+
+  return canvas;
+}

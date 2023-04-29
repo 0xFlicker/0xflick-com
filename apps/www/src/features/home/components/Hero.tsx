@@ -247,7 +247,7 @@ export const Hero: FC = () => {
           style={parallaxStyleCenter}
         >
           <SlideFromSide scrollY={scroll}>
-            <Image src="/network.png" alt="" layout="fill" />
+            <Image src="/images/network.png" alt="" layout="fill" />
           </SlideFromSide>
         </ParallaxLayer>
         <ParallaxLayer
@@ -258,7 +258,7 @@ export const Hero: FC = () => {
         >
           <SlideFromSide right scrollY={scroll}>
             <Image
-              src="/network.png"
+              src="/images/network.png"
               alt=""
               layout="fill"
               style={{

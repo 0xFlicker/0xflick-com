@@ -22,7 +22,7 @@ export const SiteMenu: FC<{
           <ExchangeIcon />
         </ListItemIcon>
         <ListItemText
-          primary={<Typography textAlign="right">(testnet) Wrap</Typography>}
+          primary={<Typography textAlign="right">Wrap</Typography>}
         />
       </MenuItem>
       <MenuItem component={WrappedLink} href="/faq" disabled={isFaq}>

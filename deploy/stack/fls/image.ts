@@ -95,6 +95,26 @@ export class Image extends Construct {
     storageBucket.grantReadWrite(thumbHandler);
     storageBucket.grantPutAcl(thumbHandler);
 
+    const mosaicHandler = new lambda.DockerImageFunction(this, "mosaic", {
+      timeout: cdk.Duration.seconds(30),
+      code: lambda.DockerImageCode.fromImageAsset(
+        path.join(__dirname, "../../.layers/fls-mosaic"),
+        {
+          file: "../../docker/canvas/Dockerfile",
+          cmd: ["index.handler"],
+          extraHash: "15-mosaic",
+          networkMode: NetworkMode.HOST,
+        }
+      ),
+      memorySize: 1536,
+      environment: {
+        ASSET_BUCKET: storageBucket.bucketName,
+        IMAGE_HOST: storageBucket.bucketDomainName,
+      },
+    });
+    storageBucket.grantReadWrite(mosaicHandler);
+    storageBucket.grantPutAcl(mosaicHandler);
+
     const httpApi = new apigateway.RestApi(this, "fls-image-flip", {
       domainName: {
         domainName,
@@ -122,6 +142,17 @@ export class Image extends Construct {
     thumbApiResource.addMethod(
       "GET",
       new apigateway.LambdaIntegration(thumbHandler)
+    );
+    const mosaicApiResource = httpApi.root
+      .addResource("mosaic")
+      .addResource("{tokenIds}");
+    mosaicApiResource.addCorsPreflight({
+      allowOrigins: corsAllowedOrigins,
+      allowMethods: ["GET"],
+    });
+    mosaicApiResource.addMethod(
+      "GET",
+      new apigateway.LambdaIntegration(mosaicHandler)
     );
 
     new cdk.CfnOutput(this, "apiUrl", {

@@ -28,6 +28,7 @@ export const WalletModal: FC<IProps> = ({ assetPrefix, open, handleClose }) => {
       return isMetamaskConnector(c as TAppConnectors);
     });
     if (connector) {
+      handleClose();
       connect({
         connector,
       });
@@ -39,6 +40,7 @@ export const WalletModal: FC<IProps> = ({ assetPrefix, open, handleClose }) => {
       return isWalletConnector(c as TAppConnectors);
     });
     if (connector) {
+      handleClose();
       connect({
         connector,
       });
@@ -50,6 +52,7 @@ export const WalletModal: FC<IProps> = ({ assetPrefix, open, handleClose }) => {
       return isCoinbaseWalletConnector(c as TAppConnectors);
     });
     if (connector) {
+      handleClose();
       connect({
         connector,
       });
@@ -61,6 +64,7 @@ export const WalletModal: FC<IProps> = ({ assetPrefix, open, handleClose }) => {
       return isInjectedConnector(c as TAppConnectors);
     });
     if (connector) {
+      handleClose();
       connect({
         connector,
       });
@@ -123,7 +127,7 @@ export const WalletModal: FC<IProps> = ({ assetPrefix, open, handleClose }) => {
                 startIcon={
                   <Image
                     alt=""
-                    src={`${assetPrefix ?? ""}/wallets/metamask-fox.svg`}
+                    src={`${assetPrefix ?? ""}/images/wallets/metamask-fox.svg`}
                     width={25}
                     height={25}
                   />
@@ -150,7 +154,9 @@ export const WalletModal: FC<IProps> = ({ assetPrefix, open, handleClose }) => {
                 startIcon={
                   <Image
                     alt=""
-                    src={`${assetPrefix ?? ""}/wallets/walletconnect.svg`}
+                    src={`${
+                      assetPrefix ?? ""
+                    }/images/wallets/walletconnect.svg`}
                     width={25}
                     height={25}
                   />
@@ -171,7 +177,9 @@ export const WalletModal: FC<IProps> = ({ assetPrefix, open, handleClose }) => {
                 startIcon={
                   <Image
                     alt=""
-                    src={`${assetPrefix ?? ""}/wallets/coinbase_wallet.png`}
+                    src={`${
+                      assetPrefix ?? ""
+                    }/images/wallets/coinbase_wallet.png`}
                     width={25}
                     height={25}
                   />
@@ -192,7 +200,7 @@ export const WalletModal: FC<IProps> = ({ assetPrefix, open, handleClose }) => {
                 startIcon={
                   <Image
                     alt=""
-                    src={`${assetPrefix ?? ""}/wallets/FrameLogo512.png`}
+                    src={`${assetPrefix ?? ""}/images/wallets/FrameLogo512.png`}
                     width={25}
                     height={25}
                   />

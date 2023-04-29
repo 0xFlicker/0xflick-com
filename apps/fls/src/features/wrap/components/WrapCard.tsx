@@ -14,6 +14,10 @@ export const WrapCard: FC<{ minTokenId: number; maxTokenId: number }> = ({
         return (
           <GoerliSelectWrap minTokenId={minTokenId} maxTokenId={maxTokenId} />
         );
+      case 1:
+        return (
+          <MainnetSelectWrap minTokenId={minTokenId} maxTokenId={maxTokenId} />
+        );
       default:
         return null;
     }

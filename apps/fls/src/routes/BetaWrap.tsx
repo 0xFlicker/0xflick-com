@@ -16,38 +16,46 @@ import { wagmiClientAutoConnect } from "@0xflick/feature-web3/src/wagmi";
 import { BetaTurboWrap } from "@/features/wrap/components/BetaTurboWrap";
 import { BetaWrapCard } from "@/features/wrap/components/BetaWrapCard";
 import { UnwrapCard } from "@/features/wrap/components/UnWrapCard";
+import useLocalStorage from "use-local-storage";
+import { AgreeModal } from "@/features/wrap/components/AgreeModal";
 
 const Content: FC<{
   hasMint?: boolean;
 }> = ({ hasMint = true }) => {
   const isClient = useClient();
+  const [hasAgreed, setHasAgreed] = useLocalStorage("agree-to-risk", false);
   return (
-    <Container maxWidth="lg">
-      <Grid2 container spacing={2}>
-        {hasMint ? (
+    <>
+      <Container maxWidth="lg">
+        <Grid2 container spacing={2}>
+          {hasMint ? (
+            <Grid2 xs={12} sm={12} md={12}>
+              <Box component="div" sx={{ mt: 4 }}>
+                {isClient && <MintCard />}
+              </Box>
+            </Grid2>
+          ) : null}
           <Grid2 xs={12} sm={12} md={12}>
             <Box component="div" sx={{ mt: 4 }}>
-              {isClient && <MintCard />}
+              {isClient && <BetaTurboWrap />}
             </Box>
           </Grid2>
-        ) : null}
-        <Grid2 xs={12} sm={12} md={12}>
-          <Box component="div" sx={{ mt: 4 }}>
-            {isClient && <BetaTurboWrap />}
-          </Box>
+          <Grid2 xs={12} sm={12} md={12}>
+            <Box component="div" sx={{ mt: 4 }}>
+              {isClient && <BetaWrapCard minTokenId={0} maxTokenId={8887} />}
+            </Box>
+          </Grid2>
+          <Grid2 xs={12} sm={12} md={12}>
+            <Box component="div" sx={{ mt: 4 }}>
+              {isClient && <UnwrapCard />}
+            </Box>
+          </Grid2>
         </Grid2>
-        <Grid2 xs={12} sm={12} md={12}>
-          <Box component="div" sx={{ mt: 4 }}>
-            {isClient && <BetaWrapCard minTokenId={0} maxTokenId={8887} />}
-          </Box>
-        </Grid2>
-        <Grid2 xs={12} sm={12} md={12}>
-          <Box component="div" sx={{ mt: 4 }}>
-            {isClient && <UnwrapCard />}
-          </Box>
-        </Grid2>
-      </Grid2>
-    </Container>
+      </Container>
+      {!hasAgreed && (
+        <AgreeModal open={!hasAgreed} onClose={() => setHasAgreed(true)} />
+      )}
+    </>
   );
 };
 

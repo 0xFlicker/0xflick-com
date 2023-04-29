@@ -20,10 +20,15 @@ import Button from "@mui/material/Button";
 
 import { useWeb3 } from "@0xflick/feature-web3";
 import { BigNumber, utils } from "ethers";
-import { Box, FormControlLabel, Switch } from "@mui/material";
+import Box from "@mui/material/Box";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Switch from "@mui/material/Switch";
+import CircularProgress from "@mui/material/CircularProgress";
 import { TransactionProgress } from "@/components/TransactionProgress";
 import { DevTipModal, TipCloseReason } from "./DevTipModal";
 import { useEnsAddress } from "wagmi";
+import CheckCircle from "@mui/icons-material/CheckCircle";
+import { useRouter } from "next/router";
 
 export const TurboWrapContent: FC<{
   tokenIds: BigNumber[];
@@ -40,11 +45,13 @@ export const TurboWrapContent: FC<{
   setApprovalForAll,
   testnet,
 }) => {
+  const router = useRouter();
   const [transferTo, setTransferTo] = useState(false);
   const [isTipRequested, setIsTipRequested] = useState(false);
   const [tipState, setTipState] = useState<{
     reason?: TipCloseReason;
     value?: BigNumber;
+    wrapTo?: boolean;
   }>({});
   const [sendToInput, setSendToInput] = useState<string>();
   const { data: sendTo, isLoading: ensAddressIsLoading } = useEnsAddress({
@@ -153,30 +160,24 @@ export const TurboWrapContent: FC<{
     async (reason: TipCloseReason, tip?: BigNumber) => {
       setIsTipRequested(false);
       if (reason === "confirm") {
-        setTipState({ reason, value: tip });
+        setTipState({ reason, value: tip, wrapTo: transferTo && !!sendTo });
       }
     },
-    []
+    [sendTo, transferTo]
   );
   useEffect(() => {
     if (
       tipState.reason === "confirm" &&
       // Keep trying until one of these is true
-      ((transferTo && sendTo && utils.isAddress(sendTo) && wrappedNftWrapTo) ||
-        wrappedNftWrap)
+      ((tipState.wrapTo && wrappedNftWrapTo) || wrappedNftWrap)
     ) {
-      let wasCancelled = false;
       Promise.resolve().then(async () => {
         setTipState({});
         try {
           setWrapInProgress(true);
-          const response =
-            transferTo && sendTo && utils.isAddress(sendTo)
-              ? await wrappedNftWrapTo?.()
-              : await wrappedNftWrap?.();
-          if (wasCancelled) {
-            return;
-          }
+          const response = tipState.wrapTo
+            ? await wrappedNftWrapTo?.()
+            : await wrappedNftWrap?.();
           setWrappedTransactionResult(response);
         } catch (e) {
           console.error(e);
@@ -184,15 +185,16 @@ export const TurboWrapContent: FC<{
           setWrapInProgress(false);
         }
       });
-      return () => {
-        wasCancelled = true;
-      };
     }
   }, [tipState, transferTo, sendTo, wrappedNftWrapTo, wrappedNftWrap]);
   const onWrapSuccess = useCallback(() => {
     setWrapInProgress(false);
     setWrappedTransactionResult(undefined);
-  }, []);
+    const params = new URLSearchParams();
+    params.set("tokenIds", tokenIds.join(","));
+    params.set("txHash", wrapTransactionResult?.hash || "");
+    router.push(`/wrap/success?${params.toString()}`);
+  }, [router, tokenIds, wrapTransactionResult?.hash]);
   const [approveInProgress, setApproveInProgress] = useState(false);
   const [approveTransactionResult, setApproveTransactionResult] =
     useState<SendTransactionResult>();
@@ -241,6 +243,13 @@ export const TurboWrapContent: FC<{
               disabled={!transferTo}
               onChange={(e) => {
                 setSendToInput(e.target.value);
+              }}
+              InputProps={{
+                endAdornment: ensAddressIsLoading ? (
+                  <CircularProgress color="inherit" size={20} />
+                ) : sendTo ? (
+                  <CheckCircle color="success" />
+                ) : null,
               }}
             />
           </FormGroup>

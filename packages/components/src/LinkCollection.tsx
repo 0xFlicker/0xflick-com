@@ -39,7 +39,7 @@ export const LinkCollection: FC<{
           }
           CardMediaProps={{
             ...defaultCardMediaProps,
-            image: `/marketing/demo-${isDarkMode ? "dark" : "light"}.png`,
+            image: `/images/marketing/demo-${isDarkMode ? "dark" : "light"}.png`,
           }}
           to="/demo"
         />
@@ -54,7 +54,7 @@ export const LinkCollection: FC<{
           }
           CardMediaProps={{
             ...defaultCardMediaProps,
-            image: `/marketing/presale-signup-${
+            image: `/images/marketing/presale-signup-${
               isDarkMode ? "dark" : "light"
             }.png`,
           }}
@@ -71,7 +71,7 @@ export const LinkCollection: FC<{
           }
           CardMediaProps={{
             ...defaultCardMediaProps,
-            image: `/marketing/github-${isDarkMode ? "dark" : "light"}.png`,
+            image: `/images/marketing/github-${isDarkMode ? "dark" : "light"}.png`,
           }}
           to="https://github.com/nameflick"
         />
@@ -86,7 +86,7 @@ export const LinkCollection: FC<{
           }
           CardMediaProps={{
             ...defaultCardMediaProps,
-            image: `/marketing/twitter-${isDarkMode ? "dark" : "light"}.png`,
+            image: `/images/marketing/twitter-${isDarkMode ? "dark" : "light"}.png`,
           }}
           to="https://twitter.com/NameflickENS"
         />
@@ -117,7 +117,7 @@ export const LinkCollection: FC<{
           }
           CardMediaProps={{
             ...defaultCardMediaProps,
-            image: `/marketing/discord-${isDarkMode ? "dark" : "light"}.png`,
+            image: `/images/marketing/discord-${isDarkMode ? "dark" : "light"}.png`,
           }}
           to="https://discord.gg/GE3zFDU8aU"
         />
@@ -132,7 +132,7 @@ export const LinkCollection: FC<{
           }
           CardMediaProps={{
             ...defaultCardMediaProps,
-            image: `/marketing/faq-${isDarkMode ? "dark" : "light"}.png`,
+            image: `/images/marketing/faq-${isDarkMode ? "dark" : "light"}.png`,
           }}
           to="/faq"
         />

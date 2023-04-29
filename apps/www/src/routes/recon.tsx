@@ -6,9 +6,9 @@ import type { IStaticProps } from "context/staticProps";
 
 export { getStaticProps } from "context/staticProps";
 
-const Page: NextPage<IStaticProps> = ({ i18n, theme }) => {
+const Page: NextPage<IStaticProps> = ({ theme }) => {
   return (
-    <DefaultProvider i18n={i18n} initialTheme={theme}>
+    <DefaultProvider initialTheme={theme}>
       <Head>
         <title>Recon</title>
       </Head>

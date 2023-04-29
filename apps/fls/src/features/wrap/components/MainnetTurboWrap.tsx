@@ -88,7 +88,7 @@ export const MainnetTurboWrap: FC<{}> = () => {
       tokenIds={tokenIds}
       isApprovedForAll={isApprovedForAll}
       setApprovalForAll={setApprovalForAll}
-      testnet
+      testnet={false}
     />
   );
 };

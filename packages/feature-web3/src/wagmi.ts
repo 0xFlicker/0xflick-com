@@ -1,11 +1,11 @@
-import { Chain } from "@wagmi/chains";
+import { Chain, mainnet } from "@wagmi/chains";
 import { createClient, configureChains } from "wagmi";
 import { infuraProvider } from "wagmi/providers/infura";
 import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";
 import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import { CoinbaseWalletConnector } from "wagmi/connectors/coinbaseWallet";
-import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
+import { WalletConnectLegacyConnector } from "wagmi/connectors/walletConnectLegacy";
 import { InjectedConnector } from "wagmi/connectors/injected";
 import "@wagmi/core";
 import {
@@ -32,17 +32,16 @@ export const appChains = lazySingleton(() => {
 
 export type TAppConnectors =
   | MetaMaskConnector
-  | WalletConnectConnector
+  | WalletConnectLegacyConnector
   | CoinbaseWalletConnector
   | InjectedConnector;
 export const appConnectors = lazySingleton<TAppConnectors[]>(() => {
   const { chains } = appChains.get();
   return [
     new MetaMaskConnector({ chains }),
-    new WalletConnectConnector({
-      chains,
+    new WalletConnectLegacyConnector({
       options: {
-        projectId: "7eda77ab5f68c6d387446c34a633565d",
+        qrcode: true,
       },
     }),
     new CoinbaseWalletConnector({
@@ -62,7 +61,7 @@ export const metamaskConnector = lazySingleton(function metamaskConnector() {
   return appConnectors.get().find(isMetamaskConnector);
 });
 export function isWalletConnector(connector: TAppConnectors) {
-  return connector.id === "walletConnect";
+  return connector.id === "walletConnectLegacy";
 }
 export const walletConnectConnector = lazySingleton(
   function walletConnectConnector() {
@@ -101,4 +100,6 @@ export const wagmiClientAutoConnect = lazySingleton(() => {
   });
 });
 
-export type WagmiConfiguredClient = ReturnType<typeof wagmiClient.get> | ReturnType<typeof wagmiClientAutoConnect.get>;
+export type WagmiConfiguredClient =
+  | ReturnType<typeof wagmiClient.get>
+  | ReturnType<typeof wagmiClientAutoConnect.get>;

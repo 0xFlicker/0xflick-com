@@ -7,23 +7,29 @@ import {
   useLayoutEffect,
   useState,
 } from "react";
-import { useAccount, useConnect, Chain, useNetwork } from "wagmi";
+import {
+  useAccount,
+  useConnect,
+  Chain,
+  useNetwork,
+  useDisconnect,
+} from "wagmi";
 import { defaultChain } from "@0xflick/utils";
 
 export type TChain = Chain & {
   chainImageUrl: string;
 };
 export function decorateChainImageUrl(chain?: Chain): string {
-  let chainImageUrl = "/chains/unknown.png";
+  let chainImageUrl = "/images/chains/unknown.png";
   switch (chain?.id) {
     case 1:
-      chainImageUrl = "/chains/homestead.png";
+      chainImageUrl = "/images/chains/homestead.png";
       break;
     case 111_55_111:
-      chainImageUrl = "/chains/sepolia.png";
+      chainImageUrl = "/images/chains/sepolia.png";
       break;
     case 5:
-      chainImageUrl = "/chains/goerli.png";
+      chainImageUrl = "/images/chains/goerli.png";
       break;
   }
   return chainImageUrl;
@@ -47,7 +53,8 @@ function useDeferFirstRender() {
 
 export function useWeb3Context() {
   const { connector: activeConnector, isConnected, address } = useAccount({});
-  const { connect, isLoading, reset, data: provider } = useConnect();
+  const { connect, isLoading, data: provider } = useConnect();
+  const { disconnect } = useDisconnect();
   // We don't want the address to be available on first load so that client render matches server render
   const isFirstLoad = useDeferFirstRender();
   const { chain } = useNetwork();
@@ -57,7 +64,7 @@ export function useWeb3Context() {
     provider: provider?.provider,
     selectedAddress: isFirstLoad ? undefined : address,
     connect,
-    reset,
+    reset: disconnect,
     activeConnector,
     isConnected,
     isLoading,

@@ -20,10 +20,9 @@ import { HomeMenu } from "./HomeMenu";
 import { ChainSelector } from "@0xflick/feature-web3/src/components/ChainSelector";
 
 export const AppBar: FC<{
-  onFlick?: MouseEventHandler;
   menu: ReactNode;
   title?: ReactNode;
-}> = ({ menu, title, onFlick }) => {
+}> = ({ menu, title }) => {
   const [menuAnchorEl, setMenuAnchorEl] = useState<Element | null>(null);
 
   const onMenuClose = useCallback(() => {

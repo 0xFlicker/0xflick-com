@@ -5,7 +5,7 @@ import Grid from "@mui/material/Grid";
 import ReactCountDown from "react-countdown";
 import { useRouter } from "next/router";
 
-const END_DATE = new Date("2023-04-21T00:00:00.000Z");
+const END_DATE = new Date("2023-04-27T17:20:00.000Z");
 const SIZED_COUNTER = {
   typography: {
     sm: "h2",

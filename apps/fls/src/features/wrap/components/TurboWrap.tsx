@@ -9,6 +9,8 @@ export const TurboWrap: FC<{}> = () => {
     switch (currentChain?.id) {
       case 5:
         return <GoerliTurboWrap />;
+      case 1:
+        return <MainnetTurboWrap />;
       default:
         return null;
     }

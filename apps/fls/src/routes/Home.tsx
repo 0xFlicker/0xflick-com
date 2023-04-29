@@ -13,12 +13,14 @@ import NextImage from "next/image";
 import { RandomWrapVideo } from "@/features/reveal/components/RandomWrapVideo";
 import { PostReveal } from "@/features/reveal/components/PostReveal";
 import { useState } from "react";
+import { WrappedLink } from "@0xflick/components/src/WrappedLink";
 
 const HomePage: NextPage<{}> = () => {
   const { t } = useLocale(["common"]);
   const title = "Fame Lady Society";
   const description = "Unstoppable";
   const [isRevealed, setIsRevealed] = useState(false);
+
   return (
     <DefaultProvider>
       <Head>
@@ -50,9 +52,18 @@ const HomePage: NextPage<{}> = () => {
           </>
         }
         title={
-          <Typography variant="h5" component="h1" marginLeft={2}>
-            {isRevealed ? "Fame Lady Society" : "coming soon"}
-          </Typography>
+          <>
+            <Typography variant="h5" component="h1" marginLeft={2}>
+              {isRevealed ? "Fame Lady Society" : "coming soon"}
+            </Typography>
+            {isRevealed ? (
+              <WrappedLink href="/wrap">
+                <Typography variant="h5" component="h1" marginLeft={2}>
+                  wrap here
+                </Typography>
+              </WrappedLink>
+            ) : null}
+          </>
         }
       >
         {isRevealed ? (
