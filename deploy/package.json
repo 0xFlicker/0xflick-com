@@ -15,6 +15,7 @@
     "deploy:nameflick": "AWS_PROFILE=nameflick DEPLOYMENT=nameflick.com node --experimental-json-modules ./node_modules/.bin/cdk deploy",
     "deploy:fls": "AWS_PROFILE=0xflick-portfolio-admin DEPLOYMENT=fls.0xflick.com DEPLOYMENT_NAME=dev node --experimental-json-modules ./node_modules/.bin/cdk --app \"node --loader ts-node/esm stack/fls/app.ts\" deploy",
     "deploy:fls:prod": "AWS_PROFILE=0xflick-portfolio-admin DEPLOYMENT=fameladysociety.com DEPLOYMENT_NAME=prod node --experimental-json-modules ./node_modules/.bin/cdk --app \"node --loader ts-node/esm stack/fls/app.ts\" deploy",
+    "deploy:frontend": "AWS_PROFILE=0xflick-portfolio-admin node --experimental-json-modules ./node_modules/.bin/cdk --app \"node --loader ts-node/esm stack/frontend/app.ts\" deploy",
     "bootstrap": "yarn cdk --app \"node --loader ts-node/esm stack/bootstrap.ts\" bootstrap",
     "deploy:bootstrap": "yarn cdk --app \"node --loader ts-node/esm stack/bootstrap.ts\" deploy --all",
     "build:layer:sharp": "bash ./scripts/build-layer-sharp.sh",
@@ -40,6 +41,8 @@
   "license": "MIT",
   "dependencies": {
     "aws-cdk": "^2.55.1",
+    "cdk-nextjs-standalone": "^3.0.0",
+    "esbuild": "0.17.16",
     "jose": "^4.8.3"
   }
 }

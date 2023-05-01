@@ -8,7 +8,13 @@ First, create a new local .env.local file
 cp .env.example .env.local
 ```
 
-The only secret that needs to be added is an etherscan.io API key, which is only needed to generate new wagmi generated files, for example when a new smart contract is added to [wagmi.config.ts](./wagmi.config.ts). For must development, this can be left blank.
+### RPC keys
+
+Signup for infura.io and alchemy.com (free accounts). Create an ethereum RPC for each and get API keys.
+
+### optional
+
+The etherscan.io API key, which is only needed to generate new wagmi generated files, for example when a new smart contract is added to [wagmi.config.ts](./wagmi.config.ts). For must development, this can be left blank.
 
 Finally, run the development server:
 
