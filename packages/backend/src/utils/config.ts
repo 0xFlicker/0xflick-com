@@ -28,41 +28,6 @@ export const ensRpcUrl = {
   },
 };
 
-export const web3RpcUrl = {
-  get() {
-    if (!process.env.WEB3_RPC_URL) {
-      throw new Error("WEB3_RPC_URL is not set");
-    }
-    return process.env.WEB3_RPC_URL;
-  },
-};
-
-export const ipfsApiUrl = {
-  get() {
-    if (!process.env.IPFS_API_URL) {
-      throw new Error("IPFS_API_URL is not set");
-    }
-    return process.env.IPFS_API_URL;
-  },
-};
-
-export const ipfsApiHeaders = {
-  get() {
-    if (!process.env.IPFS_API_PROJECT) {
-      throw new Error("IPFS_API_PROJECT is not set");
-    }
-
-    if (!process.env.IPFS_API_SECRET) {
-      throw new Error("IPFS_API_SECRET is not set");
-    }
-    return {
-      Authorization: `Basic ${Buffer.from(
-        `${process.env.IPFS_API_PROJECT}:${process.env.IPFS_API_SECRET}`
-      ).toString("base64")}`,
-    };
-  },
-};
-
 export const publicImageResizerUrl = {
   get() {
     if (!process.env.NEXT_PUBLIC_IMAGE_RESIZER) {

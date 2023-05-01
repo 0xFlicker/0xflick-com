@@ -94,7 +94,6 @@ export class FlsStack extends cdk.Stack {
     const imageDomain: [string, string] = subDomain.length
       ? [`img.${subDomain}`, [domainWithoutTld, tld].join(".")]
       : ["img", domain];
-    console.log("Image domain:", imageDomain);
 
     new IpfsStack(this, "IPFS", {
       domain: ipfsDomain,

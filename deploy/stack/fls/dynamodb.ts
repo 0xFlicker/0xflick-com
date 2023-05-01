@@ -1,6 +1,7 @@
 import * as cdk from "aws-cdk-lib";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as ssm from "aws-cdk-lib/aws-ssm";
+import * as iam from "aws-cdk-lib/aws-iam";
 import { Construct } from "constructs";
 
 export interface IProps {
@@ -236,8 +237,31 @@ export class DynamoDB extends Construct {
       }),
     });
     this.tableParam = tableParam;
+
+    // const dbAccessGroup = new iam.Group(this, "FLS-DBAccessGroup");
+    // const dbaccessRole = new iam.Role(this, "FLS-DBAccessRole", {
+    //   assumedBy: new iam.ArnPrincipal(dbAccessGroup.groupArn),
+    // });
+    // tableParam.grantRead(dbaccessRole);
+    // affiliateTable.grantReadWriteData(dbaccessRole);
+    // userNonceTable.grantReadWriteData(dbaccessRole);
+    // nameflickTable.grantReadWriteData(dbaccessRole);
+    // rolesTable.grantReadWriteData(dbaccessRole);
+    // rolesPermissionsTable.grantReadWriteData(dbaccessRole);
+    // userRolesTable.grantReadWriteData(dbaccessRole);
+    // externalAuthTable.grantReadWriteData(dbaccessRole);
+    // drinkerTable.grantReadWriteData(dbaccessRole);
+    // urlShortenerTable.grantReadWriteData(dbaccessRole);
+    // lastWrapperEventBlock.grantReadWriteData(dbaccessRole);
+
     new cdk.CfnOutput(this, "TableNamesParam", {
       value: tableParam.parameterName,
     });
+    // new cdk.CfnOutput(this, "DBAccessRole", {
+    //   value: dbaccessRole.roleArn,
+    // });
+    // new cdk.CfnOutput(this, "DBAccessGroup", {
+    //   value: dbAccessGroup.groupName,
+    // });
   }
 }

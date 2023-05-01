@@ -38,8 +38,8 @@ export const AppBar: FC<{
           <MenuIcon onClick={handleMenu} />
           {title}
           <Box sx={{ flexGrow: 1 }} component="span" />
-          <ChainSelector assetPrefix="/images" />
-          <Connect assetPrefix="/images" />
+          <ChainSelector />
+          <Connect />
         </Toolbar>
       </MuiAppBar>
       <HomeMenu anchorEl={menuAnchorEl} handleClose={onMenuClose}>

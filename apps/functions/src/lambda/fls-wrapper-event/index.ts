@@ -192,7 +192,7 @@ async function notifyDiscordMultipleTokens({
   const displayName = ensName ? ensName : toAddress;
   const fields: APIEmbedField[] = [];
   fields.push({
-    name: "total wrapped",
+    name: "total",
     value: tokenIds.length.toString(),
     inline: true,
   });
