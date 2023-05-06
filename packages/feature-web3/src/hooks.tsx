@@ -14,6 +14,8 @@ import {
   useNetwork,
   useDisconnect,
 } from "wagmi";
+import "@wagmi/core";
+import "@wagmi/connectors";
 import { defaultChain } from "@0xflick/utils";
 
 export type TChain = Chain & {

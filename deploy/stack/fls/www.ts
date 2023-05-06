@@ -455,5 +455,14 @@ export class WwwStack extends Construct {
     new cdk.CfnOutput(this, "tableParamName", {
       value: tableNamesParam.parameterName,
     });
+    new cdk.CfnOutput(this, "imageCachePolicyOutput", {
+      value: imageCachePolicy.cachePolicyId,
+    });
+    new cdk.CfnOutput(this, "permissiveCachePolicyOutput", {
+      value: permissiveCachePolicy.cachePolicyId,
+    });
+    new cdk.CfnOutput(this, "defaultCachePolicyOutput", {
+      value: defaultCachePolicy.cachePolicyId,
+    });
   }
 }

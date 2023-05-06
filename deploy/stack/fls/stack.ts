@@ -194,7 +194,7 @@ export class FlsStack extends cdk.Stack {
       graphqlApi,
       withLogging: true,
       whiteListedHeaders: ["Authorization", "Host", "Content-Type", "Accept"],
-      serverlessBuildOutDir: path.resolve(__dirname, "../../.layers"),
+      serverlessBuildOutDir: path.resolve(__dirname, "../../.layers/fls"),
     });
   }
 }

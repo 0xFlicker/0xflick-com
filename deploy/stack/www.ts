@@ -61,7 +61,7 @@ export class WwwStack extends cdk.Stack {
 
     const publicAssetsBucket = new s3.Bucket(this, "PublicAssets", {
       publicReadAccess: false, // CloudFront/Lambdas are granted access so we don't want it publicly available
-      // Given this resource is created internally and also should only contain
+      // Given this resource eis created internally and also should only contain
       // assets uploaded by this library we should be able to safely delete all
       // contents along with the bucket its self upon stack deletion.
       autoDeleteObjects: true,

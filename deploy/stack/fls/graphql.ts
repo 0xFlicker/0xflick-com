@@ -168,21 +168,6 @@ export class GraphqlStack extends Construct {
 
     const httpApi = new HttpApi(this, "http-api", {
       description: "This service serves graphql.",
-      corsPreflight: {
-        allowHeaders: [
-          "Content-Type",
-          "X-Amz-Date",
-          "Authorization",
-          "X-Api-Key",
-        ],
-        allowMethods: [
-          CorsHttpMethod.OPTIONS,
-          CorsHttpMethod.GET,
-          CorsHttpMethod.POST,
-        ],
-        allowCredentials: true,
-        allowOrigins: ["http://localhost:3000", "http://localhost:3001"],
-      },
     });
     httpApi.addRoutes({
       path: "/api/graphql",

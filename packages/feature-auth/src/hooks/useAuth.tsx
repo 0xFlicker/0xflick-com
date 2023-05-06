@@ -19,7 +19,7 @@ import {
 } from "@0xflick/models";
 import { useSignIn } from "./useSignIn";
 import { useSignOut } from "./useSignOut";
-import { useAccount, useEnsAvatar, useEnsName } from "wagmi";
+import { useEnsAvatar, useEnsName } from "wagmi";
 import { useSelf } from "./useSelf";
 
 function useAuthContext({ autoLogin = false }: { autoLogin?: boolean }) {
@@ -287,11 +287,7 @@ export const Provider: FC<
   );
 };
 
-export function useAuth({
-  noAutoSignIn,
-}: {
-  noAutoSignIn?: boolean;
-} = {}) {
+export function useAuth() {
   const ctx = useContext(AuthProvider);
   if (ctx === null) {
     throw new Error("No context defined");

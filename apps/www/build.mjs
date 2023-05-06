@@ -29,7 +29,7 @@ try {
   process.env = { ...process.env, ...env, DEPLOYMENT: deployment };
   const builder = new Builder(
     ".",
-    "../../deploy/.layers",
+    "../../deploy/.layers/nameflick",
     {
       args: ["build", "--no-lint"],
 

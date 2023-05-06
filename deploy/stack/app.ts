@@ -127,7 +127,7 @@ new FaucetStack(app, "Faucet", {
 new WwwStack(app, "www", {
   domain: deployment,
   graphqlApiUrl: "45h95rp36i.execute-api.us-east-1.amazonaws.com",
-  serverlessBuildOutDir: path.resolve(__dirname, "../.layers"),
+  serverlessBuildOutDir: path.resolve(__dirname, "../.layers/nameflick"),
   withLogging: true,
   whiteListedHeaders: ["Authorization", "Host", "Content-Type", "Accept"],
   env: {

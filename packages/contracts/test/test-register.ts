@@ -139,11 +139,6 @@ describe("Registry", function () {
     const eip2544ResolverSelector = resolverServiceInterface.getSighash(
       "resolve(bytes,bytes)"
     );
-    console.log(
-      "addr(bytes32,uint256)",
-      resolverAddrInterface.getSighash("addr(bytes32,uint256)")
-    );
-    console.log("resolve(bytes,bytes):", eip2544ResolverSelector);
     expect(await nameflickResolver.supportsInterface(eip2544ResolverSelector))
       .to.be.true;
   });
@@ -780,5 +775,86 @@ describe("Registry", function () {
     await expect(
       nameflickResolver.disableContract(utils.namehash("example.eth"))
     ).to.emit(nameflickResolver, "DisableContractResolution");
+  });
+
+  describe("ENS Relfection", () => {
+    let resolverAddress: string;
+    let resolver: NameflickENSReflectionResolver;
+
+    before(async () => {
+      const [owner] = await ethers.getSigners();
+      const ENSRegistry = await ethers.getContractFactory("ENSRegistry", owner);
+      const registry = await ENSRegistry.deploy();
+      await registry.deployed();
+
+      // deploy root ETH node
+      await registry.setSubnodeOwner(
+        "0x0000000000000000000000000000000000000000000000000000000000000000",
+        utils.id("eth"),
+        owner.address
+      );
+
+      // deploy example.eth node
+      await registry.setSubnodeOwner(
+        utils.namehash("eth"),
+        utils.id("example"),
+        owner.address
+      );
+
+      // deploy NameFlickENSResolver
+      const NameFlickENSResolver = await ethers.getContractFactory(
+        "NameflickENSReflectionResolver",
+        owner
+      );
+      const nameflickResolver = await NameFlickENSResolver.deploy();
+      await registry.setResolver(
+        utils.namehash("example.eth"),
+        nameflickResolver.address
+      );
+      resolverAddress = nameflickResolver.address;
+      resolver = nameflickResolver;
+    });
+    it("can reflect an address", async () => {
+      const [owner] = await ethers.getSigners();
+
+      expect(
+        await resolveAddress(
+          resolverAddress,
+          `${owner.address}.example.eth`,
+          owner.provider
+        )
+      ).to.hexEqual(owner.address);
+    });
+
+    it("reverts on non address", async () => {
+      const [owner] = await ethers.getSigners();
+
+      await expect(
+        resolveAddress(resolverAddress, `foo.example.eth`, owner.provider)
+      ).to.be.reverted;
+    });
+
+    it("uppercase", async () => {
+      const [owner] = await ethers.getSigners();
+
+      expect(
+        await resolveAddress(
+          resolverAddress,
+          `${owner.address.toUpperCase()}.example.eth`,
+          owner.provider
+        )
+      ).to.hexEqual(owner.address);
+    });
+    it("lowercase", async () => {
+      const [owner] = await ethers.getSigners();
+
+      expect(
+        await resolveAddress(
+          resolverAddress,
+          `${owner.address.toLowerCase()}.example.eth`,
+          owner.provider
+        )
+      ).to.hexEqual(owner.address);
+    });
   });
 });

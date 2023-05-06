@@ -29,7 +29,7 @@ try {
   process.env = { ...process.env, ...env, DEPLOYMENT: deployment };
   const builder = new Builder(
     ".",
-    "../../deploy/.layers",
+    "../../deploy/.layers/fls",
     {
       args: ["build", "--no-lint"],
 
