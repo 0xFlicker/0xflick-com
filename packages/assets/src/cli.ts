@@ -6,10 +6,12 @@ import cliProgress from "cli-progress";
 import operations from "./canvas/axolotlValley/generate";
 import createCanvas from "./canvas/canvas";
 import { renderCanvas } from "./canvas/core";
-import { resolve } from "path";
+import { fileURLToPath } from "url";
+import { resolve, dirname } from "path";
 import { generateNameflick } from "./generate-nameflick";
 
 const program = new Command();
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 function randomUint8ArrayOfLength(length: number) {
   const arr = new Uint8Array(length);
@@ -82,7 +84,7 @@ program
       cliProgress.Presets.shades_classic
     );
     bar.start(count, 0);
-    const canvas = createCanvas(569, 569);
+    const canvas = await createCanvas(569, 569);
     await fs.promises.mkdir("./generated/images", { recursive: true });
     await fs.promises.mkdir("./generated/metadata", { recursive: true });
     if (!noClean) {
@@ -93,14 +95,17 @@ program
     await fs.promises.mkdir("./generated/metadata", { recursive: true });
     for (let i = 0; i < count; i++) {
       const seedBytes: Uint8Array = randomUint8ArrayOfLength(32);
-      const { metadata, layers } = operations(seedBytes, async (imagePath) => {
-        const imgData = await fs.promises.readFile(
-          resolve(__dirname, "..", "..", "properties", imagePath)
-        );
-        const img = new Image();
-        img.src = imgData;
-        return img;
-      });
+      const { metadata, layers } = await operations(
+        seedBytes,
+        async (imagePath) => {
+          const imgData = await fs.promises.readFile(
+            resolve(__dirname, "..", "properties", imagePath)
+          );
+          const img = new Image();
+          img.src = imgData;
+          return img;
+        }
+      );
       await renderCanvas(canvas, layers);
       const outData = canvas.toBuffer("image/png");
 

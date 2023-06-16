@@ -326,29 +326,69 @@ interface ITailLayer extends IBaseLayer {
   tailType: TailTypes;
 }
 
-export function makeTailLayer(
+export async function makeTailLayer(
   { color, splitColor, tailType }: ITailLayer,
   imageFetcher: IImageFetcher
 ) {
-  return [
-    makeConditionalColorGenerator(
-      {
-        zIndex: -1000,
-        baseColor: color,
-        secondaryColor: splitColor,
-        baseColorBasePath: `Tails/${tailType}-Colors`,
-        secondaryColorBasePath: `Tails/${tailType}-Colors`,
-      },
-      imageFetcher
-    ),
-    {
-      draw: cachedDrawImage(
-        resolveProperties(`Tails/${tailType}.PNG`),
+  const ops: ILayer["draw"][] = [];
+  color = splitColor ?? color;
+  if (isSpecialColor(color)) {
+    ops.push(
+      cachedDrawImage(
+        resolveProperties(`Tails/${tailType}-Colors/${color}.PNG`),
         imageFetcher
+      )
+    );
+  } else {
+    const colorFilters = applyColorFilters(baseColorDetails, color);
+    const accentColorFilters = applyColorFilters(accentColorDetails, color);
+    ops.push(
+      await composeWithCanvas(
+        cachedDrawImage(
+          resolveProperties(`Tails/${tailType}-Colors/${tailType}-Base.PNG`),
+          imageFetcher
+        ),
+        ...colorFilters
       ),
-      zIndex: -500,
+      await composeWithCanvas(
+        cachedDrawImage(
+          resolveProperties(`Tails/${tailType}-Colors/${tailType}-Accent.PNG`),
+          imageFetcher
+        ),
+        ...accentColorFilters
+      )
+    );
+  }
+
+  ops.push(
+    cachedDrawImage(resolveProperties(`Tails/${tailType}.PNG`), imageFetcher)
+  );
+
+  return [
+    {
+      draw: await composeWithCanvas(...ops),
+      zIndex: -1000,
     },
   ];
+  // return [
+  //   makeConditionalColorGenerator(
+  //     {
+  //       zIndex: -1000,
+  //       baseColor: color,
+  //       secondaryColor: splitColor,
+  //       baseColorBasePath: `Tails/${tailType}-Colors`,
+  //       secondaryColorBasePath: `Tails/${tailType}-Colors`,
+  //     },
+  //     imageFetcher
+  //   ),
+  //   {
+  // draw: cachedDrawImage(
+  //   resolveProperties(`Tails/${tailType}.PNG`),
+  //   imageFetcher
+  // ),
+  // zIndex: -500,
+  //   },
+  // ];
 }
 
 export function makeOutlineLayer(imageFetcher: IImageFetcher) {
@@ -705,7 +745,7 @@ export async function makeAccessoriesLayer(
       ),
       zIndex: 1000530,
     });
-  } else {
+  } else if (accessoryType !== "None") {
     ops.push({
       draw: cachedDrawImage(
         resolveProperties(`Accessories/${accessoryType}.PNG`),

@@ -208,14 +208,14 @@ export default async function (
         imageFetcher
       )),
       makeOutlineLayer(imageFetcher),
-      ...makeTailLayer(
+      ...(await makeTailLayer(
         {
           color: baseColor,
           splitColor: secondaryColor,
           tailType: tail,
         },
         imageFetcher
-      ),
+      )),
     ],
   };
 }
