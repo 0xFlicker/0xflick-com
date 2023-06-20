@@ -1,5 +1,5 @@
 import { GraphQLResolveInfo } from 'graphql';
-import { IUser } from '@0xflick/models';
+import { IUser, IMetadataJob } from '@0xflick/models';
 import { TRole, TPermission, TAffiliates, TOpenSeaAssetContract, TOpenSeaAsset, TOpenSeaAccount, TOpenSeaRarityData } from './models';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
@@ -116,6 +116,8 @@ export type Mutation = {
   createOrUpdateNameflick: Nameflick;
   createRole: Role;
   deleteNameflick: Scalars['Boolean'];
+  nftMetadataJob: NftMetadataFetchJob;
+  nftMetadataJobsForUser: Array<NftMetadataFetchJob>;
   nonceForAddress?: Maybe<Nonce>;
   requestPresaleApproval: PresaleApprovalResponse;
   role: Role;
@@ -123,6 +125,7 @@ export type Mutation = {
   self?: Maybe<Web3User>;
   signIn?: Maybe<Web3LoginUser>;
   signOut: Scalars['Boolean'];
+  startNftMetadataUpdate: NftMetadataFetchJob;
   user?: Maybe<Web3User>;
 };
 
@@ -155,6 +158,16 @@ export type MutationDeleteNameflickArgs = {
 };
 
 
+export type MutationNftMetadataJobArgs = {
+  id: Scalars['ID'];
+};
+
+
+export type MutationNftMetadataJobsForUserArgs = {
+  address: Scalars['String'];
+};
+
+
 export type MutationNonceForAddressArgs = {
   address: Scalars['String'];
 };
@@ -175,6 +188,15 @@ export type MutationSignInArgs = {
   chainId: Scalars['Int'];
   issuedAt: Scalars['String'];
   jwe: Scalars['String'];
+};
+
+
+export type MutationStartNftMetadataUpdateArgs = {
+  chainId: Scalars['Int'];
+  contractAddress: Scalars['String'];
+  tokenIdEnd?: InputMaybe<Scalars['Int']>;
+  tokenIdStart?: InputMaybe<Scalars['Int']>;
+  tokenIds?: InputMaybe<Array<Scalars['String']>>;
 };
 
 
@@ -250,6 +272,26 @@ export type Nft = {
   contractAddress: Scalars['String'];
   ownedTokens: Array<NftToken>;
 };
+
+export type NftMetadataFetchJob = {
+  __typename?: 'NftMetadataFetchJob';
+  chainId: Scalars['Int'];
+  contractAddress: Scalars['String'];
+  createdAt: Scalars['Int'];
+  jobId: Scalars['ID'];
+  progress: Scalars['Float'];
+  status: NftMetadataFetchJobStatus;
+  stop: NftMetadataFetchJob;
+  updatedAt: Scalars['Int'];
+};
+
+export enum NftMetadataFetchJobStatus {
+  Complete = 'COMPLETE',
+  Failed = 'FAILED',
+  InProgress = 'IN_PROGRESS',
+  Pending = 'PENDING',
+  Stopped = 'STOPPED'
+}
 
 export type NftToken = {
   __typename?: 'NftToken';
@@ -407,6 +449,8 @@ export type Query = {
   nameflickByEnsHash?: Maybe<Nameflick>;
   nameflickByFqdn?: Maybe<Nameflick>;
   nameflicksByRootDomain: Array<Nameflick>;
+  nftMetadataJob: NftMetadataFetchJob;
+  nftMetadataJobsForUser: Array<NftMetadataFetchJob>;
   openSeaCollectionByAddress?: Maybe<OpenSeaCollection>;
   role: Role;
   roles: Array<Role>;
@@ -448,6 +492,16 @@ export type QueryNameflickByFqdnArgs = {
 
 export type QueryNameflicksByRootDomainArgs = {
   rootDomain: Scalars['String'];
+};
+
+
+export type QueryNftMetadataJobArgs = {
+  id: Scalars['ID'];
+};
+
+
+export type QueryNftMetadataJobsForUserArgs = {
+  address: Scalars['String'];
 };
 
 
@@ -601,6 +655,8 @@ export type ResolversTypes = {
   NameflickTextRecord: ResolverTypeWrapper<NameflickTextRecord>;
   NameflickTextRecordInput: NameflickTextRecordInput;
   Nft: ResolverTypeWrapper<Nft>;
+  NftMetadataFetchJob: ResolverTypeWrapper<IMetadataJob>;
+  NftMetadataFetchJobStatus: NftMetadataFetchJobStatus;
   NftToken: ResolverTypeWrapper<NftToken>;
   Nonce: ResolverTypeWrapper<Nonce>;
   OpenSeaAsset: ResolverTypeWrapper<TOpenSeaAsset>;
@@ -648,6 +704,7 @@ export type ResolversParentTypes = {
   NameflickTextRecord: NameflickTextRecord;
   NameflickTextRecordInput: NameflickTextRecordInput;
   Nft: Nft;
+  NftMetadataFetchJob: IMetadataJob;
   NftToken: NftToken;
   Nonce: Nonce;
   OpenSeaAsset: TOpenSeaAsset;
@@ -750,6 +807,8 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   createOrUpdateNameflick?: Resolver<ResolversTypes['Nameflick'], ParentType, ContextType, RequireFields<MutationCreateOrUpdateNameflickArgs, 'domain' | 'fields'>>;
   createRole?: Resolver<ResolversTypes['Role'], ParentType, ContextType, RequireFields<MutationCreateRoleArgs, 'name' | 'permissions'>>;
   deleteNameflick?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteNameflickArgs, 'domain'>>;
+  nftMetadataJob?: Resolver<ResolversTypes['NftMetadataFetchJob'], ParentType, ContextType, RequireFields<MutationNftMetadataJobArgs, 'id'>>;
+  nftMetadataJobsForUser?: Resolver<Array<ResolversTypes['NftMetadataFetchJob']>, ParentType, ContextType, RequireFields<MutationNftMetadataJobsForUserArgs, 'address'>>;
   nonceForAddress?: Resolver<Maybe<ResolversTypes['Nonce']>, ParentType, ContextType, RequireFields<MutationNonceForAddressArgs, 'address'>>;
   requestPresaleApproval?: Resolver<ResolversTypes['PresaleApprovalResponse'], ParentType, ContextType, Partial<MutationRequestPresaleApprovalArgs>>;
   role?: Resolver<ResolversTypes['Role'], ParentType, ContextType, RequireFields<MutationRoleArgs, 'id'>>;
@@ -757,6 +816,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   self?: Resolver<Maybe<ResolversTypes['Web3User']>, ParentType, ContextType>;
   signIn?: Resolver<Maybe<ResolversTypes['Web3LoginUser']>, ParentType, ContextType, RequireFields<MutationSignInArgs, 'address' | 'chainId' | 'issuedAt' | 'jwe'>>;
   signOut?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  startNftMetadataUpdate?: Resolver<ResolversTypes['NftMetadataFetchJob'], ParentType, ContextType, RequireFields<MutationStartNftMetadataUpdateArgs, 'chainId' | 'contractAddress'>>;
   user?: Resolver<Maybe<ResolversTypes['Web3User']>, ParentType, ContextType, RequireFields<MutationUserArgs, 'address'>>;
 };
 
@@ -799,6 +859,18 @@ export type NftResolvers<ContextType = any, ParentType extends ResolversParentTy
   collectionName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   contractAddress?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   ownedTokens?: Resolver<Array<ResolversTypes['NftToken']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type NftMetadataFetchJobResolvers<ContextType = any, ParentType extends ResolversParentTypes['NftMetadataFetchJob'] = ResolversParentTypes['NftMetadataFetchJob']> = {
+  chainId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  contractAddress?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  jobId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  progress?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  status?: Resolver<ResolversTypes['NftMetadataFetchJobStatus'], ParentType, ContextType>;
+  stop?: Resolver<ResolversTypes['NftMetadataFetchJob'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -916,6 +988,8 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   nameflickByEnsHash?: Resolver<Maybe<ResolversTypes['Nameflick']>, ParentType, ContextType, RequireFields<QueryNameflickByEnsHashArgs, 'ensHash'>>;
   nameflickByFqdn?: Resolver<Maybe<ResolversTypes['Nameflick']>, ParentType, ContextType, RequireFields<QueryNameflickByFqdnArgs, 'fqdn'>>;
   nameflicksByRootDomain?: Resolver<Array<ResolversTypes['Nameflick']>, ParentType, ContextType, RequireFields<QueryNameflicksByRootDomainArgs, 'rootDomain'>>;
+  nftMetadataJob?: Resolver<ResolversTypes['NftMetadataFetchJob'], ParentType, ContextType, RequireFields<QueryNftMetadataJobArgs, 'id'>>;
+  nftMetadataJobsForUser?: Resolver<Array<ResolversTypes['NftMetadataFetchJob']>, ParentType, ContextType, RequireFields<QueryNftMetadataJobsForUserArgs, 'address'>>;
   openSeaCollectionByAddress?: Resolver<Maybe<ResolversTypes['OpenSeaCollection']>, ParentType, ContextType, RequireFields<QueryOpenSeaCollectionByAddressArgs, 'address'>>;
   role?: Resolver<ResolversTypes['Role'], ParentType, ContextType, RequireFields<QueryRoleArgs, 'id'>>;
   roles?: Resolver<Array<ResolversTypes['Role']>, ParentType, ContextType>;
@@ -968,6 +1042,7 @@ export type Resolvers<ContextType = any> = {
   NameflickAddress?: NameflickAddressResolvers<ContextType>;
   NameflickTextRecord?: NameflickTextRecordResolvers<ContextType>;
   Nft?: NftResolvers<ContextType>;
+  NftMetadataFetchJob?: NftMetadataFetchJobResolvers<ContextType>;
   NftToken?: NftTokenResolvers<ContextType>;
   Nonce?: NonceResolvers<ContextType>;
   OpenSeaAsset?: OpenSeaAssetResolvers<ContextType>;

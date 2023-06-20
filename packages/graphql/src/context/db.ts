@@ -12,6 +12,7 @@ import {
   AccountProviderDao,
   AccountUserDao,
   AffiliateDAO,
+  MetadataJobDAO,
 } from "@0xflick/backend";
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 
@@ -46,6 +47,7 @@ export interface IDbContext {
   userDao: UserDAO;
   userRolesDao: UserRolesDAO;
   nameFlickDao: NameFlickDAO;
+  metadataJob: MetadataJobDAO;
 }
 
 export async function createDbContext({
@@ -68,5 +70,6 @@ export async function createDbContext({
     userDao: new UserDAO(db),
     userRolesDao: new UserRolesDAO(db),
     nameFlickDao: new NameFlickDAO(db),
+    metadataJob: new MetadataJobDAO(db),
   };
 }

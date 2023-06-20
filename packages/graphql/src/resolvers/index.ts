@@ -80,6 +80,8 @@ export const typeDefs = gql`
       page: Int
       pageSize: Int
     ): OpenSeaAssetPagination!
+    nftMetadataJobsForUser(address: String!): [NftMetadataFetchJob!]!
+    nftMetadataJob(id: ID!): NftMetadataFetchJob!
   }
 
   type Mutation {
@@ -105,6 +107,15 @@ export const typeDefs = gql`
     requestPresaleApproval(affiliate: String): PresaleApprovalResponse!
     affiliateForAddress(address: String!): AffiliateMutation!
     createAffiliate(address: String!): AffiliateMutation!
+    startNftMetadataUpdate(
+      contractAddress: String!
+      chainId: Int!
+      tokenIds: [String!]
+      tokenIdStart: Int
+      tokenIdEnd: Int
+    ): NftMetadataFetchJob!
+    nftMetadataJobsForUser(address: String!): [NftMetadataFetchJob!]!
+    nftMetadataJob(id: ID!): NftMetadataFetchJob!
   }
 `;
 

@@ -13,6 +13,7 @@ generates:
         OpenSeaAsset: "./models#TOpenSeaAsset"
         OpenSeaOwnership: "./models#TOpenSeaAccount"
         OpenSeaRarityData: "./models#TOpenSeaRarityData"
+        NftMetadataFetchJob: "@0xflick/models#IMetadataJob"
     plugins:
       - typescript
       - typescript-resolvers
