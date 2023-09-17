@@ -128,15 +128,15 @@ export class WwwStack extends cdk.Stack {
       transferAcceleration: true,
     });
 
-    new s3deploy.BucketDeployment(this, "DeployWebsite", {
-      sources: [
-        s3deploy.Source.asset(
-          path.join(__dirname, "../../packages/assets/properties")
-        ),
-      ],
-      destinationBucket: generativeAssetBucket,
-      destinationKeyPrefix: "static/axolotl-valley/properties", // optional prefix in destination bucket
-    });
+    // new s3deploy.BucketDeployment(this, "DeployWebsite", {
+    //   sources: [
+    //     s3deploy.Source.asset(
+    //       path.join(__dirname, "../../packages/assets/properties")
+    //     ),
+    //   ],
+    //   destinationBucket: generativeAssetBucket,
+    //   destinationKeyPrefix: "static/axolotl-valley/properties", // optional prefix in destination bucket
+    // });
 
     // Domain
     const domains = domain instanceof Array ? domain : [domain];

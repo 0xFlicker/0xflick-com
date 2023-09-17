@@ -1,7 +1,45 @@
 import { NameFlickDAO } from "@0xflick/backend";
 import { coinTypeToName, INameFlickTextRecord } from "@0xflick/models";
 import ch from "content-hash";
+import { utils } from "ethers";
+import { friendFromUsername } from "./ft";
 import { DatabaseResult } from "./types";
+
+export async function resolveFriendCoinAddress(
+  name: string,
+  fqn: string,
+  nameflickDao: NameFlickDAO
+) {
+  const nameflick = await nameflickDao.getByNormalizedName(fqn);
+
+  let friendCoinAddress = nameflick?.friendTechAddress;
+  if (!friendCoinAddress) {
+    // see if we can find it from the friend's twitter username
+    const user = await friendFromUsername(name);
+    if (user) {
+      friendCoinAddress = user.address;
+    }
+    const avatar = user.twitterPfpUrl;
+    // save address and avatar
+    await nameflickDao.createOrUpdate({
+      ensHash: utils.namehash(fqn),
+      addresses: {
+        ETH: friendCoinAddress,
+      },
+      friendTechAddress: friendCoinAddress,
+      // 1 week
+      ttl: (Date.now() + 1000 * 60 * 60 * 24 * 7) / 1000,
+      textRecord: {
+        avatar,
+      },
+    });
+  }
+
+  return {
+    result: [friendCoinAddress],
+    ttl: nameflick.ttl ?? 0,
+  };
+}
 
 export async function resolveCoinAddress(
   name: string,
@@ -34,6 +72,42 @@ export async function resolveContent(name: string, nameflickDao: NameFlickDAO) {
   console.log(`Resolved content hash: ${contentHash}`);
   return {
     result: [contentHash],
+    ttl: nameflick.ttl ?? 0,
+  };
+}
+
+export async function resolveFriendAvatar(
+  name: string,
+  fqdn: string,
+  nameflickDao: NameFlickDAO
+) {
+  const nameflick = await nameflickDao.getByNormalizedName(fqdn);
+
+  let avatar = nameflick?.textRecord?.avatar;
+
+  if (!avatar) {
+    // see if we can find it from the friend's twitter username
+    const user = await friendFromUsername(name);
+    if (user) {
+      avatar = user.twitterPfpUrl;
+    }
+    const address = user.address;
+    // save address and avatar
+    await nameflickDao.createOrUpdate({
+      ensHash: utils.namehash(fqdn),
+      addresses: {
+        ETH: address,
+      },
+      friendTechAddress: address,
+      // 1 week
+      ttl: (Date.now() + 1000 * 60 * 60 * 24 * 7) / 1000,
+      textRecord: {
+        avatar,
+      },
+    });
+  }
+  return {
+    result: [avatar],
     ttl: nameflick.ttl ?? 0,
   };
 }

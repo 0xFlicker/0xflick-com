@@ -177,6 +177,25 @@ type Flick {
   nfts: [Nft!]
 }
 
+enum NftMetadataFetchJobStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETE
+  FAILED
+  STOPPED
+}
+
+type NftMetadataFetchJob {
+  jobId: ID!
+  status: NftMetadataFetchJobStatus!
+  progress: Float!
+  contractAddress: String!
+  chainId: Int!
+  createdAt: Int!
+  updatedAt: Int!
+  stop: NftMetadataFetchJob!
+}
+
 type PresaleApprovalResponse {
   approved: Boolean!
   token: String!
@@ -296,6 +315,8 @@ type Query {
   affiliateForAddress(address: String!): AffiliateQuery!
   openSeaCollectionByAddress(address: String!, testnet: Boolean): OpenSeaCollection
   assetsForUserInExactCollection(address: String!, collectionSlug: String!, contractAddress: String!, testnet: Boolean, cursor: String, page: Int, pageSize: Int): OpenSeaAssetPagination!
+  nftMetadataJobsForUser(address: String!): [NftMetadataFetchJob!]!
+  nftMetadataJob(id: ID!): NftMetadataFetchJob!
 }
 
 type Mutation {
@@ -312,4 +333,7 @@ type Mutation {
   requestPresaleApproval(affiliate: String): PresaleApprovalResponse!
   affiliateForAddress(address: String!): AffiliateMutation!
   createAffiliate(address: String!): AffiliateMutation!
+  startNftMetadataUpdate(contractAddress: String!, chainId: Int!, tokenIds: [String!], tokenIdStart: Int, tokenIdEnd: Int): NftMetadataFetchJob!
+  nftMetadataJobsForUser(address: String!): [NftMetadataFetchJob!]!
+  nftMetadataJob(id: ID!): NftMetadataFetchJob!
 }

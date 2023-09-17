@@ -1,4 +1,5 @@
 import { importSPKI, jwtVerify, KeyLike } from "jose";
+import { utils } from "ethers";
 import { generateRolesFromIds, namespacedClaim, TokenModel } from "./token";
 
 export interface IUser {
@@ -152,8 +153,11 @@ export class UserModel implements IUser {
 
 export class UserWithRolesModel implements IUserWithRoles {
   public roleIds: string[];
-  public get address(): string {
-    return this._user.address;
+  public get address(): `0x{string}` {
+    if (!utils.isAddress(this._user.address)) {
+      throw new Error("Invalid address");
+    }
+    return this._user.address as `0x{string}`;
   }
   public get nonce(): number {
     return this._user.nonce;

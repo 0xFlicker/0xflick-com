@@ -166,7 +166,7 @@ export class GraphqlStack extends Construct {
     tableNamesParam.grantRead(graphqlHandler);
     discordMessageTopic.grantPublish(graphqlHandler);
 
-    const httpApi = new HttpApi(this, "http-api", {
+    const httpApi = new HttpApi(this as any, "http-api", {
       description: "This service serves graphql.",
     });
     httpApi.addRoutes({

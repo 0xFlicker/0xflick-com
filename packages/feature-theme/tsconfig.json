@@ -8,9 +8,6 @@
     "composite": true,
     "jsx": "preserve",
     "paths": {
-      "@0xflick/models": ["../../packages/models/src/index"],
-      "@0xflick/graphql": ["../../packages/backend/src/index"],
-      "@0xflick/utils": ["../../packages/utils/src/index"]
     },
     "plugins": [
     ]
@@ -18,14 +15,5 @@
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["./node_modules"],
   "references": [
-    {
-      "path": "../../packages/models"
-    },
-    {
-      "path": "../../packages/graphql"
-    },
-    {
-      "path": "../../packages/utils"
-    }
   ]
 }

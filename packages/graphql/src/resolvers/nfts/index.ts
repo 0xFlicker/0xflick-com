@@ -1,6 +1,7 @@
 import {
   allowAdminAll,
   allowAdminOnResource,
+  EMetadataFetchEventDetailType,
   EMetadataJobStatus,
   EResource,
   oneOf,
@@ -10,10 +11,7 @@ import { v4 as uuidv4 } from "uuid";
 import { gql } from "apollo-server-core";
 import { TContext } from "../../context";
 import { verifyAuthorizedUser } from "../../controllers/auth/authorized";
-import {
-  EMetadataFetchEventDetailType,
-  emitMetadataEvent,
-} from "../../controllers/metadata/bus";
+import { emitMetadataEvent } from "../../controllers/metadata/bus";
 import {
   createJob,
   getJob,

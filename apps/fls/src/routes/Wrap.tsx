@@ -17,6 +17,7 @@ import { FC, useEffect } from "react";
 import { wagmiClientAutoConnect } from "@0xflick/feature-web3/src/wagmi";
 import { TurboWrap } from "@/features/wrap/components/TurboWrap";
 import { UnwrapCard } from "@/features/wrap/components/UnWrapCard";
+import { LinksMenuItems } from "@/features/appbar/components/LinksMenuItems";
 
 const Content: FC<{
   hasMint?: boolean;
@@ -67,6 +68,7 @@ const FaqPage: NextPage<{
         menu={
           <>
             <MenuList dense disablePadding>
+              <LinksMenuItems />
               <SiteMenu isWrap />
             </MenuList>
           </>

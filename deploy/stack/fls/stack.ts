@@ -39,6 +39,8 @@ interface IProps extends cdk.StackProps {
   discordAppId: string;
   discordTestingGuildId: string;
   discordPublicKey: string;
+  infuraApiKey: string;
+  alchemyApiKey: string;
 }
 
 export class FlsStack extends cdk.Stack {
@@ -70,6 +72,8 @@ export class FlsStack extends cdk.Stack {
       discordAppId,
       discordTestingGuildId,
       discordPublicKey,
+      infuraApiKey,
+      alchemyApiKey,
       ...rest
     } = props;
     super(scope, id, rest);
@@ -148,6 +152,8 @@ export class FlsStack extends cdk.Stack {
       goerliRpc: goerliRpcUrl,
       mainnetRpc: web3RpcUrl,
       lastWrapperEventBlock: lastWrapperEventBlock,
+      infuraApiKey,
+      alchemyApiKey,
     });
 
     const { api: graphqlApi } = new GraphqlStack(this, "Graphql", {

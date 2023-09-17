@@ -144,14 +144,14 @@ export class ImageStack extends cdk.Stack {
       transferAcceleration: true,
     });
 
-    new s3deploy.BucketDeployment(this, "DeployAssets", {
-      sources: [
-        s3deploy.Source.asset(
-          path.join(__dirname, "../../packages/assets/properties")
-        ),
-      ],
-      destinationBucket: generativeAssetBucket,
-    });
+    // new s3deploy.BucketDeployment(this, "DeployAssets", {
+    //   sources: [
+    //     s3deploy.Source.asset(
+    //       path.join(__dirname, "../../packages/assets/properties")
+    //     ),
+    //   ],
+    //   destinationBucket: generativeAssetBucket,
+    // });
     // Bucket with a single image
     const seedBucket = new s3.Bucket(this, "seed-bucket", {
       publicReadAccess: true,

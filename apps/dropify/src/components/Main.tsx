@@ -23,13 +23,12 @@ export const Main: FC<
     <>
       <AppBar title={title} />
       <Box
-        ref={targetRef}
         component="main"
         display="flex"
         sx={{ flexFlow: "column", height: "100%" }}
       >
-        <Toolbar ref={toolbarRef} sx={{ flex: "0 1 auto" }} />
-        <Box component="div" display="flex" sx={{ flex: "1 1 auto", height }}>
+        <Toolbar sx={{ flex: "0 1 auto" }} />
+        <Box component="div" display="flex" sx={{ flex: "1 1 auto" }}>
           {children}
         </Box>
       </Box>

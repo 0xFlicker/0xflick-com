@@ -83,7 +83,7 @@ export const DevTipModal: FC<{
   handleClose: (reason: TipCloseReason, tip?: BigNumber) => void;
 }> = ({ open, handleClose, numberOfTokens }) => {
   const [tip, setTip] = useState<BigNumber | undefined>();
-  const [tipPerToken, setTipPerToken] = useState(0.01);
+  const [tipPerToken, setTipPerToken] = useState(0);
   useEffect(() => {
     setTip(
       utils.parseEther((tipPerToken * numberOfTokens).toPrecision(6).toString())

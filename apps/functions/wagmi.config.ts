@@ -31,6 +31,18 @@ export default defineConfig({
         },
       ],
     }),
+    etherscan({
+      apiKey: process.env.ETHERSCAN_API_KEY,
+      chainId: mainnet.id,
+      contracts: [
+        {
+          name: "FameLadySquad",
+          address: {
+            [mainnet.id]: "0xf3E6DbBE461C6fa492CeA7Cb1f5C5eA660EB1B47" as const,
+          },
+        },
+      ],
+    }),
     actions({
       readContract: true,
       watchContractEvent: false,

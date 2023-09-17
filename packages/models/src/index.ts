@@ -4,6 +4,7 @@ export * from "./auth";
 export * from "./image";
 export * from "./matcher";
 export * from "./metadata";
+export * from "./metadataJob";
 export * from "./message";
 export * from "./nameflick";
 export * from "./nfts";

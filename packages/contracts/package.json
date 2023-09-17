@@ -28,6 +28,7 @@
     "@openzeppelin/contracts": "^4.8.2",
     "erc721a": "^4.2.3",
     "ethers": "^5.7.1",
+    "solady": "^0.0.123",
     "solmate": "^6.7.0"
   },
   "devDependencies": {

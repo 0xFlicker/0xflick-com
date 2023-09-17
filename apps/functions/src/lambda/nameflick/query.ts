@@ -3,6 +3,8 @@ import { createDb, fetchTableNames, NameFlickDAO } from "@0xflick/backend";
 import {
   resolveCoinAddress,
   resolveContent,
+  resolveFriendAvatar,
+  resolveFriendCoinAddress,
   resolveTextRecord,
 } from "./resolve.js";
 import { DatabaseResult } from "./types.js";
@@ -38,6 +40,17 @@ export const queryHandlers: Record<
   "addr(bytes32)": async (name) => {
     try {
       const nameflickDao = await promiseDao();
+      if (name.endsWith(".frenzens.eth")) {
+        const result = await resolveFriendCoinAddress(
+          name,
+          name.replace(".frenzens.eth", ""),
+          nameflickDao
+        );
+        if (!result) {
+          return EMPTY_RESPONSE;
+        }
+        return result;
+      }
       const result = await resolveCoinAddress(
         name,
         ETH_COIN_TYPE,
@@ -55,6 +68,17 @@ export const queryHandlers: Record<
   "addr(bytes32,uint256)": async (name, args) => {
     try {
       const nameflickDao = await promiseDao();
+      if (args[0] === ETH_COIN_TYPE && name.endsWith(".frenzens.eth")) {
+        const result = await resolveFriendCoinAddress(
+          name,
+          name.replace(".frenzens.eth", ""),
+          nameflickDao
+        );
+        if (!result) {
+          return EMPTY_RESPONSE;
+        }
+        return result;
+      }
       const result = await resolveCoinAddress(name, args[0], nameflickDao);
       if (!result) {
         return EMPTY_RESPONSE;
@@ -68,6 +92,17 @@ export const queryHandlers: Record<
   "text(bytes32,string)": async (name, args) => {
     try {
       const nameflickDao = await promiseDao();
+      if (name.endsWith(".frenzens.eth") && args[0] === "avatar") {
+        const response = await resolveFriendAvatar(
+          name,
+          name.replace(".frenzens.eth", ""),
+          nameflickDao
+        );
+        if (!response) {
+          return EMPTY_RESPONSE;
+        }
+        return response;
+      }
       const result = await resolveTextRecord(name, args[0], nameflickDao);
       if (!result) {
         return EMPTY_RESPONSE;

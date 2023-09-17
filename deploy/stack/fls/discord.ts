@@ -28,6 +28,8 @@ export interface DiscordProps {
   readonly lastWrapperEventBlock: dynamodb.ITable;
   readonly mainnetRpc: string;
   readonly goerliRpc: string;
+  readonly infuraApiKey: string;
+  readonly alchemyApiKey: string;
 }
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -45,6 +47,8 @@ export class DiscordStack extends Construct {
       lastWrapperEventBlock,
       mainnetRpc,
       goerliRpc,
+      infuraApiKey,
+      alchemyApiKey,
     } = props;
     super(scope, id);
 
@@ -120,6 +124,8 @@ export class DiscordStack extends Construct {
           RPC_URL_GOERLI: goerliRpc,
           DYNAMODB_REGION: region,
           DYNAMODB_TABLE: lastWrapperEventBlock.tableName,
+          INFURA_API_KEY: infuraApiKey,
+          ALCHEMY_API_KEY: alchemyApiKey,
         },
       }
     );

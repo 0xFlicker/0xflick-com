@@ -11,6 +11,7 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import theme from "@/theme";
 import FAQ from "@/features/faq";
 import Box from "@mui/material/Box";
+import { LinksMenuItems } from "@/features/appbar/components/LinksMenuItems";
 
 const FaqPage: NextPage<{}> = () => {
   const { t } = useLocale(["common"]);
@@ -43,6 +44,7 @@ const FaqPage: NextPage<{}> = () => {
         menu={
           <>
             <MenuList dense disablePadding>
+              <LinksMenuItems />
               <SiteMenu isFaq />
             </MenuList>
           </>

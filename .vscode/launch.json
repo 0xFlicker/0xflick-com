@@ -5,6 +5,16 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "type": "node",
+      "request": "launch",
+      "name": "Apps/functions jest tests",
+      "program": "${workspaceRoot}/apps/functions/node_modules/.bin/jest",
+      "args": ["${fileBasenameNoExtension}"],
+      "internalConsoleOptions": "openOnSessionStart",
+      "cwd": "${workspaceFolder}/apps/functions",
+      "console": "integratedTerminal"
+    },
+    {
       "name": "Attach",
       "port": 9229,
       "request": "attach",

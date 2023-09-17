@@ -95,7 +95,7 @@ export const resolvers: Resolvers<TContext> = {
       }
       return {
         address: userAddress,
-        // We don't actually known the nonce of the user
+        // We don't actually know the nonce of the user
         nonce: -1,
       };
     },

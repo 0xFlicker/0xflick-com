@@ -14,6 +14,7 @@ import { RandomWrapVideo } from "@/features/reveal/components/RandomWrapVideo";
 import { PostReveal } from "@/features/reveal/components/PostReveal";
 import { useState } from "react";
 import { WrappedLink } from "@0xflick/components/src/WrappedLink";
+import { LinksMenuItems } from "@/features/appbar/components/LinksMenuItems";
 
 const HomePage: NextPage<{}> = () => {
   const { t } = useLocale(["common"]);
@@ -47,6 +48,7 @@ const HomePage: NextPage<{}> = () => {
         menu={
           <>
             <MenuList dense disablePadding>
+            <LinksMenuItems />
               <SiteMenu isHome />
             </MenuList>
           </>

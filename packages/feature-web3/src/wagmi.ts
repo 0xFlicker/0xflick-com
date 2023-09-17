@@ -5,7 +5,7 @@ import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";
 import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import { CoinbaseWalletConnector } from "wagmi/connectors/coinbaseWallet";
-import { WalletConnectLegacyConnector } from "wagmi/connectors/walletConnectLegacy";
+import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
 import { InjectedConnector } from "wagmi/connectors/injected";
 import "@wagmi/core";
 import {
@@ -32,16 +32,17 @@ export const appChains = lazySingleton(() => {
 
 export type TAppConnectors =
   | MetaMaskConnector
-  | WalletConnectLegacyConnector
+  | WalletConnectConnector
   | CoinbaseWalletConnector
   | InjectedConnector;
 export const appConnectors = lazySingleton<TAppConnectors[]>(() => {
   const { chains } = appChains.get();
   return [
     new MetaMaskConnector({ chains }),
-    new WalletConnectLegacyConnector({
+    new WalletConnectConnector({
+      chains,
       options: {
-        qrcode: true,
+        projectId: "dab55e435303632d6ce634a4f32a652b",
       },
     }),
     new CoinbaseWalletConnector({
@@ -61,7 +62,7 @@ export const metamaskConnector = lazySingleton(function metamaskConnector() {
   return appConnectors.get().find(isMetamaskConnector);
 });
 export function isWalletConnector(connector: TAppConnectors) {
-  return connector.id === "walletConnectLegacy";
+  return connector.id === "walletConnect";
 }
 export const walletConnectConnector = lazySingleton(
   function walletConnectConnector() {

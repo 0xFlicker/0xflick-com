@@ -99,7 +99,12 @@ program
         seedBytes,
         async (imagePath) => {
           const imgData = await fs.promises.readFile(
-            resolve(__dirname, "..", "properties", imagePath)
+            resolve(
+              __dirname,
+              "..",
+              "properties_old",
+              imagePath.replace(".webp", ".PNG")
+            )
           );
           const img = new Image();
           img.src = imgData;

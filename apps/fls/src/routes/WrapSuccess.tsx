@@ -19,6 +19,7 @@ import { UnwrapCard } from "@/features/wrap/components/UnWrapCard";
 import useLocalStorage from "use-local-storage";
 import { AgreeModal } from "@/features/wrap/components/AgreeModal";
 import { Success } from "../features/wrap/components/Success";
+import { LinksMenuItems } from "@/features/appbar/components/LinksMenuItems";
 
 const TestSuccessPage: NextPage<{}> = () => {
   const { t } = useLocale(["common"]);
@@ -42,6 +43,7 @@ const TestSuccessPage: NextPage<{}> = () => {
         menu={
           <>
             <MenuList dense disablePadding>
+              <LinksMenuItems />
               <SiteMenu isWrap />
             </MenuList>
           </>

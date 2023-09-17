@@ -13,11 +13,16 @@ import {
 } from "./operations";
 import { BaseColor } from "./types";
 import * as weights from "./weights";
-import { utils } from "ethers";
 import { IImageFetcher } from "../cache";
 
-function chompLast256bits(inNum: number): number {
-  return inNum % 256;
+function uint8ArrayToHexString(uint8Array: Uint8Array) {
+  let hexString = "";
+  for (let i = 0; i < uint8Array.length; i++) {
+    let hex = uint8Array[i].toString(16);
+    hex = hex.length === 1 ? "0" + hex : hex;
+    hexString += hex;
+  }
+  return hexString;
 }
 
 export type IAttributeMetadata = Omit<
@@ -78,7 +83,7 @@ export function generateTraits(_seed: Uint8Array) {
   );
 
   const metadata: IAttributeMetadata = {
-    seed: utils.hexlify(_seed),
+    seed: uint8ArrayToHexString(_seed),
     attributes: [
       {
         trait_type: "Background Color",

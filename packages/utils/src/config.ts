@@ -133,6 +133,7 @@ export const supportedChains = lazySingleton(() => {
       chains.push(wagmiChain);
     }
   }
+
   return chains;
 });
 

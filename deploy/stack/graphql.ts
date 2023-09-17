@@ -159,6 +159,7 @@ export class GraphqlStack extends cdk.Stack {
     tableNamesParam.grantRead(graphqlHandler);
     discordMessageTopic.grantPublish(graphqlHandler);
 
+    // @ts-ignore
     const httpApi = new HttpApi(this, "http-api-example", {
       description: "This service serves graphql.",
       corsPreflight: {

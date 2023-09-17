@@ -9,7 +9,8 @@
     "generate": "yarn cli",
     "cli": "yarn build:cli && node ./dist/cli.mjs",
     "sync-from-s3": "bash -c \"aws s3 sync s3://$(aws cloudformation describe-stacks --stack-name Assets --query 'Stacks[0].Outputs' --output json | jq -rc '.[] | select(.OutputKey==\"BucketName\") | .OutputValue')/properties properties\"",
-    "sync-to-s3": "bash -c \"aws s3 sync properties s3://$(aws cloudformation describe-stacks --stack-name Assets --query 'Stacks[0].Outputs' --output json | jq -rc '.[] | select(.OutputKey==\"BucketName\") | .OutputValue')/properties\""
+    "sync-to-s3": "bash -c \"aws s3 sync properties s3://$(aws cloudformation describe-stacks --stack-name Assets --query 'Stacks[0].Outputs' --output json | jq -rc '.[] | select(.OutputKey==\"BucketName\") | .OutputValue')/properties\"",
+    "build:ordinal": "esbuild --bundle --platform=browser --target=es2022 --external:canvas --outfile=web/script.js --tree-shaking=true --minify src/ordinal.ts"
   },
   "devDependencies": {
     "@types/cli-progress": "^3.9.2",
@@ -20,11 +21,13 @@
     "cli-progress": "^3.10.0",
     "color-name": "^1.1.4",
     "commander": "^9.0.0",
+    "esbuild": "^0.18.4",
     "ethers": "^5.5.4",
     "ipfs-http-client": "^60.0.0",
     "node-emoji": "^1.11.0",
     "ramda": "^0.28.0",
     "rimraf": "^3.0.2",
+    "terser": "^5.18.0",
     "typescript": "^4.7.4"
   },
   "dependencies": {

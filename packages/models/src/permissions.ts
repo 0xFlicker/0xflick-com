@@ -18,6 +18,7 @@ export enum EResource {
   PERMISSION = "permission",
   ROLE = "role",
   AFFILIATE = "affiliate",
+  NFT_METADATA_JOB = "nft_metadata_job",
 }
 export function isAction(possibleAction: string): possibleAction is EActions {
   return Object.values(EActions).includes(possibleAction as EActions);

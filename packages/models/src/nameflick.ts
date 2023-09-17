@@ -24,6 +24,7 @@ export interface INameflick {
   content?: string;
   textRecord: INameFlickTextRecord;
   erc721?: string;
+  friendTechAddress?: string;
 }
 
 export enum ENameflickTokenStatus {

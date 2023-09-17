@@ -1,3 +1,4 @@
+// eslint-disable-next-line @next/next/no-server-import-in-page
 import { NextRequest, NextResponse } from "next/server";
 import acceptLanguage from "accept-language";
 import { fallbackLng, languages } from "@0xflick/feature-locale/src/settings";
@@ -16,7 +17,7 @@ const cookieName = "i18next";
 export function middleware(req: NextRequest) {
   let lng;
   if (req.cookies.has(cookieName))
-    lng = acceptLanguage.get(req.cookies.get(cookieName)!.value);
+    lng = acceptLanguage.get(req.cookies.get(cookieName)!);
   if (!lng) lng = acceptLanguage.get(req.headers.get("Accept-Language"));
   if (!lng) lng = fallbackLng;
 

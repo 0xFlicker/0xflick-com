@@ -3,7 +3,7 @@ import {
   createLogger,
   decryptJweToken,
 } from "@0xflick/backend";
-import { authMessage, IUser } from "@0xflick/models";
+import { authMessage } from "@0xflick/models";
 import { utils } from "ethers";
 import { TContext } from "../../context";
 import { AuthError } from "../../errors/auth";

@@ -12,14 +12,37 @@ import {
   wrappedNftAddress,
   fameLadySocietyABI,
   fameLadySocietyAddress,
+  readFameLadySquad,
 } from "./generated";
 import { SNS } from "@aws-sdk/client-sns";
 import { APIEmbedField } from "discord-api-types/v10";
 import { sendDiscordMessage } from "@0xflick/backend/discord/send";
 import { createLogger } from "@0xflick/backend";
+import { configureChains, mainnet, createClient } from "wagmi";
+import { publicProvider } from "@wagmi/core/providers/public";
+import { infuraProvider } from "@wagmi/core/providers/infura";
+import { alchemyProvider } from "@wagmi/core/providers/alchemy";
 
 const logger = createLogger({
   name: "fls-wrapper-event",
+});
+
+const { provider, webSocketProvider } = configureChains(
+  [mainnet],
+  [
+    infuraProvider({
+      apiKey: process.env.INFURA_API_KEY,
+    }),
+    alchemyProvider({
+      apiKey: process.env.ALCHEMY_API_KEY,
+    }),
+    publicProvider(),
+  ]
+);
+
+createClient({
+  provider,
+  webSocketProvider,
 });
 
 interface Event {
@@ -108,6 +131,7 @@ async function findEvents(
 
 async function notifyDiscordSingleToken({
   tokenId,
+  wrappedCount,
   toAddress,
   channelId,
   provider,
@@ -116,6 +140,7 @@ async function notifyDiscordSingleToken({
   sns,
 }: {
   tokenId: string;
+  wrappedCount: number;
   toAddress: string;
   channelId: string;
   provider: providers.Provider;
@@ -143,6 +168,11 @@ async function notifyDiscordSingleToken({
       inline: true,
     });
   }
+  fields.push({
+    name: "wrapped",
+    value: wrappedCount.toString(),
+    inline: true,
+  });
 
   await sendDiscordMessage({
     channelId,
@@ -167,6 +197,7 @@ async function notifyDiscordSingleToken({
 
 async function notifyDiscordMultipleTokens({
   tokenIds,
+  wrappedCount,
   toAddress,
   channelId,
   provider,
@@ -175,6 +206,7 @@ async function notifyDiscordMultipleTokens({
   sns,
 }: {
   tokenIds: string[];
+  wrappedCount: number;
   toAddress: string;
   channelId: string;
   provider: providers.Provider;
@@ -192,7 +224,7 @@ async function notifyDiscordMultipleTokens({
   const displayName = ensName ? ensName : toAddress;
   const fields: APIEmbedField[] = [];
   fields.push({
-    name: "total",
+    name: "new",
     value: tokenIds.length.toString(),
     inline: true,
   });
@@ -208,7 +240,11 @@ async function notifyDiscordMultipleTokens({
       inline: true,
     });
   }
-
+  fields.push({
+    name: "wrapped",
+    value: wrappedCount.toString(),
+    inline: true,
+  });
   await sendDiscordMessage({
     channelId,
     message: {
@@ -235,6 +271,7 @@ export const handler = async () =>
   {
     const wrappedNftInterface = new Interface(wrappedNftABI);
     const fameLadySocietyInterface = new Interface(fameLadySocietyABI);
+
     // Get last bock read
     const [lastBlockGoerliResponse, lastBlockMainnetResponse] =
       await Promise.all([
@@ -299,6 +336,13 @@ export const handler = async () =>
       events.push(event);
       mainnetEventsByTo.set(event.args[1], events);
     }
+    // get total wrapped count of fame lady society
+    // fameLadySquadInterface.balanceOf(fameLadySocietyAddress[1])
+    const wrappedCountBigNumber = await readFameLadySquad({
+      functionName: "balanceOf",
+      args: [fameLadySocietyAddress[1]],
+    });
+    const wrappedCount = wrappedCountBigNumber.toNumber();
 
     // Now push out the events
     for (const [to, events] of goerliEventsByTo.entries()) {
@@ -306,6 +350,7 @@ export const handler = async () =>
       if (tokenIds.length === 1) {
         await notifyDiscordSingleToken({
           tokenId: tokenIds[0],
+          wrappedCount: 0, // fake
           toAddress: to,
           channelId: process.env.DISCORD_CHANNEL_ID,
           provider: goerliProvider,
@@ -316,6 +361,7 @@ export const handler = async () =>
       } else {
         await notifyDiscordMultipleTokens({
           tokenIds,
+          wrappedCount: 0, // fake
           toAddress: to,
           channelId: process.env.DISCORD_CHANNEL_ID,
           provider: goerliProvider,
@@ -331,6 +377,7 @@ export const handler = async () =>
       if (tokenIds.length === 1) {
         await notifyDiscordSingleToken({
           tokenId: tokenIds[0],
+          wrappedCount,
           toAddress: to,
           channelId: process.env.DISCORD_CHANNEL_ID,
           provider: mainnetProvider,
@@ -341,6 +388,7 @@ export const handler = async () =>
       } else {
         await notifyDiscordMultipleTokens({
           tokenIds,
+          wrappedCount,
           toAddress: to,
           channelId: process.env.DISCORD_CHANNEL_ID,
           provider: mainnetProvider,

@@ -53,8 +53,12 @@ export function nameflickToDb(nameflick: INameflick): INameFlickDB {
   return {
     pk: asPk(nameflick.normalized),
     GSI1PK: asGsi1Pk(rootDomain),
+
     ...(nameflick.ensHash ? { GSI2PK: asGsi2Pk(nameflick.ensHash) } : {}),
     ...(nameflick.ttl ? { ttl: nameflick.ttl } : {}),
+    ...(nameflick.friendTechAddress
+      ? { friendTechAddress: nameflick.friendTechAddress }
+      : {}),
     ...(nameflick.addresses?.BTC
       ? { ["address_btc"]: nameflick.addresses?.BTC }
       : {}),
@@ -110,6 +114,7 @@ function dbToNameflick(nameflick: Record<string, any>): INameflick {
     normalized: nameflick.pk,
     ensHash: nameflick.GSI2PK,
     ttl: nameflick.ttl,
+    friendTechAddress: nameflick.friendTechAddress,
     addresses: {
       ...(nameflick["address_btc"] ? { BTC: nameflick["address_btc"] } : {}),
       ...(nameflick["address_eth"] ? { ETH: nameflick["address_eth"] } : {}),

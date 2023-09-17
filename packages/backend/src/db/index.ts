@@ -2,6 +2,7 @@ export * from "./affiliate";
 export * from "./auth";
 export * from "./drinker";
 export * from "./dynamodb";
+export * from "./metadataJob";
 export * from "./nameflick";
 export * from "./rolePermissions";
 export * from "./roles";

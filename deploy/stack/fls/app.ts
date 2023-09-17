@@ -57,5 +57,7 @@ new FlsStack(
       account: process.env.CDK_DEFAULT_ACCOUNT,
       region: "us-east-1",
     },
+    infuraApiKey: secretsJson.infuraKey,
+    alchemyApiKey: secretsJson.alchemyKey,
   }
 );

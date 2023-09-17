@@ -7,6 +7,7 @@ import Typography from "@mui/material/Typography";
 import MenuList from "@mui/material/MenuList";
 import { SiteMenu } from "@/features/appbar/components/SiteMenu";
 import { Main } from "@/layouts/Main";
+import { LinksMenuItems } from "@/features/appbar/components/LinksMenuItems";
 
 const RevealPage: NextPage<{}> = () => {
   const { t } = useLocale(["common"]);
@@ -38,6 +39,7 @@ const RevealPage: NextPage<{}> = () => {
         menu={
           <>
             <MenuList dense disablePadding>
+              <LinksMenuItems />
               <SiteMenu isHome />
             </MenuList>
           </>

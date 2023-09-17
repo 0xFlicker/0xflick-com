@@ -10,7 +10,6 @@ import {
 } from "./openSea";
 
 export type TPermission = Omit<IRolePermission, "roleId">;
-
 export type TRole = RoleModel;
 
 export type TAffiliates = AffiliateModel;

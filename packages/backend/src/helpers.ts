@@ -18,6 +18,7 @@ import { DrinkerDAO } from "./db/drinker";
 import { AuthOrchestrationDao } from "./db/auth/orchestration";
 import { UrlShortenerDAO } from "./db/urlShortener";
 import { NameFlickDAO } from "./db/nameflick";
+import { MetadataJobDAO } from "./db";
 
 /**
  * Configures all the DAOs.
@@ -62,6 +63,8 @@ export async function fetchTableNames({
     tableNames.urlShortenerTable ?? UrlShortenerDAO.TABLE_NAME;
   NameFlickDAO.TABLE_NAME =
     tableNames.nameflickTable ?? NameFlickDAO.TABLE_NAME;
+  MetadataJobDAO.TABLE_NAME =
+    tableNames.metadataJobTable ?? MetadataJobDAO.TABLE_NAME;
   return tableNames.region as string;
 }
 

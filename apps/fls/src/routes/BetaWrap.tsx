@@ -18,6 +18,7 @@ import { BetaWrapCard } from "@/features/wrap/components/BetaWrapCard";
 import { UnwrapCard } from "@/features/wrap/components/UnWrapCard";
 import useLocalStorage from "use-local-storage";
 import { AgreeModal } from "@/features/wrap/components/AgreeModal";
+import { LinksMenuItems } from "@/features/appbar/components/LinksMenuItems";
 
 const Content: FC<{
   hasMint?: boolean;
@@ -74,6 +75,7 @@ const FaqPage: NextPage<{
         menu={
           <>
             <MenuList dense disablePadding>
+              <LinksMenuItems />
               <SiteMenu isWrap />
             </MenuList>
           </>
