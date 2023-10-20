@@ -13,13 +13,14 @@ export interface ApiProps extends cdk.StackProps {
   readonly domain: [string, string] | string;
   readonly web3RpcUrl: string;
   readonly privateKey: string;
+  readonly ftToken: string;
 }
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export class NameflickStack extends cdk.Stack {
   constructor(scope: cdk.Stage, id: string, props: ApiProps) {
-    const { domain, web3RpcUrl, privateKey, ...rest } = props;
+    const { domain, web3RpcUrl, privateKey, ftToken, ...rest } = props;
     super(scope, id, rest);
 
     // Fetch table names from SSM Parameter Store
@@ -58,6 +59,7 @@ export class NameflickStack extends cdk.Stack {
         SSM_PARAM_NAME: tableNamesParam.parameterName,
         SSM_REGION: "us-east-1",
         ENS_REGISTRAR_ADDRESS: "0x1bdf895bB48841e5556b3324be5E6481992069E6",
+        FT_TOKEN: ftToken,
       },
     });
     nameflickTable.grantReadWriteData(nameflickHandler);

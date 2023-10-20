@@ -1,28 +1,36 @@
-import { NameFlickDAO } from "@0xflick/backend";
+import { NameFlickDAO, createLogger } from "@0xflick/backend";
 import { coinTypeToName, INameFlickTextRecord } from "@0xflick/models";
 import ch from "content-hash";
 import { utils } from "ethers";
 import { friendFromUsername } from "./ft";
 import { DatabaseResult } from "./types";
 
+const logger = createLogger({ name: "resolve" });
+
 export async function resolveFriendCoinAddress(
   name: string,
-  fqn: string,
+  fqdn: string,
   nameflickDao: NameFlickDAO
 ) {
-  const nameflick = await nameflickDao.getByNormalizedName(fqn);
+  logger.info(`Resolving friend coin address for domain ${name}`);
+  const nameflick = await nameflickDao.getByNormalizedName(fqdn);
+
+  logger.info({ nameflick }, "nameflick");
 
   let friendCoinAddress = nameflick?.friendTechAddress;
   if (!friendCoinAddress) {
+    logger.info(`No friend coin address found for domain ${name}`);
     // see if we can find it from the friend's twitter username
     const user = await friendFromUsername(name);
     if (user) {
       friendCoinAddress = user.address;
     }
     const avatar = user.twitterPfpUrl;
+    logger.info({ friendCoinAddress, avatar }, "friendCoinAddress");
     // save address and avatar
     await nameflickDao.createOrUpdate({
-      ensHash: utils.namehash(fqn),
+      normalized: fqdn,
+      ensHash: utils.namehash(fqdn),
       addresses: {
         ETH: friendCoinAddress,
       },
@@ -35,9 +43,11 @@ export async function resolveFriendCoinAddress(
     });
   }
 
+  logger.info("done");
+
   return {
     result: [friendCoinAddress],
-    ttl: nameflick.ttl ?? 0,
+    ttl: nameflick?.ttl ?? (Date.now() + 1000 * 60 * 60 * 24 * 7) / 1000,
   };
 }
 
@@ -81,19 +91,24 @@ export async function resolveFriendAvatar(
   fqdn: string,
   nameflickDao: NameFlickDAO
 ) {
+  logger.info(`Resolving friend avatar for domain ${name}`);
   const nameflick = await nameflickDao.getByNormalizedName(fqdn);
 
   let avatar = nameflick?.textRecord?.avatar;
-
+  logger.info({ avatar }, "avatar");
   if (!avatar) {
+    logger.info(`No friend avatar found for domain ${name}`);
     // see if we can find it from the friend's twitter username
     const user = await friendFromUsername(name);
     if (user) {
       avatar = user.twitterPfpUrl;
     }
     const address = user.address;
+
+    logger.info({ avatar, address }, "avatar");
     // save address and avatar
     await nameflickDao.createOrUpdate({
+      normalized: fqdn,
       ensHash: utils.namehash(fqdn),
       addresses: {
         ETH: address,
@@ -106,9 +121,12 @@ export async function resolveFriendAvatar(
       },
     });
   }
+
+  logger.info("done");
+
   return {
     result: [avatar],
-    ttl: nameflick.ttl ?? 0,
+    ttl: nameflick?.ttl ?? (Date.now() + 1000 * 60 * 60 * 24 * 7) / 1000,
   };
 }
 

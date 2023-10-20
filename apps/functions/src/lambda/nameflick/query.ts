@@ -1,5 +1,10 @@
 import { utils } from "ethers";
-import { createDb, fetchTableNames, NameFlickDAO } from "@0xflick/backend";
+import {
+  createDb,
+  fetchTableNames,
+  NameFlickDAO,
+  createLogger,
+} from "@0xflick/backend";
 import {
   resolveCoinAddress,
   resolveContent,
@@ -13,6 +18,8 @@ import { ETH_COIN_TYPE } from "./config.js";
 const ttl = 300;
 const EMPTY_RESPONSE = { result: [""], ttl };
 const EMPTY_HEX_RESPONSE = { result: ["0x"], ttl };
+
+const logger = createLogger({ name: "query" });
 
 const promiseDao = (() => {
   const p = Promise.resolve().then(async () => {
@@ -38,12 +45,13 @@ export const queryHandlers: Record<
   (name: string, args: utils.Result) => Promise<DatabaseResult>
 > = {
   "addr(bytes32)": async (name) => {
+    logger.info({ name }, "addr");
     try {
       const nameflickDao = await promiseDao();
       if (name.endsWith(".frenzens.eth")) {
         const result = await resolveFriendCoinAddress(
-          name,
           name.replace(".frenzens.eth", ""),
+          name,
           nameflickDao
         );
         if (!result) {
@@ -66,12 +74,13 @@ export const queryHandlers: Record<
     }
   },
   "addr(bytes32,uint256)": async (name, args) => {
+    logger.info({ name, args }, "addr");
     try {
       const nameflickDao = await promiseDao();
       if (args[0] === ETH_COIN_TYPE && name.endsWith(".frenzens.eth")) {
         const result = await resolveFriendCoinAddress(
-          name,
           name.replace(".frenzens.eth", ""),
+          name,
           nameflickDao
         );
         if (!result) {
@@ -90,12 +99,13 @@ export const queryHandlers: Record<
     }
   },
   "text(bytes32,string)": async (name, args) => {
+    logger.info({ name, args }, "text");
     try {
       const nameflickDao = await promiseDao();
       if (name.endsWith(".frenzens.eth") && args[0] === "avatar") {
         const response = await resolveFriendAvatar(
-          name,
           name.replace(".frenzens.eth", ""),
+          name,
           nameflickDao
         );
         if (!response) {

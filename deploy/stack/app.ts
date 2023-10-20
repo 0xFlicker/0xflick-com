@@ -107,6 +107,7 @@ new NameflickStack(app, "NameflickBeta", {
   domain: ["nameflick-beta", deployment],
   privateKey: secretsJson.privateKey,
   web3RpcUrl: secretsJson.chains["1"].rpc,
+  ftToken: secretsJson.FT_TOKEN,
   env: {
     account: process.env.CDK_DEFAULT_ACCOUNT,
     region: process.env.CDK_DEFAULT_REGION,
