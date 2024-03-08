@@ -62,7 +62,7 @@
     "@twitter-api-v2/plugin-token-refresher": "^1.0.0",
     "apache-arrow": "^12.0.0",
     "apollo-server-core": "^3.10.0",
-    "apollo-server-lambda": "^3.10.0",
+    "apollo-server-lambda": "^3.13.0",
     "aws-lambda": "^1.0.7",
     "aws-sdk": "^2.1120.0",
     "axios": "^0.27.2",

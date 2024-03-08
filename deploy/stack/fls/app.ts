@@ -4,7 +4,7 @@ import * as cdk from "aws-cdk-lib";
 import { jsonFromSecret } from "../utils/files.js";
 import path from "path";
 import { fileURLToPath } from "url";
-import { FlsStack } from "./stack.js";
+import { FameusMagazineStack, FlsStack } from "./stack.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -61,3 +61,11 @@ new FlsStack(
     alchemyApiKey: secretsJson.alchemyKey,
   }
 );
+
+new FameusMagazineStack(app, "Fameus", {
+  env: {
+    account: process.env.CDK_DEFAULT_ACCOUNT,
+    region: "us-east-1",
+  },
+  path: "apps/fameus/src",
+});

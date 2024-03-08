@@ -34,6 +34,7 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(",") ?? [];
 
 const RATE_LIMIT_ADDRESS = Number(process.env.RATE_LIMIT_ADDRESS ?? 1);
 const RATE_LIMIT_IP = Number(process.env.RATE_LIMIT_IP ?? 1);
+const RATE_LIMIT_GLOBAL = Number(process.env.RATE_LIMIT_GLOBAL ?? 2);
 
 const provider = new providers.JsonRpcProvider(process.env.RPC_URL);
 const wallet = new Wallet(process.env.PRIVATE_KEY, provider);
@@ -107,6 +108,8 @@ export const handler = async (
       body: "",
     };
   }
+  const ip =
+    event.headers["x-real-ip"] ?? event.headers["x-forwarded-for"] ?? "";
   // for GET, return faucet details about price and rate limit
   if (event.httpMethod === "GET") {
     // Get the remaining balance of the faucet
@@ -130,6 +133,26 @@ export const handler = async (
       }),
     };
   }
+  // check balance
+  const remainingBalance = await wallet.getBalance();
+  if (remainingBalance.lt(value)) {
+    logger.error(
+      `Faucet balance ${utils.formatEther(
+        remainingBalance
+      )} is less than ${utils.formatEther(value)}`
+    );
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: "Faucet is dry" }),
+      headers: addCorsHeaders(
+        {
+          "Content-Type": "application/json",
+        },
+        event.headers.origin
+      ),
+    };
+  }
+
   const drinkerDao = await promiseDao;
   try {
     const strBody = event.body;
@@ -167,8 +190,38 @@ export const handler = async (
       };
     }
 
+    // check global rate limit
+    let drinker: Drinker | null;
+    drinker = await drinkerDao.isAlcoholic("global");
+    if (drinker && drinker.remainingCount <= 0) {
+      logger.info(
+        `Global rate limit reached with ${drinker.remainingCount} remaining`
+      );
+      return {
+        statusCode: 429,
+        body: JSON.stringify({
+          remainingTime: -666,
+        }),
+        headers: addCorsHeaders(
+          {
+            "Content-Type": "application/json",
+          },
+          event.headers.origin
+        ),
+      };
+    }
+    if (!drinker) {
+      drinker = Drinker.fromJson({
+        key: "global",
+        remainingCount: RATE_LIMIT_GLOBAL,
+        ttl:
+          Math.floor(Date.now() / 1000) + 60 * 60 + (Math.random() * 720 - 360),
+      });
+      await drinkerDao.brew(drinker);
+    }
+
     logger.info(`Check if to: ${body.to} is alcoholic`);
-    let drinker: Drinker | null = await drinkerDao.isAlcoholic(body.to);
+    drinker = await drinkerDao.isAlcoholic(body.to);
     if (drinker && drinker.remainingCount <= 0) {
       logger.info(
         `${body.to} is alcoholic with ${drinker.remainingCount} remaining`
@@ -192,6 +245,35 @@ export const handler = async (
         remainingCount: RATE_LIMIT_ADDRESS,
       });
       await drinkerDao.brew(drinker);
+    }
+
+    if (ip !== "") {
+      logger.info(`Check if to: ${ip} is alcoholic`);
+      drinker = await drinkerDao.isAlcoholic(ip);
+      if (drinker && drinker.remainingCount <= 0) {
+        logger.info(
+          `${ip} is alcoholic with ${drinker.remainingCount} remaining`
+        );
+        return {
+          statusCode: 429,
+          body: JSON.stringify({
+            remainingTime: drinker.ttl - Math.floor(Date.now() / 1000),
+          }),
+          headers: addCorsHeaders(
+            {
+              "Content-Type": "application/json",
+            },
+            event.headers.origin
+          ),
+        };
+      }
+      if (!drinker) {
+        drinker = Drinker.fromJson({
+          key: ip,
+          remainingCount: RATE_LIMIT_IP,
+        });
+        await drinkerDao.brew(drinker);
+      }
     }
 
     logger.info(`Checking recaptcha ${JSON.stringify(body)}`);
@@ -236,6 +318,15 @@ export const handler = async (
     await drinkerDao.drank({
       key: body.to,
     });
+    await drinkerDao.drank({
+      key: "global",
+    });
+    if (ip !== "") {
+      await drinkerDao.drank({
+        key: ip,
+      });
+    }
+
     return {
       statusCode: 200,
       body: JSON.stringify({

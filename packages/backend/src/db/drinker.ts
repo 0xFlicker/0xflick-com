@@ -21,7 +21,11 @@ export class DrinkerDAO {
     this.db = db;
   }
 
-  public async brew(drinker: Omit<IDrinker, "ttl">): Promise<DrinkerDAO> {
+  public async brew(
+    drinker: Omit<IDrinker, "ttl"> & {
+      ttl?: number;
+    }
+  ): Promise<DrinkerDAO> {
     // Add a -/+ random ttl variance
     const ttlVariance = Math.floor(Math.random() * 60 * 60) - 30 * 60;
     await this.db.send(
@@ -30,7 +34,7 @@ export class DrinkerDAO {
         Item: {
           key: drinker.key,
           remainingCount: drinker.remainingCount,
-          ttl: Math.floor(Date.now() / 1000) + TTL + ttlVariance,
+          ttl: drinker.ttl ?? Math.floor(Date.now() / 1000) + TTL + ttlVariance,
         },
       })
     );

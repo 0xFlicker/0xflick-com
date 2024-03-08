@@ -5,7 +5,7 @@ if [ "$1" == "--clean" ]; then
     mkdir -p .build/layer/sharp
 fi
 
-docker build --file docker/sharp/Dockerfile --tag amazonlinux:nodejs_14 docker/sharp
+docker build --file docker/sharp/Dockerfile --tag amazonlinux:nodejs_14 docker/sharp --network host
 cp .layers/image/origin/index.mjs .build/layer/sharp/index.mjs
 
 if [ "$1" == "--clean" ]; then
