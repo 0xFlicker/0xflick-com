@@ -35,10 +35,12 @@ export async function createJob(
 ) {
   return await metadataJob.create({
     jobId,
+    status: EMetadataJobStatus.STOPPED,
     forAddress,
     contractAddress,
     chainId,
-    status: EMetadataJobStatus.PENDING,
-    progress: 0,
+    total: 0,
+    totalSuccess: 0,
+    totalFailed: 0,
   });
 }
