@@ -135,7 +135,7 @@ export class DiscordStack extends Construct {
       this,
       "wrappedEventScheduleRule",
       {
-        schedule: events.Schedule.rate(cdk.Duration.minutes(1)),
+        schedule: events.Schedule.rate(cdk.Duration.minutes(4)),
       }
     );
     wrappedEventScheduleRule.addTarget(

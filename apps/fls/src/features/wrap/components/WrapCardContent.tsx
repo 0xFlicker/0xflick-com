@@ -7,9 +7,11 @@ import FormGroup from "@mui/material/FormGroup";
 import TextField from "@mui/material/TextField";
 import { SendTransactionResult } from "@wagmi/core";
 import {
+  useWrappedNftWrapCost,
   usePrepareWrappedNftWrap,
   useWrappedNftWrap,
   useWrappedNftWrapTo,
+  useFameLadySocietyWrapCost,
   usePrepareWrappedNftWrapTo,
   usePrepareFameLadySocietyWrap,
   useFameLadySocietyWrap,
@@ -69,9 +71,21 @@ export const WrapCardContent: FC<{
   const { selectedAddress } = useWeb3();
   const { isAuthenticated } = useAuth();
 
+  const { data: goerliWrapCost } = useWrappedNftWrapCost({
+    enabled:
+      testnet && selectedAddress && isApprovedForAll && tokenIds.length > 0,
+  });
+  const { data: mainnetWrapCost } = useFameLadySocietyWrapCost({
+    enabled:
+      !testnet && selectedAddress && isApprovedForAll && tokenIds.length > 0,
+  });
+
   const { config: configureWrappedNftWrap } = usePrepareWrappedNftWrap({
     overrides: {
-      value: tipState.value,
+      value:
+        goerliWrapCost &&
+        tipState.value &&
+        goerliWrapCost.mul(tokenIds.length).add(tipState.value),
     },
     enabled: testnet && isApprovedForAll && tokenIds.length > 0 && !transferTo,
     ...(selectedAddress &&
@@ -89,7 +103,10 @@ export const WrapCardContent: FC<{
   const { config: configureFameLadySocietyWrap } =
     usePrepareFameLadySocietyWrap({
       overrides: {
-        value: tipState.value,
+        value:
+          tipState.value &&
+          mainnetWrapCost &&
+          mainnetWrapCost.mul(tokenIds.length).add(tipState.value),
       },
       enabled:
         !testnet && isApprovedForAll && tokenIds.length > 0 && !transferTo,

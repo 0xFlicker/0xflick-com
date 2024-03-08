@@ -1,2 +1,2 @@
 export { typeDefs, resolvers } from "./resolvers";
-export { createContext } from "./context";
+export { createContext, TContext } from "./context";

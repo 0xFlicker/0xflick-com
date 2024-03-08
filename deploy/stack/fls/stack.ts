@@ -9,6 +9,7 @@ import { WwwStack } from "./www.js";
 import { DiscordStack } from "./discord.js";
 import { IpfsStack } from "./ipfs.js";
 import { Image } from "./image.js";
+import { FameusMagazine } from "./fameusMagazine.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -201,6 +202,20 @@ export class FlsStack extends cdk.Stack {
       withLogging: true,
       whiteListedHeaders: ["Authorization", "Host", "Content-Type", "Accept"],
       serverlessBuildOutDir: path.resolve(__dirname, "../../.layers/fls"),
+    });
+  }
+}
+
+interface IFameusMagazineStackProps extends cdk.StackProps {
+  path: string;
+}
+
+export class FameusMagazineStack extends cdk.Stack {
+  constructor(scope: Construct, id: string, props: IFameusMagazineStackProps) {
+    const { path: websiteDirectoryPath } = props;
+    super(scope, id);
+    new FameusMagazine(this, "FameusMagazine", {
+      path: websiteDirectoryPath,
     });
   }
 }

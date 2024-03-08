@@ -1,6 +1,9 @@
 import { ApolloServer } from "apollo-server-lambda";
-import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-core";
-import { typeDefs, resolvers, createContext } from "@0xflick/graphql";
+import {
+  ApolloServerPluginLandingPageGraphQLPlayground,
+  GraphQLRequestContext,
+} from "apollo-server-core";
+import { typeDefs, resolvers, createContext, TContext } from "@0xflick/graphql";
 import {
   createLogger,
   deserializeSessionCookie,
@@ -59,18 +62,20 @@ const server = new ApolloServer({
     {
       async requestDidStart(requestContext) {
         return {
-          async didResolveOperation(requestContext) {
-            logger.info(
+          async didResolveOperation(
+            requestContext: GraphQLRequestContext<TContext>
+          ) {
+            logger.trace(
               `Request ${requestContext.request.operationName} started`
             );
           },
           async didResolveSource(requestContext) {
-            logger.info(
+            logger.trace(
               `Request ${requestContext.request.operationName} resolved source`
             );
           },
           async willSendResponse(requestContext) {
-            logger.info(
+            logger.trace(
               `Request ${requestContext.request.operationName} will send response`
             );
           },

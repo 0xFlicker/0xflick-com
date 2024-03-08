@@ -1,6 +1,9 @@
 FROM amazonlinux:2
 
 WORKDIR /tmp
+
+# when aws sucks ass
+RUN echo 'sslverify=0' >> /etc/yum.conf
 #install the dependencies
 RUN yum -y install gcc-c++ && yum -y install findutils tar gzip
 
