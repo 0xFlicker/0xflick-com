@@ -14,6 +14,7 @@ export function jsonFromSecret(file: string) {
   const { stdout, stderr } = spawnSync("sops", ["--decrypt", file], {
     cwd: path.join(__dirname, "../../../secrets"),
     encoding: "utf8",
+    env: process.env,
   });
   if (stderr) {
     throw new Error(stderr);

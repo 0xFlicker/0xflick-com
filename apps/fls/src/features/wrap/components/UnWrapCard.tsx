@@ -4,18 +4,17 @@ import Card from "@mui/material/Card";
 import CardTitle from "@mui/material/CardHeader";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
-import { goerli, useAccount } from "wagmi";
-import { WrappedLink } from "@0xflick/components/src/WrappedLink";
-import { useWeb3 } from "@0xflick/feature-web3";
+import { useAccount } from "wagmi";
+import { sepolia } from "wagmi/chains";
+import { WrappedLink } from "@/components/WrappedLink";
 
 export const UnwrapCard: FC<{
   testnetOnly?: boolean;
 }> = ({ testnetOnly = false }) => {
-  const { isConnected } = useAccount();
-  const { currentChain } = useWeb3();
+  const { isConnected, chain: currentChain } = useAccount();
 
   return isConnected &&
-    ((testnetOnly && currentChain.id === goerli.id) || !testnetOnly) ? (
+    ((testnetOnly && currentChain.id === sepolia.id) || !testnetOnly) ? (
     <Card>
       <CardTitle title="Unwrap" />
       <CardContent>

@@ -13,6 +13,6 @@
     "use-local-storage": "^2.3.6"
   },
   "devDependencies": {
-    "typescript": "^4.9.4"
+    "typescript": "^5.4.2"
   }
 }

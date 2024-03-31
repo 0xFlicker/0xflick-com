@@ -6,19 +6,17 @@ import Typography from "@mui/material/Typography";
 import FormGroup from "@mui/material/FormGroup";
 import TextField from "@mui/material/TextField";
 import { SendTransactionResult } from "@wagmi/core";
-import {
-  usePrepareWrappedNftWrap,
-  useWrappedNftWrap,
-  useWrappedNftWrapTo,
-  usePrepareWrappedNftWrapTo,
-  usePrepareFameLadySocietyWrap,
-  useFameLadySocietyWrap,
-  usePrepareFameLadySocietyWrapTo,
-  useFameLadySocietyWrapTo,
-} from "@/wagmi";
+import {} from // usePrepareWrappedNftWrap,
+// useWrappedNftWrap,
+// useWrappedNftWrapTo,
+// usePrepareWrappedNftWrapTo,
+// usePrepareFameLadySocietyWrap,
+// useFameLadySocietyWrap,
+// usePrepareFameLadySocietyWrapTo,
+// useFameLadySocietyWrapTo,
+"@/wagmi";
 import Button from "@mui/material/Button";
 
-import { useWeb3 } from "@0xflick/feature-web3";
 import { BigNumber, utils } from "ethers";
 import Box from "@mui/material/Box";
 import FormControlLabel from "@mui/material/FormControlLabel";
@@ -26,12 +24,12 @@ import Switch from "@mui/material/Switch";
 import CircularProgress from "@mui/material/CircularProgress";
 import { TransactionProgress } from "@/components/TransactionProgress";
 import { DevTipModal, TipCloseReason } from "./DevTipModal";
-import { useEnsAddress } from "wagmi";
+import { useAccount, useEnsAddress } from "wagmi";
 import CheckCircle from "@mui/icons-material/CheckCircle";
 import { useRouter } from "next/router";
 
 export const TurboWrapContent: FC<{
-  tokenIds: BigNumber[];
+  tokenIds: bigint[];
   isApprovedForAll?: boolean;
   setApprovalForAll?: () => Promise<SendTransactionResult>;
   approveIsError: boolean;
@@ -58,7 +56,7 @@ export const TurboWrapContent: FC<{
     name: sendToInput,
   });
 
-  const { selectedAddress } = useWeb3();
+  const { address: selectedAddress } = useAccount();
 
   const { config: configureWrappedNftWrap } = usePrepareWrappedNftWrap({
     overrides: {

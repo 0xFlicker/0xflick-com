@@ -13,11 +13,11 @@ import Typography from "@mui/material/Typography";
 import NextImage from "next/image";
 import TwitterIcon from "@mui/icons-material/Twitter";
 import BackIcon from "@mui/icons-material/ArrowBack";
-import { WrappedLink } from "@0xflick/components/src/WrappedLink";
 import { EtherscanIcon } from "@/components/icons/etherscan";
 import { OpenSeaIcon } from "@/components/icons/opensea";
 import { useRouter } from "next/router";
 import { IconButton } from "@mui/material";
+import { WrappedLink } from "@/components/WrappedLink";
 
 const tweetText = encodeURIComponent(
   "Just wrapped my FameLadySquad tokens into the @FameLadySociety collection! Flaunt to support a true community-run project & excited for what's next! Join me in embracing transparency in WebWE:🎉💪💋 #itsawrap"

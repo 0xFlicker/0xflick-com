@@ -1,69 +1,45 @@
 import {
   fameLadySocietyAddress,
-  usePrepareFameLadySquadSetApprovalForAll,
-  useFameLadySquadIsApprovedForAll,
-  useFameLadySquadSetApprovalForAll,
+  useWriteFameLadySocietySetApprovalForAll,
+  useReadFameLadySocietyIsApprovedForAll,
+  useReadFameLadySocietyBalanceOf,
   fameLadySquadAddress,
-  useFameLadySquadBalanceOf,
   fameLadySquadABI,
 } from "@/wagmi";
-import { useWeb3 } from "@0xflick/feature-web3";
 import { BigNumber } from "ethers";
 import { FC, useMemo } from "react";
-import { useContractReads } from "wagmi";
+import { useAccount, useChainId, useReadContracts } from "wagmi";
 import { TurboWrapContent } from "./TurboWrapContent";
 
 export const MainnetTurboWrap: FC<{}> = () => {
-  const { selectedAddress, currentChain } = useWeb3();
+  const { address: selectedAddress } = useAccount();
+  const chainId = useChainId();
 
   const isValidToCheckApproval =
-    selectedAddress &&
-    currentChain &&
-    fameLadySocietyAddress[currentChain?.id] !== undefined;
+    selectedAddress && fameLadySocietyAddress[chainId] !== undefined;
 
   const { data: isApprovedForAll, isFetched: isApprovedForAllFetched } =
-    useFameLadySquadIsApprovedForAll({
-      enabled: isValidToCheckApproval,
-      watch: true,
+    useReadFameLadySocietyIsApprovedForAll({
       ...(isValidToCheckApproval && {
-        args: [
-          selectedAddress,
-          fameLadySocietyAddress[currentChain?.id] as `0x${string}`,
-        ],
+        args: [selectedAddress, fameLadySocietyAddress[chainId]],
       }),
     });
-  const { config: configureSetApprovalForAll } =
-    usePrepareFameLadySquadSetApprovalForAll({
-      enabled:
-        isValidToCheckApproval && isApprovedForAllFetched && !isApprovedForAll,
-      ...(isValidToCheckApproval &&
-        isApprovedForAllFetched &&
-        !isApprovedForAll && {
-          args: [
-            fameLadySocietyAddress[currentChain?.id] as `0x${string}`,
-            true,
-          ],
-        }),
-    });
   const {
-    writeAsync: setApprovalForAll,
+    writeContractAsync: setApprovalForAll,
     isError: approveIsError,
-    isLoading: approveIsLoading,
+    isPending: approveIsLoading,
     isSuccess: approveIsSuccess,
-  } = useFameLadySquadSetApprovalForAll(configureSetApprovalForAll);
+  } = useWriteFameLadySocietySetApprovalForAll({});
 
-  const { data: balanceOf } = useFameLadySquadBalanceOf({
-    enabled: selectedAddress !== undefined,
-    watch: true,
+  const { data: balanceOf } = useReadFameLadySocietyBalanceOf({
     ...(selectedAddress !== undefined && {
       args: [selectedAddress],
     }),
   });
-  const { data: ownedTokens } = useContractReads({
-    watch: true,
+  const { data: ownedTokens } = useReadContracts({
     contracts:
       selectedAddress !== undefined && balanceOf !== undefined
-        ? (Array.from({ length: balanceOf.toNumber() }).map((_, index) => ({
+        ? (Array.from({ length: Number(balanceOf) }).map((_, index) => ({
             abi: fameLadySquadABI,
             address: fameLadySquadAddress[currentChain?.id] as `0x${string}`,
             functionName: "tokenOfOwnerByIndex",
@@ -78,7 +54,9 @@ export const MainnetTurboWrap: FC<{}> = () => {
   });
 
   const tokenIds = useMemo(() => {
-    return (ownedTokens ?? []).filter((tokenId) => !!tokenId) as BigNumber[];
+    return (ownedTokens ?? [])
+      .filter((tokenId) => !!tokenId?.result)
+      .map((t) => t.result) as bigint[];
   }, [ownedTokens]);
 
   return (
@@ -87,7 +65,14 @@ export const MainnetTurboWrap: FC<{}> = () => {
       approveIsSuccess={approveIsSuccess}
       tokenIds={tokenIds}
       isApprovedForAll={isApprovedForAll}
-      setApprovalForAll={setApprovalForAll}
+      setApprovalForAll={() =>
+        setApprovalForAll({
+          args: [
+            fameLadySocietyAddress[currentChain?.id] as `0x${string}`,
+            true,
+          ],
+        })
+      }
       testnet={false}
     />
   );

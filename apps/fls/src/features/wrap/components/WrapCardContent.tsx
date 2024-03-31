@@ -5,23 +5,29 @@ import CardActions from "@mui/material/CardActions";
 import Typography from "@mui/material/Typography";
 import FormGroup from "@mui/material/FormGroup";
 import TextField from "@mui/material/TextField";
-import { SendTransactionResult } from "@wagmi/core";
+// import { SendTransactionResult } from "@wagmi/core";
 import {
-  useWrappedNftWrapCost,
-  usePrepareWrappedNftWrap,
-  useWrappedNftWrap,
-  useWrappedNftWrapTo,
-  useFameLadySocietyWrapCost,
-  usePrepareWrappedNftWrapTo,
-  usePrepareFameLadySocietyWrap,
-  useFameLadySocietyWrap,
-  usePrepareFameLadySocietyWrapTo,
-  useFameLadySocietyWrapTo,
+  useReadWrappedNftWrapCost,
+  useWriteWrappedNftWrap,
+  useWriteWrappedNftWrapTo,
+  useReadFameLadySocietyWrapCost,
+  useWriteFameLadySocietyWrap,
+  useWriteFameLadySocietyWrapTo,
+  bulkMinterConfig,
+  // useWrappedNftWrapCost,
+  // usePrepareWrappedNftWrap,
+  // useWrappedNftWrap,
+  // useWrappedNftWrapTo,
+  // useFameLadySocietyWrapCost,
+  // usePrepareWrappedNftWrapTo,
+  // usePrepareFameLadySocietyWrap,
+  // useFameLadySocietyWrap,
+  // usePrepareFameLadySocietyWrapTo,
+  // useFameLadySocietyWrapTo,
   bulkMinterAddress,
 } from "@/wagmi";
 import Button from "@mui/material/Button";
 
-import { useWeb3 } from "@0xflick/feature-web3";
 import { BigNumber, utils } from "ethers";
 import Box from "@mui/material/Box";
 import FormControlLabel from "@mui/material/FormControlLabel";
@@ -71,125 +77,113 @@ export const WrapCardContent: FC<{
   const { selectedAddress } = useWeb3();
   const { isAuthenticated } = useAuth();
 
-  const { data: goerliWrapCost } = useWrappedNftWrapCost({
-    enabled:
-      testnet && selectedAddress && isApprovedForAll && tokenIds.length > 0,
+  const { data: goerliWrapCost } = useReadWrappedNftWrapCost({
+    // enabled:
+    //   testnet && selectedAddress && isApprovedForAll && tokenIds.length > 0,
   });
-  const { data: mainnetWrapCost } = useFameLadySocietyWrapCost({
-    enabled:
-      !testnet && selectedAddress && isApprovedForAll && tokenIds.length > 0,
-  });
-
-  const { config: configureWrappedNftWrap } = usePrepareWrappedNftWrap({
-    overrides: {
-      value:
-        goerliWrapCost &&
-        tipState.value &&
-        goerliWrapCost.mul(tokenIds.length).add(tipState.value),
-    },
-    enabled: testnet && isApprovedForAll && tokenIds.length > 0 && !transferTo,
-    ...(selectedAddress &&
-      isApprovedForAll && {
-        args: [
-          tokenIds
-            .filter((tokenId) => tokenId !== null)
-            .map((n) => BigNumber.from(n)) as BigNumber[],
-        ],
-      }),
+  const { data: mainnetWrapCost } = useReadFameLadySocietyWrapCost({
+    // enabled:
+    //   !testnet && selectedAddress && isApprovedForAll && tokenIds.length > 0,
   });
 
-  const testnetWrapWrite = useWrappedNftWrap(configureWrappedNftWrap);
+  const testnetWrapWrite = useWriteWrappedNftWrap({
+    // overrides: {
+    //   value:
+    //     goerliWrapCost &&
+    //     tipState.value &&
+    //     goerliWrapCost.mul(tokenIds.length).add(tipState.value),
+    // },
+    // enabled: testnet && isApprovedForAll && tokenIds.length > 0 && !transferTo,
+    // ...(selectedAddress &&
+    //   isApprovedForAll && {
+    //     args: [
+    //       tokenIds
+    //         .filter((tokenId) => tokenId !== null)
+    //         .map((n) => BigNumber.from(n)) as BigNumber[],
+    //     ],
+    //   }),
+  });
 
-  const { config: configureFameLadySocietyWrap } =
-    usePrepareFameLadySocietyWrap({
-      overrides: {
-        value:
-          tipState.value &&
-          mainnetWrapCost &&
-          mainnetWrapCost.mul(tokenIds.length).add(tipState.value),
-      },
-      enabled:
-        !testnet && isApprovedForAll && tokenIds.length > 0 && !transferTo,
-      ...(selectedAddress &&
-        isApprovedForAll && {
-          args: [
-            tokenIds
-              .filter((tokenId) => tokenId !== null)
-              .map((n) => BigNumber.from(n)) as BigNumber[],
-          ],
-        }),
-    });
-
-  const flsWrapWrite = useFameLadySocietyWrap(configureFameLadySocietyWrap);
+  const flsWrapWrite = useWriteFameLadySocietyWrap({
+    // overrides: {
+    //   value:
+    //     tipState.value &&
+    //     mainnetWrapCost &&
+    //     mainnetWrapCost.mul(tokenIds.length).add(tipState.value),
+    // },
+    // enabled:
+    //   !testnet && isApprovedForAll && tokenIds.length > 0 && !transferTo,
+    // ...(selectedAddress &&
+    //   isApprovedForAll && {
+    //     args: [
+    //       tokenIds
+    //         .filter((tokenId) => tokenId !== null)
+    //         .map((n) => BigNumber.from(n)) as BigNumber[],
+    //     ],
+    //   }),
+  });
 
   const {
-    writeAsync: wrappedNftWrap,
+    writeContractAsync: wrappedNftWrap,
     isError: wrapIsError,
-    isLoading: wrapIsLoading,
+    isPending: wrapIsLoading,
     isSuccess: wrapIsSuccess,
   } = testnet ? testnetWrapWrite : flsWrapWrite;
 
-  const { config: configureWrappedNftWrapTo } = usePrepareWrappedNftWrapTo({
-    overrides: {
-      value: tipState.value,
-    },
-    enabled:
-      testnet &&
-      isApprovedForAll &&
-      tokenIds.length > 0 &&
-      transferTo &&
-      !!sendTo &&
-      utils.isAddress(sendTo),
-    ...(selectedAddress &&
-      transferTo &&
-      !!sendTo &&
-      utils.isAddress(sendTo) &&
-      isApprovedForAll && {
-        args: [
-          sendTo as `0x${string}`,
-          tokenIds
-            .filter((tokenId) => tokenId !== null)
-            .map((n) => BigNumber.from(n)) as BigNumber[],
-        ],
-      }),
+  const testnetWrapToWrite = useWriteWrappedNftWrapTo({
+    // overrides: {
+    //   value: tipState.value,
+    // },
+    // enabled:
+    //   testnet &&
+    //   isApprovedForAll &&
+    //   tokenIds.length > 0 &&
+    //   transferTo &&
+    //   !!sendTo &&
+    //   utils.isAddress(sendTo),
+    // ...(selectedAddress &&
+    //   transferTo &&
+    //   !!sendTo &&
+    //   utils.isAddress(sendTo) &&
+    //   isApprovedForAll && {
+    //     args: [
+    //       sendTo as `0x${string}`,
+    //       tokenIds
+    //         .filter((tokenId) => tokenId !== null)
+    //         .map((n) => BigNumber.from(n)) as BigNumber[],
+    //     ],
+    //   }),
   });
 
-  const testnetWrapToWrite = useWrappedNftWrapTo(configureWrappedNftWrapTo);
-
-  const { config: configureFameLadySocietyWrapTo } =
-    usePrepareFameLadySocietyWrapTo({
-      overrides: {
-        value: tipState.value,
-      },
-      enabled:
-        !testnet &&
-        isApprovedForAll &&
-        tokenIds.length > 0 &&
-        transferTo &&
-        !!sendTo &&
-        utils.isAddress(sendTo),
-      ...(selectedAddress &&
-        transferTo &&
-        !!sendTo &&
-        utils.isAddress(sendTo) &&
-        isApprovedForAll && {
-          args: [
-            sendTo as `0x${string}`,
-            tokenIds
-              .filter((tokenId) => tokenId !== null)
-              .map((n) => BigNumber.from(n)) as BigNumber[],
-          ],
-        }),
-    });
-
-  const flsWrapToWrite = useFameLadySocietyWrapTo(
-    configureFameLadySocietyWrapTo
-  );
+  const flsWrapToWrite = useWriteFameLadySocietyWrapTo({
+    // overrides: {
+    //   value: tipState.value,
+    // },
+    // enabled:
+    //   !testnet &&
+    //   isApprovedForAll &&
+    //   tokenIds.length > 0 &&
+    //   transferTo &&
+    //   !!sendTo &&
+    //   utils.isAddress(sendTo),
+    // ...(selectedAddress &&
+    //   transferTo &&
+    //   !!sendTo &&
+    //   utils.isAddress(sendTo) &&
+    //   isApprovedForAll && {
+    //     args: [
+    //       sendTo as `0x${string}`,
+    //       tokenIds
+    //         .filter((tokenId) => tokenId !== null)
+    //         .map((n) => BigNumber.from(n)) as BigNumber[],
+    //     ],
+    //   }),
+  });
 
   const {
-    writeAsync: wrappedNftWrapTo,
+    writeContractAsync: wrappedNftWrapTo,
     isError: wrapToIsError,
-    isLoading: wrapToIsLoading,
+    isPending: wrapToIsLoading,
     isSuccess: wrapToIsSuccess,
   } = testnet ? testnetWrapToWrite : flsWrapToWrite;
 

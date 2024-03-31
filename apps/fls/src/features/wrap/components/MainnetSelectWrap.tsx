@@ -1,18 +1,17 @@
 import {
   fameLadySocietyAddress,
-  usePrepareFameLadySquadSetApprovalForAll,
-  useFameLadySquadIsApprovedForAll,
-  useFameLadySquadSetApprovalForAll,
+  useWriteFameLadySocietySetApprovalForAll,
+  useReadFameLadySocietyIsApprovedForAll,
 } from "@/wagmi";
-import { useWeb3 } from "@0xflick/feature-web3";
 import { FC } from "react";
-import { WrapCardContent } from "./WrapCardContent";
+import { WrapCardContent } from "./MainnetWrapCardContent";
+import { useAccount } from "wagmi";
 
 export const MainnetSelectWrap: FC<{
   minTokenId: number;
   maxTokenId: number;
 }> = ({ minTokenId, maxTokenId }) => {
-  const { selectedAddress, currentChain } = useWeb3();
+  const { address: selectedAddress, chain: currentChain } = useAccount();
 
   const isValidToCheckApproval =
     selectedAddress &&
@@ -20,9 +19,7 @@ export const MainnetSelectWrap: FC<{
     fameLadySocietyAddress[currentChain?.id] !== undefined;
 
   const { data: isApprovedForAll, isFetched: isApprovedForAllFetched } =
-    useFameLadySquadIsApprovedForAll({
-      enabled: isValidToCheckApproval,
-      watch: true,
+    useReadFameLadySocietyIsApprovedForAll({
       ...(isValidToCheckApproval && {
         args: [
           selectedAddress,
@@ -30,32 +27,26 @@ export const MainnetSelectWrap: FC<{
         ],
       }),
     });
-  const { config: configureSetApprovalForAll } =
-    usePrepareFameLadySquadSetApprovalForAll({
-      enabled:
-        isValidToCheckApproval && isApprovedForAllFetched && !isApprovedForAll,
-      ...(isValidToCheckApproval &&
-        isApprovedForAllFetched &&
-        !isApprovedForAll && {
-          args: [
-            fameLadySocietyAddress[currentChain?.id] as `0x${string}`,
-            true,
-          ],
-        }),
-    });
   const {
-    writeAsync: setApprovalForAll,
+    writeContractAsync: setApprovalForAll,
     isError: approveIsError,
-    isLoading: approveIsLoading,
+    isPending: approveIsLoading,
     isSuccess: approveIsSuccess,
-  } = useFameLadySquadSetApprovalForAll(configureSetApprovalForAll);
+  } = useWriteFameLadySocietySetApprovalForAll({});
 
   return (
     <WrapCardContent
       minTokenId={minTokenId}
       maxTokenId={maxTokenId}
       isApprovedForAll={isApprovedForAll}
-      setApprovalForAll={setApprovalForAll}
+      setApprovalForAll={() =>
+        setApprovalForAll({
+          args: [
+            fameLadySocietyAddress[currentChain?.id] as `0x${string}`,
+            true,
+          ],
+        })
+      }
       approveIsError={approveIsError}
       approveIsSuccess={approveIsSuccess}
     />

@@ -6,40 +6,43 @@ import FormGroup from "@mui/material/FormGroup";
 import TextField from "@mui/material/TextField";
 import CardActions from "@mui/material/CardActions";
 import Button from "@mui/material/Button";
-import {
-  useBulkMinterMint,
-  usePrepareBulkMinterMint,
-} from "@/wagmi";
+import { useWriteBulkMinterMint } from "@/wagmi";
 import { BigNumber, constants } from "ethers";
-import { useWeb3 } from "@0xflick/feature-web3";
 import { TransactionProgress } from "@/components/TransactionProgress";
 import { SendTransactionResult } from "@wagmi/core";
+import { useAccount } from "wagmi";
 
 export const MintCard: FC = () => {
-  const { selectedAddress, currentChain } = useWeb3();
+  const { address: selectedAddress, chain: currentChain } = useAccount();
   const [count, setCount] = useState("");
-  const enabled = !!selectedAddress && !!count.length && count !== "0" && Number.isInteger(Number(count));
+  const enabled =
+    !!selectedAddress &&
+    !!count.length &&
+    count !== "0" &&
+    Number.isInteger(Number(count));
   const [mintProgress, setMintProgress] = useState(false);
-  const { config } = usePrepareBulkMinterMint({
-    enabled,
-    ...(enabled && {
-      args: [BigNumber.from(count)],
-    }),
-  });
+  // const { config } = usePrepareBulkMinterMint({
+  //   enabled,
+  //   ...(enabled && {
+  //     args: [BigNumber.from(count)],
+  //   }),
+  // });
   const {
     isIdle,
     isError,
     isSuccess,
-    isLoading,
-    writeAsync: onMintAsync,
-  } = useBulkMinterMint(config);
+    isPending: isLoading,
+    writeContractAsync: onMintAsync,
+  } = useWriteBulkMinterMint(config);
   const [transactionResult, setTransactionResult] =
     useState<SendTransactionResult>();
   const onMint = useCallback(async () => {
     if (onMintAsync) {
       try {
         setMintProgress(true);
-        const response = await onMintAsync();
+        const response = await onMintAsync({
+          args: [BigInt(count)],
+        });
         setTransactionResult(response);
       } catch (e) {
         console.error(e);
@@ -47,9 +50,10 @@ export const MintCard: FC = () => {
         setMintProgress(false);
       }
     }
-  }, [onMintAsync]);
+  }, [count, onMintAsync]);
 
-  const countError = count.length && (count === "0" || !Number.isInteger(Number(count)));
+  const countError =
+    count.length && (count === "0" || !Number.isInteger(Number(count)));
 
   const onUpdateTokenId = useCallback((e: any) => {
     setCount(e.target.value);

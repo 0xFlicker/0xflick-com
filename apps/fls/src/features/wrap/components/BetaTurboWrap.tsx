@@ -1,14 +1,14 @@
 import { FC } from "react";
-import { useWeb3 } from "@0xflick/feature-web3";
-import { GoerliTurboWrap } from "./GoerliTurboWrap";
+import { SepoliaTurboWrap } from "./SepoliaTurboWrap";
 import { MainnetTurboWrap } from "./MainnetTurboWrap";
+import { useChainId } from "wagmi";
 
 export const BetaTurboWrap: FC<{}> = () => {
-  const { currentChain } = useWeb3();
+  const chainId = useChainId();
   return (() => {
-    switch (currentChain?.id) {
-      case 5:
-        return <GoerliTurboWrap />;
+    switch (chainId) {
+      case 11155111:
+        return <SepoliaTurboWrap />;
       case 1:
         return <MainnetTurboWrap />;
       default:

@@ -8,8 +8,7 @@ import CardContent from "@mui/material/CardContent";
 import CardActions from "@mui/material/CardActions";
 import CardHeader from "@mui/material/CardHeader";
 import WarningIcon from "@mui/icons-material/Warning";
-import Container from "@mui/material/Container";
-import { WrappedLink } from "@0xflick/components/src/WrappedLink";
+import { WrappedLink } from "@/components/WrappedLink";
 
 export const AgreeModal: FC<{
   open: boolean;

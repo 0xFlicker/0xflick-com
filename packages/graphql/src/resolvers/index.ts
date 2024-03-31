@@ -85,12 +85,12 @@ export const typeDefs = gql`
   }
 
   type Mutation {
-    createOrUpdateNameflick(
+    createOrUpdatePublicNameflick(
       domain: ID!
       ttl: Int
       fields: NameflickFieldsInput!
     ): Nameflick!
-    deleteNameflick(domain: ID!): Boolean!
+    deletePublicNameflick(domain: ID!): Boolean!
     role(id: ID!): Role!
     roles: [Role!]!
     createRole(name: String!, permissions: [PermissionInput!]!): Role!

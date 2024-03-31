@@ -3,7 +3,7 @@ import { INameflick } from "@0xflick/models";
 import { TContext } from "../../context";
 import { NameflickError } from "../../errors/nameflick";
 
-export async function deleteNameflickRecordByFqdn(
+export async function deletePublicNameflickRecordByFqdn(
   context: TContext,
   info: GraphQLResolveInfo,
   fqdn: string

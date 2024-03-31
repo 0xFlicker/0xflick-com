@@ -30,6 +30,7 @@ export interface DiscordProps {
   readonly goerliRpc: string;
   readonly infuraApiKey: string;
   readonly alchemyApiKey: string;
+  readonly infuraIpfsAuth: string;
 }
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -49,6 +50,7 @@ export class DiscordStack extends Construct {
       goerliRpc,
       infuraApiKey,
       alchemyApiKey,
+      infuraIpfsAuth,
     } = props;
     super(scope, id);
 
@@ -126,6 +128,7 @@ export class DiscordStack extends Construct {
           DYNAMODB_TABLE: lastWrapperEventBlock.tableName,
           INFURA_API_KEY: infuraApiKey,
           ALCHEMY_API_KEY: alchemyApiKey,
+          IPFS_AUTH: infuraIpfsAuth,
         },
       }
     );

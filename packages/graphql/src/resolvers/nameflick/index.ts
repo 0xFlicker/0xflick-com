@@ -2,9 +2,9 @@ import { IFieldResolver } from "@graphql-tools/utils";
 import { gql } from "apollo-server-core";
 import { TContext } from "../../context";
 import { NameflickFieldsInput, Nameflick } from "../../types.generated";
-import { createOrUpdateNameFlickRecord } from "../../controllers/nameflick/createOrUpdateRecord";
+import { createOrUpdateNameFlickPublicRecord } from "../../controllers/nameflick/createOrUpdateRecord";
 import { nameflickModelToGraphql } from "../../transforms/nameflick";
-import { deleteNameflickRecordByFqdn } from "../../controllers/nameflick/deleteRecord";
+import { deletePublicNameflickRecordByFqdn } from "../../controllers/nameflick/deleteRecord";
 import {
   fetchNameflickRecordsByRootDomain,
   fetchNameflickRecordByEnsHash,
@@ -98,14 +98,13 @@ export const queryResolvers: Resolvers<TContext>["Query"] = {
   nameflicksByRootDomain: nameFlicksByRootDomainResolver,
 };
 
-
 const createOrUpdateNameflickResolver: IFieldResolver<
   unknown,
   TContext,
   { domain: string; fields: NameflickFieldsInput; ttl?: number },
   Promise<Nameflick>
 > = async (_, { domain, ttl, fields }, context, info) => {
-  const result = await createOrUpdateNameFlickRecord(
+  const result = await createOrUpdateNameFlickPublicRecord(
     context,
     info,
     domain,
@@ -121,11 +120,11 @@ const deleteNameflickResolver: IFieldResolver<
   { domain: string },
   Promise<boolean>
 > = async (_, { domain }, context, info) => {
-  await deleteNameflickRecordByFqdn(context, info, domain);
+  await deletePublicNameflickRecordByFqdn(context, info, domain);
   return true;
 };
 
 export const mutationResolvers: Resolvers<TContext>["Mutation"] = {
-  createOrUpdateNameflick: createOrUpdateNameflickResolver,
-  deleteNameflick: deleteNameflickResolver,
+  createOrUpdatePublicNameflick: createOrUpdateNameflickResolver,
+  deletePublicNameflick: deleteNameflickResolver,
 };

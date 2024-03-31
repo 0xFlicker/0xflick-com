@@ -7,17 +7,15 @@ import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { Main } from "@/layouts/Main";
 import { SiteMenu } from "@/features/appbar/components/SiteMenu";
-import { useLocale } from "@0xflick/feature-locale";
 import { CountDown } from "@/components/CountDown";
 import NextImage from "next/image";
 import { RandomWrapVideo } from "@/features/reveal/components/RandomWrapVideo";
 import { PostReveal } from "@/features/reveal/components/PostReveal";
 import { useState } from "react";
-import { WrappedLink } from "@0xflick/components/src/WrappedLink";
 import { LinksMenuItems } from "@/features/appbar/components/LinksMenuItems";
+import { WrappedLink } from "@/components/WrappedLink";
 
 const HomePage: NextPage<{}> = () => {
-  const { t } = useLocale(["common"]);
   const title = "Fame Lady Society";
   const description = "Unstoppable";
   const [isRevealed, setIsRevealed] = useState(false);
@@ -48,7 +46,7 @@ const HomePage: NextPage<{}> = () => {
         menu={
           <>
             <MenuList dense disablePadding>
-            <LinksMenuItems />
+              <LinksMenuItems />
               <SiteMenu isHome />
             </MenuList>
           </>

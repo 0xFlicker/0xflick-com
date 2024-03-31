@@ -8,11 +8,8 @@ import {
 } from "react";
 import { AppBar as MuiAppBar, Toolbar, Box, Typography } from "@mui/material";
 import { Menu as MenuIcon } from "@mui/icons-material";
-import { Connect } from "@0xflick/feature-web3";
 import { HomeMenu } from "./HomeMenu";
-import { ChainSelector } from "@0xflick/feature-web3/src/components/ChainSelector";
-import { TwitterIcon } from "@/components/icons/twitter";
-import { WrappedLink } from "@0xflick/components/src/WrappedLink";
+import { ConnectKitButton } from "connectkit";
 
 export const AppBar: FC<{
   menu: ReactNode;
@@ -33,8 +30,7 @@ export const AppBar: FC<{
           <MenuIcon onClick={handleMenu} />
           {title}
           <Box sx={{ flexGrow: 1 }} component="span" />
-          <ChainSelector />
-          <Connect />
+          <ConnectKitButton />
         </Toolbar>
       </MuiAppBar>
       <HomeMenu anchorEl={menuAnchorEl} handleClose={onMenuClose}>

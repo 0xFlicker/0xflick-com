@@ -113,9 +113,9 @@ export type Mutation = {
   __typename?: 'Mutation';
   affiliateForAddress: AffiliateMutation;
   createAffiliate: AffiliateMutation;
-  createOrUpdateNameflick: Nameflick;
+  createOrUpdatePublicNameflick: Nameflick;
   createRole: Role;
-  deleteNameflick: Scalars['Boolean'];
+  deletePublicNameflick: Scalars['Boolean'];
   nftMetadataJob: NftMetadataFetchJob;
   nftMetadataJobsForUser: Array<NftMetadataFetchJob>;
   nonceForAddress?: Maybe<Nonce>;
@@ -140,7 +140,7 @@ export type MutationCreateAffiliateArgs = {
 };
 
 
-export type MutationCreateOrUpdateNameflickArgs = {
+export type MutationCreateOrUpdatePublicNameflickArgs = {
   domain: Scalars['ID'];
   fields: NameflickFieldsInput;
   ttl?: InputMaybe<Scalars['Int']>;
@@ -153,7 +153,7 @@ export type MutationCreateRoleArgs = {
 };
 
 
-export type MutationDeleteNameflickArgs = {
+export type MutationDeletePublicNameflickArgs = {
   domain: Scalars['ID'];
 };
 
@@ -804,9 +804,9 @@ export type MetadataPropertiesResolvers<ContextType = any, ParentType extends Re
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   affiliateForAddress?: Resolver<ResolversTypes['AffiliateMutation'], ParentType, ContextType, RequireFields<MutationAffiliateForAddressArgs, 'address'>>;
   createAffiliate?: Resolver<ResolversTypes['AffiliateMutation'], ParentType, ContextType, RequireFields<MutationCreateAffiliateArgs, 'address'>>;
-  createOrUpdateNameflick?: Resolver<ResolversTypes['Nameflick'], ParentType, ContextType, RequireFields<MutationCreateOrUpdateNameflickArgs, 'domain' | 'fields'>>;
+  createOrUpdatePublicNameflick?: Resolver<ResolversTypes['Nameflick'], ParentType, ContextType, RequireFields<MutationCreateOrUpdatePublicNameflickArgs, 'domain' | 'fields'>>;
   createRole?: Resolver<ResolversTypes['Role'], ParentType, ContextType, RequireFields<MutationCreateRoleArgs, 'name' | 'permissions'>>;
-  deleteNameflick?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteNameflickArgs, 'domain'>>;
+  deletePublicNameflick?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeletePublicNameflickArgs, 'domain'>>;
   nftMetadataJob?: Resolver<ResolversTypes['NftMetadataFetchJob'], ParentType, ContextType, RequireFields<MutationNftMetadataJobArgs, 'id'>>;
   nftMetadataJobsForUser?: Resolver<Array<ResolversTypes['NftMetadataFetchJob']>, ParentType, ContextType, RequireFields<MutationNftMetadataJobsForUserArgs, 'address'>>;
   nonceForAddress?: Resolver<Maybe<ResolversTypes['Nonce']>, ParentType, ContextType, RequireFields<MutationNonceForAddressArgs, 'address'>>;

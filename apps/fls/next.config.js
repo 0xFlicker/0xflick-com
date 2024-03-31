@@ -1,20 +1,6 @@
 const { spawnSync } = require("child_process");
 const path = require("path");
-const withTM = require('next-transpile-modules')([
-  '@0xflick/components',
-  '@0xflick/feature-airdrop',
-  '@0xflick/feature-auth',
-  '@0xflick/feature-contract',
-  '@0xflick/feature-locale',
-  '@0xflick/feature-theme',
-  '@0xflick/feature-web3',
-  '@0xflick/backend',
-  '@0xflick/models',
-  '@0xflick/graphql',
-  '@0xflick/contracts',
-  '@0xflick/assets',
-  '@0xflick/utils',
-]);
+const withTM = require("next-transpile-modules")([]);
 
 /**
  * @param {string} file
@@ -55,12 +41,14 @@ function getTwitterJson() {
   return _twitterJsonCache;
 }
 
-process.env.SUPPORTED_CHAINS = process.env.SUPPORTED_CHAINS || JSON.stringify(getSecretsJson().supportedChains);
+process.env.SUPPORTED_CHAINS =
+  process.env.SUPPORTED_CHAINS ||
+  JSON.stringify(getSecretsJson().supportedChains);
 
 process.env.INFURA_KEY = process.env.INFURA_KEY || getSecretsJson().infuraKey;
 
-process.env.ALCHEMY_KEY = process.env.ALCHEMY_KEY || getSecretsJson().alchemyKey;
-
+process.env.ALCHEMY_KEY =
+  process.env.ALCHEMY_KEY || getSecretsJson().alchemyKey;
 
 /** @type {import('next').NextConfig} */
 const nextConfig = withTM({
@@ -68,13 +56,17 @@ const nextConfig = withTM({
   env: {
     LOG_LEVEL: "debug",
     SIWE_EXPIRATION_TIME_SECONDS: process.env.SIWE_EXPIRATION_TIME_SECONDS,
-    NEXT_PUBLIC_JWT_CLAIM_ISSUER: process.env.NEXT_PUBLIC_JWT_CLAIM_ISSUER || getJwtJson().issuer,
-    NEXT_PUBLIC_DEFAULT_CHAIN_ID: process.env.NEXT_PUBLIC_DEFAULT_CHAIN_ID || "1",
+    NEXT_PUBLIC_JWT_CLAIM_ISSUER:
+      process.env.NEXT_PUBLIC_JWT_CLAIM_ISSUER || getJwtJson().issuer,
+    NEXT_PUBLIC_DEFAULT_CHAIN_ID:
+      process.env.NEXT_PUBLIC_DEFAULT_CHAIN_ID || "1",
     NEXT_PUBLIC_SUPPORTED_CHAINS: process.env.SUPPORTED_CHAINS,
     NEXT_PUBLIC_INFURA_KEY: process.env.INFURA_KEY,
     NEXT_PUBLIC_ALCHEMY_KEY: process.env.ALCHEMY_KEY,
-    NEXT_PUBLIC_JWT_PUBLIC_KEY: process.env.NEXT_PUBLIC_JWT_PUBLIC_KEY || getJwtJson().publicKey,
-    NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME ?? "https://0xflick.com",
+    NEXT_PUBLIC_JWT_PUBLIC_KEY:
+      process.env.NEXT_PUBLIC_JWT_PUBLIC_KEY || getJwtJson().publicKey,
+    NEXT_PUBLIC_APP_NAME:
+      process.env.NEXT_PUBLIC_APP_NAME ?? "https://0xflick.com",
   },
   webpack: (config) => {
     config.externals.push("tls", "net", "fs", "path");
@@ -82,4 +74,4 @@ const nextConfig = withTM({
   },
 });
 
-module.exports = nextConfig
+module.exports = nextConfig;

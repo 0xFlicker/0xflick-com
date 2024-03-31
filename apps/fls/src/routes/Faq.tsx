@@ -6,7 +6,6 @@ import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { Main } from "@/layouts/Main";
 import { SiteMenu } from "@/features/appbar/components/SiteMenu";
-import { useLocale } from "@0xflick/feature-locale";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import theme from "@/theme";
 import FAQ from "@/features/faq";
@@ -14,7 +13,6 @@ import Box from "@mui/material/Box";
 import { LinksMenuItems } from "@/features/appbar/components/LinksMenuItems";
 
 const FaqPage: NextPage<{}> = () => {
-  const { t } = useLocale(["common"]);
   const title = "Fame Lady Society - FAQ";
   const description = "Frequently Asked Questions about wrapping";
   const roomForTitle = useMediaQuery(theme.breakpoints.up("sm"));

@@ -32,6 +32,7 @@
     "@serverless-stack/node": "^1.18.4"
   },
   "overrides": {
-    "@aws-sdk/smithy-client": "^3.234.0"
+    "@aws-sdk/smithy-client": "^3.234.0",
+    "viem": "^2.7.22"
   }
 }

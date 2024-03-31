@@ -4,42 +4,30 @@ import Card from "@mui/material/Card";
 import CardActionArea from "@mui/material/CardActionArea";
 import CardMedia from "@mui/material/CardMedia";
 import CardHeader from "@mui/material/CardHeader";
-import CircularProgress from "@mui/material/CircularProgress";
 
 import {
-  useTokensToWrapLazyQuery,
-  TokensToWrapQuery,
-} from "../graphql/tokensToWrap.generated";
-import { Button } from "@mui/material";
-import {
-  bulkMinterAddress,
-  bulkMinterABI,
   fameLadySquadABI,
   fameLadySquadAddress,
-  useFameLadySquadBalanceOf,
+  useReadFameLadySocietyBalanceOf,
 } from "@/wagmi";
 import { BigNumber } from "ethers";
-import { useContractReads } from "wagmi";
-import { useWeb3 } from "@0xflick/feature-web3";
+import { useAccount, useReadContracts } from "wagmi";
 
 export const MainnetTokenSelect: FC<{
   onSelected: (selected: string[]) => void;
 }> = ({ onSelected }) => {
-  const { currentChain, selectedAddress } = useWeb3();
+  const { address: selectedAddress, chain: currentChain } = useAccount();
   const [tokenIds, setTokenIds] = useState<string[]>([]);
   useEffect(() => {
     onSelected(tokenIds);
   }, [tokenIds, onSelected]);
 
-  const { data: balanceOf } = useFameLadySquadBalanceOf({
-    enabled: selectedAddress !== undefined,
-    watch: true,
+  const { data: balanceOf } = useReadFameLadySocietyBalanceOf({
     ...(selectedAddress !== undefined && {
       args: [selectedAddress],
     }),
   });
-  const { data: ownedTokens } = useContractReads({
-    watch: true,
+  const { data: ownedTokens } = useReadContracts({
     contracts:
       selectedAddress !== undefined && balanceOf !== undefined
         ? (Array.from({ length: balanceOf.toNumber() }).map((_, index) => ({

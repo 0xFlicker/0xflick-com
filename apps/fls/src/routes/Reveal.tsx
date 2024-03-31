@@ -1,7 +1,6 @@
 import Head from "next/head";
 import { DefaultProvider } from "@/context/default";
 import { NextPage } from "next";
-import { useLocale } from "@0xflick/feature-locale";
 import { PostReveal } from "@/features/reveal/components/PostReveal";
 import Typography from "@mui/material/Typography";
 import MenuList from "@mui/material/MenuList";
@@ -10,7 +9,6 @@ import { Main } from "@/layouts/Main";
 import { LinksMenuItems } from "@/features/appbar/components/LinksMenuItems";
 
 const RevealPage: NextPage<{}> = () => {
-  const { t } = useLocale(["common"]);
   const title = "Fame Lady Society";
   const description = "Unstoppable";
   return (

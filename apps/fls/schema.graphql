@@ -320,8 +320,8 @@ type Query {
 }
 
 type Mutation {
-  createOrUpdateNameflick(domain: ID!, ttl: Int, fields: NameflickFieldsInput!): Nameflick!
-  deleteNameflick(domain: ID!): Boolean!
+  createOrUpdatePublicNameflick(domain: ID!, ttl: Int, fields: NameflickFieldsInput!): Nameflick!
+  deletePublicNameflick(domain: ID!): Boolean!
   role(id: ID!): Role!
   roles: [Role!]!
   createRole(name: String!, permissions: [PermissionInput!]!): Role!

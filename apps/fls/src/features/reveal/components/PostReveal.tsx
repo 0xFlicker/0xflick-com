@@ -8,7 +8,7 @@ import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { Card, CardActionArea, Typography } from "@mui/material";
-import { WrappedLink } from "@0xflick/components/src/WrappedLink";
+import { WrappedLink } from "@/components/WrappedLink";
 
 export const PostReveal = () => {
   return (

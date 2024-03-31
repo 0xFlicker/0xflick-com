@@ -19,7 +19,6 @@ import {
 } from "@/wagmi";
 import Button from "@mui/material/Button";
 
-import { useWeb3 } from "@0xflick/feature-web3";
 import { BigNumber, utils } from "ethers";
 import Box from "@mui/material/Box";
 import FormControlLabel from "@mui/material/FormControlLabel";
@@ -27,10 +26,10 @@ import Switch from "@mui/material/Switch";
 import CircularProgress from "@mui/material/CircularProgress";
 import { TransactionProgress } from "@/components/TransactionProgress";
 import { useAuth } from "@0xflick/feature-auth/src/hooks";
-import { TokenSelect } from "./TokenSelect";
+import { SepoliaTokenSelect } from "./SepoliaTokenSelect";
 import { MainnetTokenSelect } from "./MainnetTokenSelect";
 import { DevTipModal, TipCloseReason } from "./DevTipModal";
-import { useEnsAddress } from "wagmi";
+import { useAccount, useEnsAddress } from "wagmi";
 import CheckCircle from "@mui/icons-material/CheckCircle";
 import { useRouter } from "next/router";
 
@@ -66,7 +65,7 @@ export const UnwrapCardContent: FC<{
     name: sendToInput,
   });
 
-  const { selectedAddress } = useWeb3();
+  const { address: selectedAddress } = useAccount();
   const { isAuthenticated } = useAuth();
 
   const { config: configureWrappedNftWrap } = usePrepareWrappedNftWrap({
@@ -281,12 +280,8 @@ export const UnwrapCardContent: FC<{
               }}
             />
           </FormGroup>
-          {isAuthenticated && testnet ? (
-            <TokenSelect
-              contractAddress={bulkMinterAddress[5]}
-              contractSlug={"go-fame-lady-1"}
-              testnet
-              userAddress={selectedAddress}
+          {testnet ? (
+            <SepoliaTokenSelect
               onSelected={setTokenIds}
               maxTokenId={maxTokenId}
               minTokenId={minTokenId}

@@ -1,5 +1,4 @@
-import { Chain, mainnet } from "@wagmi/chains";
-import { createClient, configureChains } from "wagmi";
+import { createConfig } from "wagmi";
 import { infuraProvider } from "wagmi/providers/infura";
 import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";

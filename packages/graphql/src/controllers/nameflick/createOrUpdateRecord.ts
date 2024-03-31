@@ -4,7 +4,7 @@ import { NameflickFieldsInput } from "../../resolvers.generated";
 import { utils } from "ethers";
 import { NameflickError } from "../../errors/nameflick";
 
-export async function createOrUpdateNameFlickRecord(
+export async function createOrUpdateNameFlickPublicRecord(
   context: TContext,
   info: GraphQLResolveInfo,
   domain: string,

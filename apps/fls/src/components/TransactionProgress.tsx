@@ -1,11 +1,10 @@
 import { FC, useEffect, useState } from "react";
-import { TransactionResponse } from "@ethersproject/providers";
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
 import CircularProgress from "@mui/material/CircularProgress";
 import CircleIcon from "@mui/icons-material/Circle";
 import Stack from "@mui/material/Stack";
-import { SendTransactionResult } from "@wagmi/core";
+import { useTransaction } from "wagmi";
 
 // Transactions have three steps:
 // 1. Waiting for the user to sign the transaction
@@ -19,37 +18,41 @@ import { SendTransactionResult } from "@wagmi/core";
 export const TransactionProgress: FC<{
   isError: boolean;
   isSuccess: boolean;
-  transactionResult?: SendTransactionResult;
+  transactionHash?: `0x${string}`;
   onConfirmed?: () => void;
-}> = ({ isError, isSuccess, transactionResult, onConfirmed }) => {
+}> = ({ isError, isSuccess, transactionHash, onConfirmed }) => {
   const [isMined, setIsMined] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const { data: transactionResult } = useTransaction({
+    hash: transactionHash,
+  });
   useEffect(() => {
-    if (transactionResult?.hash) {
-      setIsSubmitted(true);
-      transactionResult?.wait().then(() => {
-        setIsMined(true);
-        setTimeout(() => {
-          onConfirmed?.();
-        }, 1000);
-      });
-    }
+    // if (transactionResult?.hash) {
+    //   setIsSubmitted(true);
+    //   transactionResult?.wait().then(() => {
+    //     setIsMined(true);
+    //     setTimeout(() => {
+    //       onConfirmed?.();
+    //     }, 1000);
+    //   });
+    // }
+    console.log(transactionResult);
   }, [onConfirmed, transactionResult]);
   const status = isError
     ? "error"
     : isSuccess
-    ? "success"
-    : isMined
-    ? "mined"
-    : "signing";
+      ? "success"
+      : isMined
+        ? "mined"
+        : "signing";
 
   const progress = !transactionResult
     ? 0 // waiting to submit
     : isMined
-    ? 100 // mined
-    : isSubmitted
-    ? 66 // submitted
-    : 33; // signing
+      ? 100 // mined
+      : isSubmitted
+        ? 66 // submitted
+        : 33; // signing
 
   return (
     <Box

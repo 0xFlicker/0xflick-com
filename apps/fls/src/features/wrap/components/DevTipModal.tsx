@@ -13,8 +13,8 @@ import Slider from "@mui/material/Slider";
 import MonetizationOn from "@mui/icons-material/MonetizationOn";
 import MuiInput from "@mui/material/Input";
 import Grid2 from "@mui/material/Unstable_Grid2";
-import { BigNumber, utils } from "ethers";
 import { Link } from "@mui/material";
+import { formatEther, parseEther } from "viem";
 
 const Input = styled(MuiInput)`
   width: 64px;
@@ -80,16 +80,14 @@ const TipSlider: FC<{
 export const DevTipModal: FC<{
   numberOfTokens: number;
   open: boolean;
-  handleClose: (reason: TipCloseReason, tip?: BigNumber) => void;
+  handleClose: (reason: TipCloseReason, tip?: bigint) => void;
 }> = ({ open, handleClose, numberOfTokens }) => {
-  const [tip, setTip] = useState<BigNumber | undefined>();
+  const [tip, setTip] = useState<bigint | undefined>();
   const [tipPerToken, setTipPerToken] = useState(0);
   useEffect(() => {
-    setTip(
-      utils.parseEther((tipPerToken * numberOfTokens).toPrecision(6).toString())
-    );
+    setTip(parseEther((tipPerToken * numberOfTokens).toString()));
   }, [numberOfTokens, tipPerToken]);
-  const tipString = `${utils.formatEther(tip || "0")} ETH`;
+  const tipString = `${formatEther(tip || 0n)} ETH`;
   return (
     <Modal
       open={open}
@@ -180,7 +178,7 @@ export const DevTipModal: FC<{
               Cancel
             </Button>
             <Button
-              onClick={() => handleClose("confirm", BigNumber.from(0))}
+              onClick={() => handleClose("confirm", 0n)}
               variant="contained"
               color="success"
             >

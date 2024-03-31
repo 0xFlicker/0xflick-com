@@ -3,12 +3,12 @@ import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
 import { FC } from "react";
 import ListItemIcon from "@mui/material/ListItemIcon";
-import { WrappedLink } from "@0xflick/components/src/WrappedLink";
 import { TwitterIcon } from "@/components/icons/twitter";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import Image from "next/image";
 import { OpenSeaIcon } from "@/components/icons/opensea";
 import Divider from "@mui/material/Divider";
+import { WrappedLink } from "@/components/WrappedLink";
 
 export const LinksMenuItems: FC<{}> = ({}) => {
   return (

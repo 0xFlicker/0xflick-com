@@ -1,18 +1,18 @@
 import { FC } from "react";
-import { useWeb3 } from "@0xflick/feature-web3";
-import { GoerliSelectWrap } from "./GoerliSelectWrap";
+import { SepoliaSelectWrap } from "./SepoliaSelectWrap";
 import { MainnetSelectWrap } from "./MainnetSelectWrap";
+import { useChainId } from "wagmi";
 
 export const BetaWrapCard: FC<{ minTokenId: number; maxTokenId: number }> = ({
   minTokenId,
   maxTokenId,
 }) => {
-  const { currentChain } = useWeb3();
+  const chainId = useChainId();
   return (() => {
-    switch (currentChain?.id) {
-      case 5:
+    switch (chainId) {
+      case 11155111:
         return (
-          <GoerliSelectWrap minTokenId={minTokenId} maxTokenId={maxTokenId} />
+          <SepoliaSelectWrap minTokenId={minTokenId} maxTokenId={maxTokenId} />
         );
       case 1:
         return (

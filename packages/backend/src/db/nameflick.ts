@@ -260,7 +260,7 @@ export class NameFlickDAO {
           ":address": address,
         },
         ExpressionAttributeNames: {
-          "#eth": `address!eth`,
+          "#eth": `address_eth`,
         },
       })
     );
