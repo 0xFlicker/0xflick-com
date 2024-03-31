@@ -1,5 +1,4 @@
 // import { EventBridgeEvent } from "aws-lambda";
-import { constants, providers } from "ethers";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import {
   DynamoDBDocumentClient,
@@ -12,56 +11,51 @@ import {
   wrappedNftAddress,
   fameLadySocietyABI,
   fameLadySocietyAddress,
+  namedLadyRendererABI,
+  namedLadyRendererAddress,
   readFameLadySquad,
 } from "./generated";
 import { SNS } from "@aws-sdk/client-sns";
 import { APIEmbedField } from "discord-api-types/v10";
 import { sendDiscordMessage } from "@0xflick/backend/discord/send";
 import { createLogger } from "@0xflick/backend";
-import { configureChains, mainnet, createClient } from "wagmi";
-import { publicProvider } from "@wagmi/core/providers/public";
-import { infuraProvider } from "@wagmi/core/providers/infura";
-import { alchemyProvider } from "@wagmi/core/providers/alchemy";
+// import { configureChains, mainnet, createClient } from "wagmi";
+import { createPublicClient, http, fallback, zeroHash } from "viem";
+import { mainnet, sepolia } from "viem/chains";
+
+type PromiseType<T extends Promise<any>> = T extends Promise<infer U>
+  ? U
+  : never;
 
 const logger = createLogger({
   name: "fls-wrapper-event",
 });
 
-const { provider, webSocketProvider } = configureChains(
-  [mainnet],
-  [
-    infuraProvider({
-      apiKey: process.env.INFURA_API_KEY,
+const sepoliaClient = createPublicClient({
+  transport: fallback([
+    http(`https://sepolia.infura.io/v3/${process.env.INFURA_KEY}`, {
+      batch: true,
     }),
-    alchemyProvider({
-      apiKey: process.env.ALCHEMY_API_KEY,
-    }),
-    publicProvider(),
-  ]
-);
-
-createClient({
-  provider,
-  webSocketProvider,
+    http(
+      `https://eth-sepolia.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_KEY}`,
+      {
+        batch: true,
+      }
+    ),
+  ]),
+  chain: sepolia,
 });
-
-interface Event {
-  blockNumber: number;
-  eventFragment: utils.EventFragment;
-  name: string;
-  signature: string;
-  topic: string;
-  args: utils.Result;
-}
-const { Interface } = utils;
-
-if (!process.env.RPC_URL_MAINNET) {
-  throw new Error("RPC_URL_MAINNET not set");
-}
-
-if (!process.env.RPC_URL_GOERLI) {
-  throw new Error("RPC_URL_GOERLI not set");
-}
+const mainnetClient = createPublicClient({
+  transport: fallback([
+    http(`https://mainnet.infura.io/v3/${process.env.INFURA_KEY}`, {
+      batch: true,
+    }),
+    http(`https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY_KEY}`, {
+      batch: true,
+    }),
+  ]),
+  chain: mainnet,
+});
 
 if (!process.env.DYNAMODB_REGION) {
   throw new Error("DYNAMODB_REGION not set");
@@ -79,16 +73,6 @@ if (!process.env.DISCORD_CHANNEL_ID) {
   throw new Error("DISCORD_CHANNEL_ID not set");
 }
 
-const mainnetProvider = new providers.JsonRpcProvider(
-  process.env.RPC_URL_MAINNET,
-  1
-);
-
-const goerliProvider = new providers.JsonRpcProvider(
-  process.env.RPC_URL_GOERLI,
-  5
-);
-
 const db = DynamoDBDocumentClient.from(
   new DynamoDBClient({
     region: process.env.DYNAMODB_REGION,
@@ -101,27 +85,43 @@ const db = DynamoDBDocumentClient.from(
 );
 
 async function findEvents(
-  provider: providers.JsonRpcProvider,
-  contractAddress: string,
-  contractInterface: utils.Interface,
-  fromBlock: number,
-  toBlock: number
-): Promise<Event[]> {
-  const events = await provider.getLogs({
+  client: typeof sepoliaClient | typeof mainnetClient,
+  contractAddress: `0x${string}`,
+  fromBlock: bigint,
+  toBlock: bigint
+) {
+  const events = await client.getLogs({
     address: contractAddress,
     fromBlock,
     toBlock,
-    topics: [contractInterface.getEventTopic("Transfer")],
+    event: {
+      type: "event",
+      anonymous: false,
+      inputs: [
+        {
+          name: "from",
+          internalType: "address",
+          type: "address",
+          indexed: true,
+        },
+        { name: "to", internalType: "address", type: "address", indexed: true },
+        {
+          name: "tokenId",
+          internalType: "uint256",
+          type: "uint256",
+          indexed: true,
+        },
+      ],
+      name: "Transfer",
+    } as const,
   });
   // Only interested in events that have from address 0x0 (new mints)
   const filteredEvents = events.filter((event) => {
-    const parsedEvent = contractInterface.parseLog(event);
-    return parsedEvent.args[0] === constants.AddressZero;
+    return event.args.from === zeroHash;
   });
   const ret = filteredEvents.map((event) => {
-    const parsedEvent = contractInterface.parseLog(event);
     return {
-      ...parsedEvent,
+      ...event,
       blockNumber: event.blockNumber,
     };
   });
@@ -134,21 +134,21 @@ async function notifyDiscordSingleToken({
   wrappedCount,
   toAddress,
   channelId,
-  provider,
+  client,
   testnet,
   discordMessageTopicArn,
   sns,
 }: {
   tokenId: string;
   wrappedCount: number;
-  toAddress: string;
+  toAddress: `0x${string}`;
   channelId: string;
-  provider: providers.Provider;
+  client: typeof sepoliaClient | typeof mainnetClient;
   testnet: boolean;
   discordMessageTopicArn: string;
   sns: SNS;
 }) {
-  const ensName = await provider.lookupAddress(toAddress);
+  const ensName = await client.getEnsName({ address: toAddress });
   const displayName = ensName ? ensName : toAddress;
   const fields: APIEmbedField[] = [];
   fields.push({
@@ -163,7 +163,7 @@ async function notifyDiscordSingleToken({
   });
   if (testnet) {
     fields.push({
-      name: "goerli",
+      name: "sepolia",
       value: "true",
       inline: true,
     });
@@ -181,7 +181,7 @@ async function notifyDiscordSingleToken({
         {
           title: "#itsawrap",
           description: `A new Fame Lady Society was wrapped${
-            testnet ? " on Goerli" : ""
+            testnet ? " on Sepolia" : ""
           }`,
           image: {
             url: `https://img.fameladysociety.com/thumb/${tokenId}`,
@@ -200,23 +200,23 @@ async function notifyDiscordMultipleTokens({
   wrappedCount,
   toAddress,
   channelId,
-  provider,
+  client,
   testnet,
   discordMessageTopicArn,
   sns,
 }: {
   tokenIds: string[];
   wrappedCount: number;
-  toAddress: string;
+  toAddress: `0x${string}`;
   channelId: string;
-  provider: providers.Provider;
+  client: typeof sepoliaClient | typeof mainnetClient;
   testnet: boolean;
   discordMessageTopicArn: string;
   sns: SNS;
 }) {
   let ensName: string;
   try {
-    ensName = await provider.lookupAddress(toAddress);
+    ensName = await client.getEnsName({ address: toAddress });
   } catch (e) {
     logger.error(e, "Failed to lookup address", toAddress);
     ensName = toAddress;
@@ -235,7 +235,7 @@ async function notifyDiscordMultipleTokens({
   });
   if (testnet) {
     fields.push({
-      name: "goerli",
+      name: "sepolia",
       value: "true",
       inline: true,
     });
@@ -252,7 +252,7 @@ async function notifyDiscordMultipleTokens({
         {
           title: "#itsawrap",
           description: `Fame Lady Society were wrapped${
-            testnet ? " on Goerli" : ""
+            testnet ? " on Sepolia" : ""
           }`,
           image: {
             url: `https://img.fameladysociety.com/mosaic/${tokenIds.join(",")}`,
@@ -269,17 +269,14 @@ async function notifyDiscordMultipleTokens({
 export const handler = async () =>
   // event: EventBridgeEvent<"check-fls-wrap", void>
   {
-    const wrappedNftInterface = new Interface(wrappedNftABI);
-    const fameLadySocietyInterface = new Interface(fameLadySocietyABI);
-
     // Get last bock read
-    const [lastBlockGoerliResponse, lastBlockMainnetResponse] =
+    const [lastBlockSepoliaResponse, lastBlockMainnetResponse] =
       await Promise.all([
         db.send(
           new GetCommand({
             TableName: process.env.DYNAMODB_TABLE,
             Key: {
-              key: "lastBlockGoerli",
+              key: "lastBlockSepolia",
             },
           })
         ),
@@ -293,29 +290,29 @@ export const handler = async () =>
         ),
       ]);
 
-    const [latestBlockGoerli, latestBlockMainnet] = await Promise.all([
-      goerliProvider.getBlockNumber(),
-      mainnetProvider.getBlockNumber(),
+    const [latestBlockSepolia, latestBlockMainnet] = await Promise.all([
+      sepoliaClient.getBlockNumber(),
+      mainnetClient.getBlockNumber(),
     ]);
 
-    const lastBlockGoerli: number =
-      lastBlockGoerliResponse.Item?.value ?? latestBlockGoerli;
-    const lastBlockMainnet: number =
-      lastBlockMainnetResponse.Item?.value ?? latestBlockMainnet;
+    const lastBlockSepolia = BigInt(
+      lastBlockSepoliaResponse.Item?.value ?? latestBlockSepolia
+    );
+    const lastBlockMainnet = BigInt(
+      lastBlockMainnetResponse.Item?.value ?? latestBlockMainnet
+    );
 
     // Get events from last block read
-    const [goerliEvents, mainnetEvents] = await Promise.all([
+    const [sepoliaEvents, mainnetEvents] = await Promise.all([
       findEvents(
-        goerliProvider,
+        sepoliaClient,
         wrappedNftAddress[5],
-        wrappedNftInterface,
-        lastBlockGoerli,
-        latestBlockGoerli
+        lastBlockSepolia,
+        latestBlockSepolia
       ),
       findEvents(
-        mainnetProvider,
+        mainnetClient,
         fameLadySocietyAddress[1],
-        fameLadySocietyInterface,
         lastBlockMainnet,
         latestBlockMainnet
       ),
@@ -324,17 +321,23 @@ export const handler = async () =>
     // Notify discord
     const sns = new SNS({});
     // Group events by to address
-    const goerliEventsByTo = new Map<string, Event[]>();
-    const mainnetEventsByTo = new Map<string, Event[]>();
-    for (const event of goerliEvents) {
-      const events: Event[] = goerliEventsByTo.get(event.args[1]) || [];
+    const sepoliaEventsByTo = new Map<
+      `0x${string}`,
+      PromiseType<ReturnType<typeof findEvents>>
+    >();
+    const mainnetEventsByTo = new Map<
+      `0x${string}`,
+      PromiseType<ReturnType<typeof findEvents>>
+    >();
+    for (const event of sepoliaEvents) {
+      const events = sepoliaEventsByTo.get(event.args.to) || [];
       events.push(event);
-      goerliEventsByTo.set(event.args[1], events);
+      sepoliaEventsByTo.set(event.args.to, events);
     }
     for (const event of mainnetEvents) {
-      const events: Event[] = mainnetEventsByTo.get(event.args[1]) || [];
+      const events = mainnetEventsByTo.get(event.args.to) || [];
       events.push(event);
-      mainnetEventsByTo.set(event.args[1], events);
+      mainnetEventsByTo.set(event.args.to, events);
     }
     // get total wrapped count of fame lady society
     // fameLadySquadInterface.balanceOf(fameLadySocietyAddress[1])
@@ -345,15 +348,15 @@ export const handler = async () =>
     const wrappedCount = wrappedCountBigNumber.toNumber();
 
     // Now push out the events
-    for (const [to, events] of goerliEventsByTo.entries()) {
-      const tokenIds = events.map(({ args }) => args[2].toString());
+    for (const [to, events] of sepoliaEventsByTo.entries()) {
+      const tokenIds = events.map(({ args }) => args.tokenId.toString());
       if (tokenIds.length === 1) {
         await notifyDiscordSingleToken({
           tokenId: tokenIds[0],
           wrappedCount: 0, // fake
           toAddress: to,
           channelId: process.env.DISCORD_CHANNEL_ID,
-          provider: goerliProvider,
+          client: sepoliaClient,
           discordMessageTopicArn: process.env.DISCORD_MESSAGE_TOPIC_ARN,
           testnet: true,
           sns,
@@ -364,7 +367,7 @@ export const handler = async () =>
           wrappedCount: 0, // fake
           toAddress: to,
           channelId: process.env.DISCORD_CHANNEL_ID,
-          provider: goerliProvider,
+          client: sepoliaClient,
           testnet: true,
           discordMessageTopicArn: process.env.DISCORD_MESSAGE_TOPIC_ARN,
           sns,
@@ -373,14 +376,14 @@ export const handler = async () =>
     }
 
     for (const [to, events] of mainnetEventsByTo.entries()) {
-      const tokenIds = events.map(({ args }) => args[2].toString());
+      const tokenIds = events.map(({ args }) => args.tokenId.toString());
       if (tokenIds.length === 1) {
         await notifyDiscordSingleToken({
           tokenId: tokenIds[0],
           wrappedCount,
           toAddress: to,
           channelId: process.env.DISCORD_CHANNEL_ID,
-          provider: mainnetProvider,
+          client: mainnetClient,
           discordMessageTopicArn: process.env.DISCORD_MESSAGE_TOPIC_ARN,
           testnet: false,
           sns,
@@ -391,7 +394,7 @@ export const handler = async () =>
           wrappedCount,
           toAddress: to,
           channelId: process.env.DISCORD_CHANNEL_ID,
-          provider: mainnetProvider,
+          client: mainnetClient,
           testnet: false,
           discordMessageTopicArn: process.env.DISCORD_MESSAGE_TOPIC_ARN,
           sns,
@@ -404,8 +407,8 @@ export const handler = async () =>
         new PutCommand({
           TableName: process.env.DYNAMODB_TABLE,
           Item: {
-            key: "lastBlockGoerli",
-            value: latestBlockGoerli + 1,
+            key: "lastBlockSepolia",
+            value: Number(latestBlockSepolia + 1n),
           },
         })
       ),
@@ -414,7 +417,7 @@ export const handler = async () =>
           TableName: process.env.DYNAMODB_TABLE,
           Item: {
             key: "lastBlockMainnet",
-            value: latestBlockMainnet + 1,
+            value: Number(latestBlockMainnet + 1n),
           },
         })
       ),
