@@ -34,6 +34,23 @@ commandCommand
               .setName("ping")
               .setDescription("Replies with pong!"),
           ],
+          [
+            "fls",
+            new SlashCommandBuilder()
+              .setName("fls")
+              .setDescription("Beep boop, I am the FlickBot!")
+              .addSubcommand((subcommand) =>
+                subcommand
+                  .setName("flaunt")
+                  .setDescription("Flaunt a lady")
+                  .addStringOption((option) =>
+                    option
+                      .setName("token")
+                      .setDescription("Token ID")
+                      .setRequired(true)
+                  )
+              ),
+          ],
         ] as [string, SlashCommandBuilder][]
       )
         .filter(([name, _]) => !exclude.includes(name))

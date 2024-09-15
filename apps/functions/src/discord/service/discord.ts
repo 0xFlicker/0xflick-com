@@ -31,7 +31,7 @@ class RateLimitHandler {
 
             // Wait and retry request
             await new Promise((resolve) =>
-              setTimeout(resolve, waitTime * 1000)
+              setTimeout(resolve, waitTime * 1000 + 1000)
             );
             return this.axiosInstance(config);
           }

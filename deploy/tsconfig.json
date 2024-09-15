@@ -23,5 +23,10 @@
     "typeRoots": ["./node_modules/@types"]
   },
   "exclude": ["cdk.out"],
-  "include": ["stack/**/*.ts"]
+  "include": ["stack/**/*.ts"],
+  "ts-node": {
+    "experimentalSpecifierResolution": "node",
+    "transpileOnly": true,
+    "esm": true,
+  },
 }

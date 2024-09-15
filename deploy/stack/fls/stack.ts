@@ -155,6 +155,9 @@ export class FlsStack extends cdk.Stack {
       lastWrapperEventBlock: lastWrapperEventBlock,
       infuraApiKey,
       alchemyApiKey,
+      infuraIpfsAuth: `Basic ${Buffer.from(
+        `${ipfsApiProject}:${ipfsApiSecret}`
+      ).toString("base64")}`,
     });
 
     const { api: graphqlApi } = new GraphqlStack(this, "Graphql", {

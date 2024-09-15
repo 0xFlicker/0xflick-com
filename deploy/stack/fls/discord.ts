@@ -64,7 +64,7 @@ export class DiscordStack extends Construct {
       new subs.SqsSubscription(deferredMessageQueue)
     );
     const discordHandler = new lambda.Function(this, "DiscordLambda", {
-      runtime: lambda.Runtime.NODEJS_16_X,
+      runtime: lambda.Runtime.NODEJS_18_X,
       code: lambda.Code.fromAsset(
         path.join(__dirname, "../../.layers/discord-interaction")
       ),
@@ -77,13 +77,18 @@ export class DiscordStack extends Construct {
         DISCORD_TESTING_CHANNEL_ID: discordTestingGuildId,
         LOG_LEVEL: "INFO",
         DISCORD_DEFERRED_MESSAGE_TOPIC_ARN: deferredMessageTopic.topicArn,
+        RPC_URL_MAINNET: mainnetRpc,
+        RPC_URL_GOERLI: goerliRpc,
+        INFURA_API_KEY: infuraApiKey,
+        ALCHEMY_API_KEY: alchemyApiKey,
+        IPFS_AUTH: infuraIpfsAuth,
       },
     });
 
     deferredMessageTopic.grantPublish(discordHandler);
 
     new lambda.Function(this, "deferredMessageHandler", {
-      runtime: lambda.Runtime.NODEJS_16_X,
+      runtime: lambda.Runtime.NODEJS_18_X,
       code: lambda.Code.fromAsset(
         path.join(__dirname, "../../.layers/discord-deferred")
       ),
@@ -96,6 +101,11 @@ export class DiscordStack extends Construct {
         DISCORD_BOT_TOKEN: discordBotToken,
         DISCORD_TESTING_CHANNEL_ID: discordTestingGuildId,
         LOG_LEVEL: "debug",
+        RPC_URL_MAINNET: mainnetRpc,
+        RPC_URL_GOERLI: goerliRpc,
+        INFURA_API_KEY: infuraApiKey,
+        ALCHEMY_API_KEY: alchemyApiKey,
+        IPFS_AUTH: infuraIpfsAuth,
       },
       events: [
         new eventSources.SqsEventSource(deferredMessageQueue, {
@@ -108,7 +118,7 @@ export class DiscordStack extends Construct {
       this,
       "wrappedEventListener",
       {
-        runtime: lambda.Runtime.NODEJS_16_X,
+        runtime: lambda.Runtime.NODEJS_18_X,
         code: lambda.Code.fromAsset(
           path.join(__dirname, "../../.layers/fls-wrapper-event")
         ),

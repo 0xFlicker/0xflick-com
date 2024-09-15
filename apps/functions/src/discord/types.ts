@@ -26,9 +26,4 @@ export interface APIApplicationCommand {
   name: string;
 }
 
-export type InferredApplicationCommandType =
-  APIApplicationCommandInteraction & {
-    data: {
-      options: { name: string; value: any }[];
-    };
-  };
+export type InferredApplicationCommandType = APIApplicationCommandInteraction;

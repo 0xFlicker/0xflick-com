@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { defineConfig } from "@wagmi/cli";
 import { etherscan, actions } from "@wagmi/cli/plugins";
-import { goerli, mainnet, sepolia } from "wagmi/chains";
+import { mainnet, sepolia } from "wagmi/chains";
 
 export default defineConfig({
   out: "src/lambda/fls-wrapper-event/generated.ts",
@@ -9,12 +9,12 @@ export default defineConfig({
   plugins: [
     etherscan({
       apiKey: process.env.ETHERSCAN_API_KEY,
-      chainId: goerli.id,
+      chainId: sepolia.id,
       contracts: [
         {
           name: "WrappedNFT",
           address: {
-            [goerli.id]: "0xD0E65bFf3612a9A5f1d620BD7245e95Cc4A7c905",
+            [sepolia.id]: "0x9EFf37047657a0f50b989165b48012834eDB2212",
           },
         },
       ],

@@ -9,15 +9,17 @@ import {
   wrappedNftAddress,
   fameLadySocietyABI,
   fameLadySocietyAddress,
+  fameLadySquadAddress,
 } from "./generated";
 import { SNS } from "@aws-sdk/client-sns";
 import { APIEmbedField } from "discord-api-types/v10";
 import { sendDiscordMessage } from "@0xflick/backend/discord/send";
 import { createLogger } from "@0xflick/backend";
 // import { configureChains, mainnet, createClient } from "wagmi";
-import { zeroHash, AbiEvent } from "viem";
+import { AbiEvent, zeroAddress } from "viem";
 import { sepoliaClient, mainnetClient } from "./viem";
 import { customDescription, fetchMetadata } from "./metadata";
+import { sepolia } from "viem/chains";
 
 type PromiseType<T extends Promise<any>> = T extends Promise<infer U>
   ? U
@@ -78,6 +80,7 @@ async function findEvents<E extends AbiEvent>(
 
 async function notifyDiscordMetadataUpdate({
   address,
+  contractAddress,
   tokenId,
   channelId,
   client,
@@ -86,6 +89,7 @@ async function notifyDiscordMetadataUpdate({
   sns,
 }: {
   address: `0x${string}`;
+  contractAddress: `0x${string}`;
   tokenId: bigint;
   channelId: string;
   client: typeof sepoliaClient | typeof mainnetClient;
@@ -97,7 +101,7 @@ async function notifyDiscordMetadataUpdate({
     client.getEnsName({ address }),
     fetchMetadata({
       client,
-      address,
+      address: contractAddress,
       tokenId,
     }),
   ]);
@@ -137,7 +141,9 @@ async function notifyDiscordMetadataUpdate({
             description ?? `A lady was named${testnet ? " on Sepolia" : ""}`,
           fields,
           image: {
-            url: `https://fls-www.vercel.app/${network}/og/token/${tokenId}`,
+            url: `https://fls-www.vercel.app/${
+              testnet ? "sepolia" : "mainnet"
+            }/og/token/${tokenId}`,
           },
         },
       ],
@@ -263,17 +269,24 @@ async function notifyDiscordMultipleTokens({
     value: wrappedCount.toString(),
     inline: true,
   });
+
+  const url = `https://img.fameladysociety.com/mosaic/${tokenIds
+    .map((t) => t.toString())
+    .join(",")}`;
+
+  logger.info("Sending discord message with url", url);
+
   await sendDiscordMessage({
     channelId,
     message: {
       embeds: [
         {
           title: "#itsawrap",
-          description: `A Fame Lady Society metadata was updated${
+          description: `New Fame Lady Society tokens were wrapped${
             testnet ? " on Sepolia" : ""
           }`,
           image: {
-            url: `https://img.fameladysociety.com/thumb/${tokenId}`,
+            url,
           },
           fields,
         },
@@ -364,13 +377,14 @@ export const handler = async () =>
     ] = await Promise.all([
       findEvents<typeof transferEvent>(
         sepoliaClient,
-        wrappedNftAddress[5],
+        wrappedNftAddress[sepolia.id],
         transferEvent,
         lastBlockSepolia,
         latestBlockSepolia
       ).then((events) => {
-        logger.info(`Found ${events.length} events on Sepolia`);
-        return events.filter((event) => event.args.from === zeroHash);
+        const ret = events.filter((event) => event.args.from === zeroAddress);
+        logger.info(`Found ${ret.length} transfer events on Sepolia`);
+        return ret;
       }),
       findEvents<typeof transferEvent>(
         mainnetClient,
@@ -379,29 +393,31 @@ export const handler = async () =>
         lastBlockMainnet,
         latestBlockMainnet
       ).then((events) => {
-        logger.info(`Found ${events.length} events on Mainnet`);
-        return events.filter((event) => event.args.from === zeroHash);
+        const ret = events.filter((event) => event.args.from === zeroAddress);
+        logger.info(`Found ${ret.length} transfer events on Mainnet`);
+        return ret;
       }),
       findEvents<typeof metadataEvent>(
         sepoliaClient,
-        wrappedNftAddress[5],
+        wrappedNftAddress[sepolia.id],
         metadataEvent,
         lastBlockSepolia,
         latestBlockSepolia
-      ),
+      ).then((events) => {
+        logger.info(`Found ${events.length} metadata events on Sepolia`);
+        return events;
+      }),
       findEvents<typeof metadataEvent>(
         mainnetClient,
         fameLadySocietyAddress[1],
         metadataEvent,
         lastBlockMainnet,
         latestBlockMainnet
-      ),
+      ).then((events) => {
+        logger.info(`Found ${events.length} metadata events on Mainnet`);
+        return events;
+      }),
     ]);
-
-    // Only interested in events that have from address 0x0 (new mints)
-    // const filteredEvents = events.filter((event) => {
-    //   return event.args.from === zeroHash;
-    // });
 
     // Notify discord
     const sns = new SNS({});
@@ -426,9 +442,9 @@ export const handler = async () =>
     }
 
     const wrappedCount =
-      sepoliaEventsByTo.size || mainnetEventsByTo.size
+      mainnetTransferEvents.length > 0
         ? await mainnetClient.readContract({
-            address: fameLadySocietyAddress[1],
+            address: fameLadySquadAddress[1],
             abi: fameLadySocietyABI,
             functionName: "balanceOf",
             args: [fameLadySocietyAddress[1]],
@@ -492,10 +508,16 @@ export const handler = async () =>
 
     for (const event of sepoliaMetadataEvents) {
       const {
+        transactionHash,
         args: { _tokenId: tokenId },
       } = event;
+      // get the address that send the transaction
+      const receipt = await sepoliaClient.getTransactionReceipt({
+        hash: transactionHash,
+      });
       await notifyDiscordMetadataUpdate({
-        address: wrappedNftAddress[5],
+        address: receipt.from,
+        contractAddress: wrappedNftAddress[sepolia.id],
         tokenId,
         channelId: process.env.DISCORD_CHANNEL_ID,
         client: sepoliaClient,
@@ -507,10 +529,15 @@ export const handler = async () =>
 
     for (const event of mainnetMetadataEvents) {
       const {
+        transactionHash,
         args: { _tokenId: tokenId },
       } = event;
+      const receipt = await mainnetClient.getTransactionReceipt({
+        hash: transactionHash,
+      });
       await notifyDiscordMetadataUpdate({
-        address: fameLadySocietyAddress[1],
+        address: receipt.from,
+        contractAddress: fameLadySocietyAddress[1],
         tokenId,
         channelId: process.env.DISCORD_CHANNEL_ID,
         client: mainnetClient,

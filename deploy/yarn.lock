@@ -3043,17 +3043,17 @@ aws-cdk-lib@^2.92.0:
     table "^6.8.1"
     yaml "1.10.2"
 
+aws-cdk@2.134.0:
+  version "2.134.0"
+  resolved "https://registry.yarnpkg.com/aws-cdk/-/aws-cdk-2.134.0.tgz#029b126df81ed5e4c95390bb1a112fb2c07fca15"
+  integrity sha512-/0rygJZpBMK4DQHciMH6ZR4bnQ80/6usHMXmJrvwbSpKFW2WpkYKwzpAxnnQeiyzfEIIUoB+oyIy7EmKS1HLtA==
+  optionalDependencies:
+    fsevents "2.3.2"
+
 aws-cdk@2.24.0:
   version "2.24.0"
   resolved "https://registry.yarnpkg.com/aws-cdk/-/aws-cdk-2.24.0.tgz#e46cc2372b232b4c1b1f52b047b2dea4424f9461"
   integrity sha512-XqAyD2WIaKnglUPlePt6c7WMICemo6Rl9RPnKqI0IKnnzTORuXHyVw9i6F9S0jNV31iDw2uxZPDUfcZ83owq/Q==
-  optionalDependencies:
-    fsevents "2.3.2"
-
-aws-cdk@2.92.0:
-  version "2.92.0"
-  resolved "https://registry.yarnpkg.com/aws-cdk/-/aws-cdk-2.92.0.tgz#37d0fa8de85c26c8657be5494cf89699c2383efc"
-  integrity sha512-9aAWJvZWSBJQxcsDopXYUAm6/pGz6vOQy2zfkn+YBuBkNelvW+ok15KPY4xn5m76tYnN79W03Gnfp/nxZUlcww==
   optionalDependencies:
     fsevents "2.3.2"
 
@@ -3418,12 +3418,12 @@ cdk-nextjs-standalone@^3.0.0:
     node-fetch "^3.3.1"
     serverless-http "^3.2.0"
 
-cdk@^2.92.0:
-  version "2.92.0"
-  resolved "https://registry.yarnpkg.com/cdk/-/cdk-2.92.0.tgz#9bc22d0ce0b33581cfdb49a81887836c06fc1c67"
-  integrity sha512-cbIAqmiVHqKlI6KaDQv7+/0JePg0IPc+FqFVWuUJP8hLt0Nsbpb4LhcXSPjA4lMCRXp8IRVcIEftKS0qJDXRTQ==
+cdk@^2.134.0:
+  version "2.134.0"
+  resolved "https://registry.yarnpkg.com/cdk/-/cdk-2.134.0.tgz#344cd1cff6b66b08dd3c5d226a53227b1003affd"
+  integrity sha512-Woko0O9FG64GIKHynxH0EOFPvIOiig3OH96wUXAHYRYtWNo42xR75DBJEmPAjw3t1+yBySZcOsIGO81xRWF/cA==
   dependencies:
-    aws-cdk "2.92.0"
+    aws-cdk "2.134.0"
 
 chalk@2.4.2, chalk@^2.0.0:
   version "2.4.2"
